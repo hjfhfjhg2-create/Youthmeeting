@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سجل الحضور والغياب الذكي - كنيسة الأنبا تكلا</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات QR Code (مولد الـ QR وقارئ الكاميرا) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -46,7 +51,6 @@
             line-height: 1.6;
         }
 
-        /* Header Animation & Styling */
         header { 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%); 
             color: white; 
@@ -83,19 +87,8 @@
             gap: 6px;
         }
 
-        header h1 { 
-            margin: 0; 
-            font-size: 28px; 
-            font-weight: 900; 
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        header h2 { 
-            margin: 0; 
-            font-size: 18px; 
-            font-weight: 600; 
-            color: #93c5fd; 
-        }
+        header h1 { margin: 0; font-size: 28px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        header h2 { margin: 0; font-size: 18px; font-weight: 600; color: #93c5fd; }
         header h3 { 
             margin: 6px 0 0 0; 
             font-size: 13px; 
@@ -108,7 +101,6 @@
             backdrop-filter: blur(4px);
         }
 
-        /* Container & Card Base */
         .container { 
             max-width: 1200px; 
             margin: 30px auto; 
@@ -125,7 +117,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Login Card */
         #login-section {
             max-width: 420px;
             margin: 60px auto;
@@ -138,30 +129,12 @@
             border: 1px solid var(--border-color);
             animation: popIn 0.4s var(--transition-bounce);
         }
-        #login-section h3 {
-            color: var(--primary);
-            margin-bottom: 24px;
-            font-size: 24px;
-            font-weight: 800;
-        }
+        #login-section h3 { color: var(--primary); margin-bottom: 24px; font-size: 24px; font-weight: 800; }
 
-        /* Inputs & Controls */
         .input-group { margin-bottom: 20px; }
-        .input-group label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 700; 
-            font-size: 13.5px; 
-            color: #334155; 
-        }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13.5px; color: #334155; }
         
-        input[type="text"], 
-        input[type="password"], 
-        input[type="date"], 
-        input[type="number"], 
-        input[type="tel"], 
-        select, 
-        textarea { 
+        input[type="text"], input[type="password"], input[type="date"], input[type="number"], input[type="tel"], select, textarea { 
             width: 100%; 
             padding: 12px 16px; 
             border: 2px solid var(--border-color); 
@@ -181,7 +154,6 @@
             transform: translateY(-1px);
         }
 
-        /* Advanced Animated Buttons */
         button { 
             background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
             color: white; 
@@ -202,324 +174,99 @@
             overflow: hidden;
         }
 
-        button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease-out, height 0.4s ease-out;
-        }
+        button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); }
+        button:active { transform: translateY(1px) scale(0.96); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
 
-        button:active::after {
-            width: 200px;
-            height: 200px;
-            transition: 0s;
-        }
-
-        button:hover { 
-            transform: translateY(-3px) scale(1.02); 
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
-        }
-
-        button:active { 
-            transform: translateY(1px) scale(0.96); 
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-edit { 
-            background: linear-gradient(135deg, var(--info), #0369a1); 
-            font-size: 12.5px; 
-            padding: 7px 14px; 
-            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.2);
-        }
-        .btn-edit:hover { box-shadow: 0 6px 14px rgba(2, 132, 199, 0.35); }
-
-        .btn-delete { 
-            background: linear-gradient(135deg, var(--danger), #b91c1c); 
-            font-size: 12.5px; 
-            padding: 7px 14px; 
-            margin-left: 4px;
-            box-shadow: 0 3px 8px rgba(239, 68, 68, 0.2);
-        }
-        .btn-delete:hover { box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35); }
-
-        .btn-success { 
-            background: linear-gradient(135deg, var(--success), var(--success-dark)); 
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-        }
-        .btn-success:hover { box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
-
-        .btn-warning { 
-            background: linear-gradient(135deg, var(--warning), #d97706); 
-            color: #fff; 
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
-        }
-        .btn-warning:hover { box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35); }
+        .btn-edit { background: linear-gradient(135deg, var(--info), #0369a1); font-size: 12.5px; padding: 7px 14px; box-shadow: 0 3px 8px rgba(2, 132, 199, 0.2); }
+        .btn-delete { background: linear-gradient(135deg, var(--danger), #b91c1c); font-size: 12.5px; padding: 7px 14px; margin-left: 4px; box-shadow: 0 3px 8px rgba(239, 68, 68, 0.2); }
+        .btn-success { background: linear-gradient(135deg, var(--success), var(--success-dark)); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+        .btn-warning { background: linear-gradient(135deg, var(--warning), #d97706); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+        .btn-qr { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25); }
 
         #app-section { display: none; }
         
-        /* Modern Navigation Tabs */
         .nav-tabs { 
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px; 
-            background: #f1f5f9;
-            padding: 8px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; 
+            background: #f1f5f9; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
         }
         .nav-tabs button { 
-            flex: 1;
-            min-width: 120px;
-            background: transparent; 
-            color: var(--text-muted); 
-            border-radius: 10px; 
-            margin: 0; 
-            border: none; 
-            font-size: 13.5px; 
-            font-weight: 700;
-            padding: 12px 10px; 
-            box-shadow: none;
-            text-align: center;
+            flex: 1; min-width: 120px; background: transparent; color: var(--text-muted); 
+            border-radius: 10px; margin: 0; border: none; font-size: 13.5px; font-weight: 700;
+            padding: 12px 10px; box-shadow: none; text-align: center;
         }
-        .nav-tabs button:hover { 
-            background: rgba(255, 255, 255, 0.8); 
-            color: var(--primary); 
-            transform: translateY(-1px); 
-        }
-        .nav-tabs button.active { 
-            background: white; 
-            color: var(--primary); 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-            transform: scale(1.02);
-        }
+        .nav-tabs button:hover { background: rgba(255, 255, 255, 0.8); color: var(--primary); transform: translateY(-1px); }
+        .nav-tabs button.active { background: white; color: var(--primary); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transform: scale(1.02); }
         
         .tab-content { display: none; }
-        .tab-content.active { 
-            display: block; 
-            animation: fadeIn 0.35s ease-out; 
-        }
+        .tab-content.active { display: block; animation: fadeIn 0.35s ease-out; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Profile Cards & Glassmorphism */
         .profile-card { 
-            border: 1px solid var(--border-color); 
-            padding: 22px; 
-            margin-bottom: 18px; 
-            border-radius: var(--radius-md); 
-            background: #fff; 
-            box-shadow: var(--shadow-subtle);
-            transition: var(--transition-smooth);
+            border: 1px solid var(--border-color); padding: 22px; margin-bottom: 18px; 
+            border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-subtle); transition: var(--transition-smooth);
         }
-        .profile-card:hover {
-            box-shadow: var(--shadow-card);
-            border-color: var(--primary-light);
-            transform: translateY(-2px);
-        }
-        .profile-card h4 { 
-            margin: 0 0 12px 0; 
-            color: var(--primary); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-size: 17px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 12px;
-        }
+        .profile-card:hover { box-shadow: var(--shadow-card); border-color: var(--primary-light); transform: translateY(-2px); }
+        .profile-card h4 { margin: 0 0 12px 0; color: var(--primary); display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
         .profile-card p { margin: 8px 0; font-size: 14px; color: #475569; }
         
-        .search-bar { 
-            display: flex; 
-            gap: 12px; 
-            margin-bottom: 24px; 
-            background: #f8fafc; 
-            padding: 18px; 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--border-color); 
-            flex-wrap: wrap;
-        }
+        .search-bar { display: flex; gap: 12px; margin-bottom: 24px; background: #f8fafc; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; }
         
         .autocomplete-container { position: relative; }
         .autocomplete-results { 
-            position: absolute; 
-            top: calc(100% + 4px); 
-            left: 0; 
-            right: 0; 
-            background: white; 
-            border: 1px solid var(--border-color); 
-            z-index: 99; 
-            max-height: 240px; 
-            overflow-y: auto; 
-            box-shadow: var(--shadow-card);
-            border-radius: var(--radius-md);
-            animation: slideUp 0.2s ease-out;
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0; 
+            background: white; border: 1px solid var(--border-color); z-index: 99; 
+            max-height: 240px; overflow-y: auto; box-shadow: var(--shadow-card);
+            border-radius: var(--radius-md); animation: slideUp 0.2s ease-out;
         }
-        .autocomplete-item { 
-            padding: 12px 18px; 
-            cursor: pointer; 
-            border-bottom: 1px solid #f1f5f9; 
-            font-size: 14px; 
-            transition: var(--transition-smooth);
-        }
-        .autocomplete-item:hover { 
-            background-color: #eff6ff; 
-            color: var(--primary); 
-            padding-right: 24px;
-        }
+        .autocomplete-item { padding: 12px 18px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; transition: var(--transition-smooth); }
+        .autocomplete-item:hover { background-color: #eff6ff; color: var(--primary); padding-right: 24px; }
         
-        /* Modern Tables */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 18px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            background: white;
-            box-shadow: var(--shadow-subtle);
-        }
-
-        .custom-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 14px; 
-            white-space: nowrap; 
-        }
-        .custom-table th, .custom-table td { 
-            padding: 14px 18px; 
-            border-bottom: 1px solid var(--border-color); 
-            text-align: right; 
-        }
-        .custom-table th { 
-            background-color: #f8fafc; 
-            color: #334155; 
-            font-weight: 800; 
-            border-bottom: 2px solid var(--border-color);
-        }
-        .custom-table tr { transition: var(--transition-smooth); }
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: white; box-shadow: var(--shadow-subtle); }
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        .custom-table th, .custom-table td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); text-align: right; }
+        .custom-table th { background-color: #f8fafc; color: #334155; font-weight: 800; border-bottom: 2px solid var(--border-color); }
         .custom-table tr:hover { background-color: #f1f5f9; }
         
-        /* Alert & Dynamic Boxes */
-        .alert-box { 
-            background-color: #fef2f2; 
-            color: #991b1b; 
-            padding: 18px; 
-            margin-bottom: 16px; 
-            border-radius: var(--radius-md); 
-            border: 1px solid #fecaca; 
-            border-right: 6px solid var(--danger); 
-            font-size: 14px; 
-            box-shadow: var(--shadow-subtle);
-            animation: popIn 0.3s ease-out;
-        }
-        .birthday-box { 
-            background-color: #ecfdf5; 
-            color: #065f46; 
-            padding: 18px; 
-            margin-bottom: 16px; 
-            border-radius: var(--radius-md); 
-            border: 1px solid #a7f3d0; 
-            border-right: 6px solid var(--success); 
-            font-size: 14px; 
-            box-shadow: var(--shadow-subtle);
-            animation: popIn 0.3s ease-out;
-        }
+        .alert-box { background-color: #fef2f2; color: #991b1b; padding: 18px; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid #fecaca; border-right: 6px solid var(--danger); font-size: 14px; box-shadow: var(--shadow-subtle); animation: popIn 0.3s ease-out; }
+        .birthday-box { background-color: #ecfdf5; color: #065f46; padding: 18px; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid #a7f3d0; border-right: 6px solid var(--success); font-size: 14px; box-shadow: var(--shadow-subtle); animation: popIn 0.3s ease-out; }
         
-        .settings-card { 
-            border: 1px solid var(--border-color); 
-            padding: 24px; 
-            margin-bottom: 20px; 
-            border-radius: var(--radius-md); 
-            background: #ffffff; 
-            box-shadow: var(--shadow-subtle);
-        }
-        .settings-card h4 { 
-            margin-top: 0; 
-            color: var(--primary); 
-            border-bottom: 2px solid #f1f5f9; 
-            padding-bottom: 12px; 
-            font-size: 17px; 
-        }
+        .settings-card { border: 1px solid var(--border-color); padding: 24px; margin-bottom: 20px; border-radius: var(--radius-md); background: #ffffff; box-shadow: var(--shadow-subtle); }
+        .settings-card h4 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 17px; }
         .action-row { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;}
 
-        /* Modern Stat Cards */
-        .stats-summary-box {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
+        .stats-summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
         @media(max-width: 650px) { .stats-summary-box { grid-template-columns: 1fr; } }
         
-        .stat-card {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            border: 1px solid var(--border-color);
-            padding: 18px;
-            border-radius: var(--radius-md);
-            text-align: center;
-            box-shadow: var(--shadow-subtle);
-            transition: var(--transition-bounce);
-        }
-        .stat-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--shadow-card);
-            border-color: var(--primary-light);
-        }
+        .stat-card { background: linear-gradient(135deg, #ffffff, #f8fafc); border: 1px solid var(--border-color); padding: 18px; border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow-subtle); transition: var(--transition-bounce); }
+        .stat-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-card); border-color: var(--primary-light); }
         .stat-card .stat-num { font-size: 24px; font-weight: 900; color: var(--primary); margin-top: 6px; }
         .stat-card .stat-title { font-size: 13px; font-weight: 700; color: var(--text-muted); }
 
-        /* Family Animated Buttons */
-        .family-card-btn {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-right: 6px solid var(--primary);
-            padding: 18px 22px;
-            border-radius: var(--radius-md);
-            margin-bottom: 14px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow-subtle);
-            transition: var(--transition-bounce);
-        }
-        .family-card-btn:hover {
-            background: #f8fafc;
-            transform: translateY(-3px) translateX(-4px);
-            box-shadow: var(--shadow-card);
-            border-color: var(--primary-light);
-        }
-        .family-card-btn:active {
-            transform: translateY(0) scale(0.98);
-        }
+        .family-card-btn { background: white; border: 1px solid var(--border-color); border-right: 6px solid var(--primary); padding: 18px 22px; border-radius: var(--radius-md); margin-bottom: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-subtle); transition: var(--transition-bounce); }
+        .family-card-btn:hover { background: #f8fafc; transform: translateY(-3px) translateX(-4px); box-shadow: var(--shadow-card); border-color: var(--primary-light); }
         
-        .family-section-title { 
-            font-size: 16px; 
-            font-weight: 800; 
-            color: var(--primary); 
-            margin: 25px 0 14px 0; 
-            padding-bottom: 8px; 
-            border-bottom: 2px solid var(--border-color); 
-            display: flex; 
-            align-items: center;
-            gap: 8px;
-        }
+        .family-section-title { font-size: 16px; font-weight: 800; color: var(--primary); margin: 25px 0 14px 0; padding-bottom: 8px; border-bottom: 2px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
 
         h3 { color: var(--primary); font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 20px; }
 
-        @keyframes popIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        /* QR Modal & Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(6px);
+            animation: fadeIn 0.25s ease-out;
         }
+        .modal-body {
+            background: white; padding: 25px; border-radius: var(--radius-lg);
+            max-width: 450px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+        #qr-scanner-view { width: 100%; max-width: 350px; margin: 0 auto; border-radius: var(--radius-md); overflow: hidden; }
+
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -528,7 +275,7 @@
         <div class="header-content">
             <h1>كنيسة القديس العظيم الأنبا تكلا</h1>
             <h2>اجتماع الشبان والشابات</h2>
-            <h3>نظام الخدمة الذكي</h3>
+            <h3>نظام الخدمة الذكي📱</h3>
         </div>
     </header>
 
@@ -594,10 +341,16 @@
                 <input type="date" id="meeting-date" onchange="loadAttendanceForDate()">
             </div>
             
-            <div class="input-group autocomplete-container" id="attendance-search-box" style="display:none;">
-                <label>ابحث بالاسم لتسجيل الحضور:</label>
-                <input type="text" id="search-attendance" placeholder="اكتب اسم المخدوم هنا..." oninput="searchForAttendance(this.value)">
-                <div id="autocomplete-results" class="autocomplete-results"></div>
+            <div id="attendance-controls" style="display:none; margin-bottom: 20px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
+                    <button class="btn-qr" onclick="openQRScanner('attendance')" style="flex:1; min-width:200px; padding:14px; font-size:15px;">📷 تسجيل سريع بمسح QR Code</button>
+                </div>
+                
+                <div class="input-group autocomplete-container">
+                    <label>أو ابحث يدوياً بالاسم لتسجيل الحضور:</label>
+                    <input type="text" id="search-attendance" placeholder="اكتب اسم المخدوم هنا..." oninput="searchForAttendance(this.value)">
+                    <div id="autocomplete-results" class="autocomplete-results"></div>
+                </div>
             </div>
 
             <div id="attendance-sheet" style="display:none; margin-top: 25px;">
@@ -676,8 +429,12 @@
                 </div>
             </div>
 
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;">
+                <button class="btn-qr" onclick="openQRScanner('trip')" style="flex:1; min-width:200px; padding:14px; font-size:15px;">📷 إضافة مخدوم للحجز بـ QR Code</button>
+            </div>
+
             <div class="input-group autocomplete-container">
-                <label>إضافة مخدوم لقائمة الحجز:</label>
+                <label>أو ابحث يدوياً بالإسم لإضافته للحجز:</label>
                 <input type="text" id="search-trip" placeholder="اكتب اسم المخدوم لإضافته للحجز..." oninput="searchForTrip(this.value)">
                 <div id="trip-autocomplete-results" class="autocomplete-results"></div>
             </div>
@@ -708,7 +465,10 @@
 
         <!-- البروفايلات والبحث -->
         <div id="profiles" class="tab-content">
-            <h3>بحث متقدم وملفات المخدومين</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+                <h3 style="margin:0;">بحث متقدم وملفات المخدومين</h3>
+                <button class="btn-qr" onclick="openQRScanner('profile')">📷 فتح بروفايل عبر QR Code</button>
+            </div>
             
             <div class="search-bar">
                 <select id="search-filter">
@@ -772,12 +532,34 @@
         </div>
     </div>
 
+    <!-- نافذة قارئ الـ QR Code Modal -->
+    <div id="qr-scanner-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 style="margin-bottom:10px;">وجه الكاميرا نحو كارت QR</h3>
+            <p id="qr-modal-hint" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">سيتم المسح تلقائياً عند التعرف عليه</p>
+            <div id="qr-scanner-view"></div>
+            <button onclick="closeQRScanner()" style="margin-top:20px; background:var(--text-muted); width:100%;">إغلاق الكاميرا ✖️</button>
+        </div>
+    </div>
+
+    <!-- نافذة عرض كارت QR Code للمخدوم -->
+    <div id="qr-display-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 id="qr-display-name" style="margin-bottom:6px;">كارت المخدوم</h3>
+            <p id="qr-display-family" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;"></p>
+            <div id="qrcode-box" style="display:flex; justify-content:center; margin:20px 0;"></div>
+            <button onclick="closeQRDisplay()" style="background:var(--primary); width:100%;">تم 💾</button>
+        </div>
+    </div>
+
     <script>
         let db = { members: [], meetings: [], tripsData: {} };
         let currentMeetingDate = '';
         let currentAttendees = [];
         let currentSelectedFamilyName = '';
         let currentFamilySearchTerm = '';
+        let html5QrCode = null;
+        let activeQRTarget = ''; // 'attendance' | 'trip' | 'profile'
 
         function loadData() {
             let saved = localStorage.getItem('TaklaDataV5_Expanded');
@@ -785,9 +567,7 @@
                 try {
                     db = JSON.parse(saved);
                     if(!db.tripsData) db.tripsData = {};
-                } catch(e) {
-                    console.error("Error loading data", e);
-                }
+                } catch(e) { console.error("Error loading data", e); }
             }
         }
 
@@ -801,9 +581,7 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadData();
-        });
+        window.addEventListener('DOMContentLoaded', () => { loadData(); });
 
         function login() {
             if (document.getElementById('username').value === 'sttakla' && 
@@ -848,6 +626,93 @@
             if(tabId === 'trips') renderTripTable();
         }
 
+        /* ----- محرك QR Code القارئ والمولد ----- */
+        function showMemberQRCode(memberId) {
+            let m = db.members.find(item => item.id == memberId);
+            if(!m) return;
+            
+            document.getElementById('qr-display-name').innerText = m.name;
+            document.getElementById('qr-display-family').innerText = `أسرة: ${m.family || '-'}`;
+            
+            let qrContainer = document.getElementById('qrcode-box');
+            qrContainer.innerHTML = '';
+            
+            new QRCode(qrContainer, {
+                text: "TAKLA:" + m.id,
+                width: 200,
+                height: 200,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qr-display-modal').style.display = 'flex';
+        }
+
+        function closeQRDisplay() {
+            document.getElementById('qr-display-modal').style.display = 'none';
+        }
+
+        function openQRScanner(target) {
+            activeQRTarget = target;
+            document.getElementById('qr-scanner-modal').style.display = 'flex';
+            
+            if(!html5QrCode) {
+                html5QrCode = new Html5Qrcode("qr-scanner-view");
+            }
+            
+            const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                (decodedText) => {
+                    handleScannedQRCode(decodedText);
+                },
+                (errorMessage) => { /* تجاهل أخطاء البحث المستمر */ }
+            ).catch(err => {
+                alert("تعذر فتح الكاميرا: يرجى إعطاء الصلاحية للكاميرا.");
+                closeQRScanner();
+            });
+        }
+
+        function closeQRScanner() {
+            if(html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('qr-scanner-modal').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('qr-scanner-modal').style.display = 'none';
+                });
+            } else {
+                document.getElementById('qr-scanner-modal').style.display = 'none';
+            }
+        }
+
+        function handleScannedQRCode(codeStr) {
+            let memberId = codeStr.replace("TAKLA:", "").trim();
+            let member = db.members.find(m => m.id == memberId);
+            
+            if(!member) {
+                alert("رمز QR غير معروف أو المخدوم غير مسجل!");
+                return;
+            }
+
+            closeQRScanner();
+
+            if(activeQRTarget === 'attendance') {
+                addMemberToMeeting(member.id);
+                alert(`✅ تم تسجيل حضور: ${member.name}`);
+            } else if(activeQRTarget === 'trip') {
+                addMemberToTrip(member.id);
+                alert(`✅ تم إضافة: ${member.name} لقائمة الرحلة/الفعالية`);
+            } else if(activeQRTarget === 'profile') {
+                document.getElementById('search-filter').value = 'name';
+                document.getElementById('search-term').value = member.name;
+                renderProfiles();
+            }
+        }
+
+        /* ----- وظائف المخدومين والبيانات ----- */
         function saveMember() {
             let name = document.getElementById('m-name').value.trim();
             if(!name) { alert('برجاء كتابة الاسم!'); return; }
@@ -880,6 +745,7 @@
                 memberData.attendance = [];
                 db.members.push(memberData);
                 alert('تم تسجيل المخدوم الجديد بنجاح!');
+                showMemberQRCode(memberData.id);
             }
 
             saveData();
@@ -956,9 +822,7 @@
                     let count = youthFamilies[fam].length;
                     youthListDiv.innerHTML += `
                         <div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شاب')">
-                            <div>
-                                <strong style="font-size:16px; color:var(--primary);">🛡️ ${fam}</strong>
-                            </div>
+                            <div><strong style="font-size:16px; color:var(--primary);">🛡️ ${fam}</strong></div>
                             <span style="background:#e0f2fe; color:#0369a1; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:bold;">${count} مخدوم</span>
                         </div>
                     `;
@@ -972,9 +836,7 @@
                     let count = girlsFamilies[fam].length;
                     girlsListDiv.innerHTML += `
                         <div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شابة')" style="border-right-color: var(--secondary);">
-                            <div>
-                                <strong style="font-size:16px; color:var(--secondary);">✨ ${fam}</strong>
-                            </div>
+                            <div><strong style="font-size:16px; color:var(--secondary);">✨ ${fam}</strong></div>
                             <span style="background:#fee2e2; color:#991b1b; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:bold;">${count} مخدومة</span>
                         </div>
                     `;
@@ -1035,6 +897,7 @@
                         <td>${m.phone || '-'}</td>
                         <td>${m.father || '-'}</td>
                         <td>
+                            <button class="btn-qr" style="padding: 5px 10px; font-size: 12px;" onclick="showMemberQRCode(${m.id})">📇 QR</button>
                             <button class="btn-edit" onclick="editProfile(${m.id})">تعديل ✏️</button>
                         </td>
                     </tr>
@@ -1061,16 +924,16 @@
 
         function loadAttendanceForDate() {
             currentMeetingDate = document.getElementById('meeting-date').value;
-            let searchBox = document.getElementById('attendance-search-box');
+            let controls = document.getElementById('attendance-controls');
             let sheet = document.getElementById('attendance-sheet');
             
             if(!currentMeetingDate) {
-                searchBox.style.display = 'none';
+                controls.style.display = 'none';
                 sheet.style.display = 'none';
                 return;
             }
 
-            searchBox.style.display = 'block';
+            controls.style.display = 'block';
             sheet.style.display = 'block';
             document.getElementById('search-attendance').value = '';
             document.getElementById('autocomplete-results').innerHTML = '';
@@ -1109,7 +972,7 @@
         }
 
         function addMemberToMeeting(id) {
-            let member = db.members.find(m => m.id === id);
+            let member = db.members.find(m => m.id == id);
             if(member) {
                 let now = new Date();
                 let timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -1130,7 +993,7 @@
         }
 
         function removeMemberFromMeeting(id) {
-            let member = db.members.find(m => m.id === id);
+            let member = db.members.find(m => m.id == id);
             if(db.attendanceRecords[currentMeetingDate]) {
                 delete db.attendanceRecords[currentMeetingDate][id];
             }
@@ -1138,7 +1001,7 @@
                 member.attendance = member.attendance.filter(d => d !== currentMeetingDate);
             }
             saveData();
-            currentAttendees = currentAttendees.filter(m => m.id !== id);
+            currentAttendees = currentAttendees.filter(m => m.id != id);
             renderAttendanceTable();
         }
 
@@ -1201,8 +1064,10 @@
 
         function addMemberToTrip(id) {
             let trip = getTripObj();
-            trip.reservations[id] = { paid: 0, installments: [] };
-            saveData();
+            if(!trip.reservations[id]) {
+                trip.reservations[id] = { paid: 0, installments: [] };
+                saveData();
+            }
             document.getElementById('search-trip').value = '';
             document.getElementById('trip-autocomplete-results').innerHTML = '';
             renderTripTable();
@@ -1352,6 +1217,7 @@
                         <h4>
                             <span>${m.name} <span style="font-size:12px; font-weight:700; background:#e2e8f0; color:#334155; padding:3px 10px; border-radius:12px; margin-right:8px;">${m.gender}</span></span>
                             <div>
+                                <button class="btn-qr" onclick="showMemberQRCode(${m.id})">📇 كارت QR</button>
                                 <button class="btn-edit" onclick="editProfile(${m.id})">✏️ تعديل</button>
                                 <button class="btn-delete" onclick="deleteProfile(${m.id})">🗑️ حذف</button>
                             </div>
