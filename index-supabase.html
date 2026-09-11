@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الحضور والغياب الذكي - كنيسة الأنبا تكلا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات QR Code (مولد الـ QR وقارئ الكاميرا) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --secondary: #991b1b;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --success-dark: #059669;
+            --info: #0284c7;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border-color: #e2e8f0;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+            --shadow-active: 0 20px 35px -10px rgba(37, 99, 235, 0.2);
+            --transition-bounce: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif; 
+            background: linear-gradient(180deg, #e2e8f0 0%, var(--bg-color) 300px);
+            min-height: 100vh;
+            margin: 0; 
+            padding: 0 0 40px 0; 
+            color: var(--text-main); 
+            line-height: 1.6;
+        }
+
+        header { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%); 
+            color: white; 
+            text-align: center; 
+            padding: 40px 20px 35px; 
+            border-bottom: 4px solid var(--warning); 
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            animation: rotateBG 25s linear infinite;
+        }
+
+        @keyframes rotateBG {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        header h1 { margin: 0; font-size: 28px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        header h2 { margin: 0; font-size: 18px; font-weight: 600; color: #93c5fd; }
+        header h3 { 
+            margin: 6px 0 0 0; 
+            font-size: 13px; 
+            color: #fef08a; 
+            font-weight: 700; 
+            background: rgba(245, 158, 11, 0.2); 
+            padding: 4px 16px; 
+            border-radius: 30px; 
+            border: 1px solid rgba(253, 224, 71, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 30px auto; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-card); 
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #login-section {
+            max-width: 420px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 40px 30px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border-top: 6px solid var(--primary);
+            border: 1px solid var(--border-color);
+            animation: popIn 0.4s var(--transition-bounce);
+        }
+        #login-section h3 { color: var(--primary); margin-bottom: 24px; font-size: 24px; font-weight: 800; }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13.5px; color: #334155; }
+        
+        input[type="text"], input[type="password"], input[type="date"], input[type="number"], input[type="tel"], select, textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid var(--border-color); 
+            border-radius: var(--radius-md); 
+            font-family: inherit; 
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            transition: var(--transition-smooth);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            background-color: #fff;
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
+        }
+
+        button { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            font-size: 14px; 
+            font-weight: 700;
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-family: inherit; 
+            transition: var(--transition-bounce);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); }
+        button:active { transform: translateY(1px) scale(0.96); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+
+        .btn-edit { background: linear-gradient(135deg, var(--info), #0369a1); font-size: 12.5px; padding: 7px 14px; box-shadow: 0 3px 8px rgba(2, 132, 199, 0.2); }
+        .btn-delete { background: linear-gradient(135deg, var(--danger), #b91c1c); font-size: 12.5px; padding: 7px 14px; margin-left: 4px; box-shadow: 0 3px 8px rgba(239, 68, 68, 0.2); }
+        .btn-success { background: linear-gradient(135deg, var(--success), var(--success-dark)); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+        .btn-warning { background: linear-gradient(135deg, var(--warning), #d97706); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+        .btn-qr { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25); }
+
+        #app-section { display: none; }
+        
+        .nav-tabs { 
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; 
+            background: #f1f5f9; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+        }
+        .nav-tabs button { 
+            flex: 1; min-width: 120px; background: transparent; color: var(--text-muted); 
+            border-radius: 10px; margin: 0; border: none; font-size: 13.5px; font-weight: 700;
+            padding: 12px 10px; box-shadow: none; text-align: center;
+        }
+        .nav-tabs button:hover { background: rgba(255, 255, 255, 0.8); color: var(--primary); transform: translateY(-1px); }
+        .nav-tabs button.active { background: white; color: var(--primary); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transform: scale(1.02); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.35s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .profile-card { 
+            border: 1px solid var(--border-color); padding: 22px; margin-bottom: 18px; 
+            border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-subtle); transition: var(--transition-smooth);
+        }
+        .profile-card:hover { box-shadow: var(--shadow-card); border-color: var(--primary-light); transform: translateY(-2px); }
+        .profile-card h4 { margin: 0 0 12px 0; color: var(--primary); display: flex; justify-content: space-between; align-items: center; font-size: 17px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
+        .profile-card p { margin: 8px 0; font-size: 14px; color: #475569; }
+        
+        .search-bar { display: flex; gap: 12px; margin-bottom: 24px; background: #f8fafc; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; }
+        
+        .autocomplete-container { position: relative; }
+        .autocomplete-results { 
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0; 
+            background: white; border: 1px solid var(--border-color); z-index: 99; 
+            max-height: 240px; overflow-y: auto; box-shadow: var(--shadow-card);
+            border-radius: var(--radius-md); animation: slideUp 0.2s ease-out;
+        }
+        .autocomplete-item { padding: 12px 18px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; transition: var(--transition-smooth); }
+        .autocomplete-item:hover { background-color: #eff6ff; color: var(--primary); padding-right: 24px; }
+        
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: white; box-shadow: var(--shadow-subtle); }
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        .custom-table th, .custom-table td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); text-align: right; }
+        .custom-table th { background-color: #f8fafc; color: #334155; font-weight: 800; border-bottom: 2px solid var(--border-color); }
+        .custom-table tr:hover { background-color: #f1f5f9; }
+        
+        .alert-box { background-color: #fef2f2; color: #991b1b; padding: 18px; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid #fecaca; border-right: 6px solid var(--danger); font-size: 14px; box-shadow: var(--shadow-subtle); animation: popIn 0.3s ease-out; }
+        .birthday-box { background-color: #ecfdf5; color: #065f46; padding: 18px; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid #a7f3d0; border-right: 6px solid var(--success); font-size: 14px; box-shadow: var(--shadow-subtle); animation: popIn 0.3s ease-out; }
+        
+        .settings-card { border: 1px solid var(--border-color); padding: 24px; margin-bottom: 20px; border-radius: var(--radius-md); background: #ffffff; box-shadow: var(--shadow-subtle); }
+        .settings-card h4 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 17px; }
+        .action-row { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;}
+
+        .stats-summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        @media(max-width: 650px) { .stats-summary-box { grid-template-columns: 1fr; } }
+        
+        .stat-card { background: linear-gradient(135deg, #ffffff, #f8fafc); border: 1px solid var(--border-color); padding: 18px; border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow-subtle); transition: var(--transition-bounce); }
+        .stat-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-card); border-color: var(--primary-light); }
+        .stat-card .stat-num { font-size: 24px; font-weight: 900; color: var(--primary); margin-top: 6px; }
+        .stat-card .stat-title { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+
+        .family-card-btn { background: white; border: 1px solid var(--border-color); border-right: 6px solid var(--primary); padding: 18px 22px; border-radius: var(--radius-md); margin-bottom: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-subtle); transition: var(--transition-bounce); }
+        .family-card-btn:hover { background: #f8fafc; transform: translateY(-3px) translateX(-4px); box-shadow: var(--shadow-card); border-color: var(--primary-light); }
+        
+        .family-section-title { font-size: 16px; font-weight: 800; color: var(--primary); margin: 25px 0 14px 0; padding-bottom: 8px; border-bottom: 2px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
+
+        h3 { color: var(--primary); font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 20px; }
+
+        /* QR Modal & Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(6px);
+            animation: fadeIn 0.25s ease-out;
+        }
+        .modal-body {
+            background: white; padding: 25px; border-radius: var(--radius-lg);
+            max-width: 450px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+        #qr-scanner-view { width: 100%; max-width: 350px; margin: 0 auto; border-radius: var(--radius-md); overflow: hidden; }
+
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>كنيسة القديس العظيم الأنبا تكلا</h1>
+            <h2>اجتماع الشبان والشابات</h2>
+            <h3>نظام الخدمة الذكي📱</h3>
+        </div>
+    </header>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-section">
+        <h3>تسجيل الدخول للإدارة</h3>
+        <input type="text" id="username" placeholder="اسم المستخدم">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button onclick="login()" style="width:100%; margin-top:10px;">دخول النظام 🚀</button>
+        <p id="login-error" style="color:var(--danger); display:none; margin-top:14px; font-weight:700; font-size:13px;">بيانات الدخول غير صحيحة!</p>
+    </div>
+
+    <!-- التطبيق -->
+    <div id="app-section" class="container">
+        <div class="nav-tabs">
+            <button class="active" onclick="showTab('add-member', this)" id="tab-add-btn">إضافة مخدوم ✨</button>
+            <button onclick="showTab('attendance', this)">شيت الحضور 📋</button>
+            <button onclick="showTab('families', this)" id="tab-fam-btn">الأسر 👥</button>
+            <button onclick="showTab('trips', this)">حجز الرحلات 🚌</button>
+            <button onclick="showTab('profiles', this)">بحث وبروفايلات 🔍</button>
+            <button onclick="showTab('birthdays', this)" id="tab-bday-btn">أعياد ميلاد 🎂</button>
+            <button onclick="showTab('alerts', this)" id="tab-alert-btn">افتقاد 🔔</button>
+            <button onclick="showTab('settings', this)">الإعدادات ⚙️</button>
+        </div>
+
+        <!-- إضافة / تعديل مخدوم -->
+        <div id="add-member" class="tab-content active">
+            <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
+            <input type="hidden" id="edit-id" value="">
+            
+            <div class="input-group"><label>الاسم الرباعي</label><input type="text" id="m-name" placeholder="أدخل الاسم رباعياً"></div>
+            <div class="input-group">
+                <label>النوع (لتصنيف المخدوم ضمن أسر الشباب أو الشابات)</label>
+                <select id="m-gender">
+                    <option value="شاب">شاب (أسر الشباب)</option>
+                    <option value="شابة">شابة (أسر الشابات)</option>
+                </select>
+            </div>
+            <div class="input-group"><label>المرحلة الجامعية / السنة</label><input type="text" id="m-stage" placeholder="مثال: فرقة أولى تجارة"></div>
+            
+            <div class="input-group autocomplete-container">
+                <label>اسم الأسرة</label>
+                <input type="text" id="m-family" placeholder="مثال: أسرة مارجرجس أو اكتب أسرة جديدة..." autocomplete="off">
+            </div>
+
+            <div class="input-group"><label>تاريخ الميلاد</label><input type="date" id="m-birthdate"></div>
+            <div class="input-group"><label>رقم التليفون</label><input type="tel" id="m-phone" placeholder="01xxxxxxxx0"></div>
+            <div class="input-group"><label>العنوان</label><input type="text" id="m-address" placeholder="العنوان بالتفصيل"></div>
+            <div class="input-group"><label>أب الاعتراف</label><input type="text" id="m-father" placeholder="اسم أب الاعتراف"></div>
+            <div class="input-group"><label>ملاحظات</label><textarea id="m-notes" rows="3" placeholder="ملاحظات هامة..."></textarea></div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 25px;">
+                <button class="btn-success" onclick="saveMember()" id="btn-save-member" style="flex: 1;">حفظ البيانات 💾</button>
+                <button onclick="cancelEdit()" id="btn-cancel-edit" style="display:none; background:var(--text-muted);">إلغاء التعديل ✖️</button>
+            </div>
+        </div>
+
+        <!-- شيت الحضور -->
+        <div id="attendance" class="tab-content">
+            <h3>تسجيل واسترجاع حضور الاجتماع</h3>
+            <div class="input-group">
+                <label>تاريخ الاجتماع</label>
+                <input type="date" id="meeting-date" onchange="loadAttendanceForDate()">
+            </div>
+            
+            <div id="attendance-controls" style="display:none; margin-bottom: 20px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
+                    <button class="btn-qr" onclick="openQRScanner('attendance')" style="flex:1; min-width:200px; padding:14px; font-size:15px;">📷 تسجيل سريع بمسح QR Code</button>
+                </div>
+                
+                <div class="input-group autocomplete-container">
+                    <label>أو ابحث يدوياً بالاسم لتسجيل الحضور:</label>
+                    <input type="text" id="search-attendance" placeholder="اكتب اسم المخدوم هنا..." oninput="searchForAttendance(this.value)">
+                    <div id="autocomplete-results" class="autocomplete-results"></div>
+                </div>
+            </div>
+
+            <div id="attendance-sheet" style="display:none; margin-top: 25px;">
+                <h4 style="border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px; font-size: 16px;">قائمة الحضور لهذا اليوم: <span id="attendees-count" style="color:var(--primary);">0</span></h4>
+                <div class="table-responsive">
+                    <table class="custom-table" id="attendance-table">
+                        <thead><tr><th>الاسم</th><th>الأسرة</th><th>وقت الحضور</th><th>إجراء</th></tr></thead>
+                        <tbody id="attendance-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- الأسر -->
+        <div id="families" class="tab-content">
+            <div id="families-main-view">
+                <h3>إدارة الأسر 👥</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">اختر أي أسرة من القائمة أدناه لعرض تفاصيل وأعضاء الأسرة بالكامل.</p>
+                
+                <div class="stats-summary-box">
+                    <div class="stat-card">
+                        <div class="stat-title">إجمالي الشباب 🛡️</div>
+                        <div class="stat-num" id="total-youth-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">إجمالي الشابات ✨</div>
+                        <div class="stat-num" id="total-girls-count">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #bfdbfe;">
+                        <div class="stat-title" style="color: var(--primary);">الإجمالي الكلي 📊</div>
+                        <div class="stat-num" id="total-all-count">0</div>
+                    </div>
+                </div>
+
+                <div class="family-section-title"><span>🛡️ أسر الشباب</span></div>
+                <div id="youth-families-list"></div>
+
+                <div class="family-section-title" style="margin-top: 35px;"><span>✨ أسر الشابات</span></div>
+                <div id="girls-families-list"></div>
+            </div>
+
+            <div id="family-detail-view" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 2px solid var(--border-color); padding-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+                    <button onclick="backToFamiliesList()" style="background: var(--text-muted); padding: 9px 18px; font-size: 13.5px;">⬅️ رجوع لقائمة الأسر</button>
+                    <div id="family-detail-header-text" style="text-align: right; flex-grow: 1;"></div>
+                    <button class="btn-success" id="btn-add-to-fam" onclick="">➕ إضافة مخدوم للأسرة</button>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="fam-search-input" placeholder="🔍 بحث سريع عن مخدوم داخل هذه الأسرة..." oninput="updateFamilySearch(this.value)">
+                </div>
+
+                <div id="family-members-container"></div>
+            </div>
+        </div>
+
+        <!-- حجز الرحلات -->
+        <div id="trips" class="tab-content">
+            <h3>نظام حجز الرحلات والفعاليات الذكي</h3>
+            
+            <div style="background:#f8fafc; padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:24px;">
+                <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                    <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                        <label>نوع الحجز / الفعالية</label>
+                        <select id="trip-type" onchange="changeTripType()">
+                            <option value="رحلة">رحلة</option>
+                            <option value="مؤتمر">مؤتمر</option>
+                            <option value="يوم روحي">يوم روحي</option>
+                            <option value="اجتماع خارجي">اجتماع خارجي</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                        <label>قيمة الاشتراك (جنيه)</label>
+                        <input type="number" id="trip-fee" placeholder="مثال: 300" oninput="updateAllTripFees()">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;">
+                <button class="btn-qr" onclick="openQRScanner('trip')" style="flex:1; min-width:200px; padding:14px; font-size:15px;">📷 إضافة مخدوم للحجز بـ QR Code</button>
+            </div>
+
+            <div class="input-group autocomplete-container">
+                <label>أو ابحث يدوياً بالإسم لإضافته للحجز:</label>
+                <input type="text" id="search-trip" placeholder="اكتب اسم المخدوم لإضافته للحجز..." oninput="searchForTrip(this.value)">
+                <div id="trip-autocomplete-results" class="autocomplete-results"></div>
+            </div>
+
+            <div id="trip-sheet" style="margin-top: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <h4 style="margin:0; font-size: 16px;">شيت حجز الفعالية: <span id="trip-count" style="color:var(--primary);">0</span></h4>
+                    <button class="btn-delete" onclick="clearTripSheet()">🗑️ تصفير شيت الحجز فقط</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>الأسرة</th>
+                                <th>الاشتراك</th>
+                                <th>المدفوع (تعديل الدفعة)</th>
+                                <th>المتبقي / الحالة</th>
+                                <th>الدفعات المسجلة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trip-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- البروفايلات والبحث -->
+        <div id="profiles" class="tab-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+                <h3 style="margin:0;">بحث متقدم وملفات المخدومين</h3>
+                <button class="btn-qr" onclick="openQRScanner('profile')">📷 فتح بروفايل عبر QR Code</button>
+            </div>
+            
+            <div class="search-bar">
+                <select id="search-filter">
+                    <option value="name">الاسم</option>
+                    <option value="father">أب الاعتراف</option>
+                    <option value="family">اسم الأسرة</option>
+                    <option value="stage">المرحلة الجامعية</option>
+                    <option value="birthdate">شهر/تاريخ الميلاد (مثال: 05)</option>
+                </select>
+                <input type="text" id="search-term" placeholder="اكتب للبحث..." oninput="renderProfiles()">
+            </div>
+
+            <div id="profiles-container"></div>
+        </div>
+
+        <!-- أعياد الميلاد -->
+        <div id="birthdays" class="tab-content">
+            <h3>أعياد ميلاد اليوم 🎂</h3>
+            <div id="birthdays-container"></div>
+        </div>
+
+        <!-- الافتقاد -->
+        <div id="alerts" class="tab-content">
+            <h3>يحتاجون لافتقاد (غياب 5 مرات متتالية)</h3>
+            <div id="alerts-container"></div>
+        </div>
+
+        <!-- الإعدادات -->
+        <div id="settings" class="tab-content">
+            <h3>إدارة البيانات والإعدادات</h3>
+            
+            <div class="settings-card">
+                <h4>💾 الأمان والنسخ الاحتياطي</h4>
+                <p style="font-size: 14px; color: var(--text-muted);">قم بتحميل نسخة احتياطية بشكل دوري لضمان حفظ بيانات الاجتماع.</p>
+                <div class="action-row">
+                    <button class="btn-success" onclick="exportData()">⬇️ تحميل نسخة احتياطية</button>
+                    <div style="position: relative;">
+                        <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+                        <button class="btn-warning" onclick="document.getElementById('import-file').click()">⬆️ استرجاع البيانات (Restore)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h4>🗑️ أدوات الحذف والتنظيف</h4>
+                <div class="action-row">
+                    <input type="number" id="delete-year" placeholder="أدخل السنة (مثال: 2026)">
+                    <button class="btn-delete" onclick="deleteYearAttendance()">مسح حضور هذه السنة للجميع</button>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:18px 0;">
+                <div class="action-row">
+                    <input type="text" id="delete-family-name" placeholder="أدخل اسم الأسرة بدقة">
+                    <button class="btn-delete" onclick="deleteFamilyMembers()">حذف الأسرة بالكامل</button>
+                    <button class="btn-warning" onclick="clearFamilyAttendance()" style="color:#fff;">تصفير حضور الأسرة فقط</button>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:18px 0;">
+                <div class="action-row">
+                    <button class="btn-delete" onclick="clearAllAttendance()">مسح كل التواريخ والحضور من النظام (سنة جديدة)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة قارئ الـ QR Code Modal -->
+    <div id="qr-scanner-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 style="margin-bottom:10px;">وجه الكاميرا نحو كارت QR</h3>
+            <p id="qr-modal-hint" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">سيتم المسح تلقائياً عند التعرف عليه</p>
+            <div id="qr-scanner-view"></div>
+            <button onclick="closeQRScanner()" style="margin-top:20px; background:var(--text-muted); width:100%;">إغلاق الكاميرا ✖️</button>
+        </div>
+    </div>
+
+    <!-- نافذة عرض كارت QR Code للمخدوم -->
+    <div id="qr-display-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 id="qr-display-name" style="margin-bottom:6px;">كارت المخدوم</h3>
+            <p id="qr-display-family" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;"></p>
+            <div id="qrcode-box" style="display:flex; justify-content:center; margin:20px 0;"></div>
+            <button onclick="closeQRDisplay()" style="background:var(--primary); width:100%;">تم 💾</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://vndevjdwuihwuwbnonxv.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YovoEAOkND4TRWhreEfkSg_nO8pCpjZ";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        const SUPABASE_ROW_ID = 1;
+
+        let db = { members: [], meetings: [], tripsData: {} };
+        let currentMeetingDate = '';
+        let currentAttendees = [];
+        let currentSelectedFamilyName = '';
+        let currentFamilySearchTerm = '';
+        let html5QrCode = null;
+        let activeQRTarget = ''; // 'attendance' | 'trip' | 'profile'
+
+        async function loadData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('app_data')
+                    .select('data')
+                    .eq('id', SUPABASE_ROW_ID)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (data && data.data) {
+                    db = data.data;
+                    if(!db.members) db.members = [];
+                    if(!db.meetings) db.meetings = [];
+                    if(!db.tripsData) db.tripsData = {};
+                    if(!db.attendanceRecords) db.attendanceRecords = {};
+                } else {
+                    // أول تشغيل: ننقل أي بيانات قديمة موجودة على نفس الجهاز إلى السحابة.
+                    const oldLocal = localStorage.getItem('TaklaDataV5_Expanded');
+                    if (oldLocal) {
+                        try {
+                            const oldDb = JSON.parse(oldLocal);
+                            db = oldDb;
+                            if(!db.members) db.members = [];
+                            if(!db.meetings) db.meetings = [];
+                            if(!db.tripsData) db.tripsData = {};
+                            if(!db.attendanceRecords) db.attendanceRecords = {};
+                            await saveData(false);
+                        } catch(e) {
+                            console.error('Error importing old local data', e);
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error('Supabase load error:', e);
+                alert('تعذر تحميل البيانات من قاعدة البيانات. تأكد من إعداد جدول app_data في Supabase.');
+            }
+        }
+
+        async function saveData(showError = true) {
+            try {
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .upsert({ id: SUPABASE_ROW_ID, data: db, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+
+                if (error) throw error;
+
+                checkBirthdays();
+                checkAlerts();
+            } catch(e) {
+                console.error('Supabase save error:', e);
+                if (showError) alert('حدث خطأ أثناء حفظ البيانات على السحابة. تأكد من إعداد جدول app_data والصلاحيات في Supabase.');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => { await loadData(); });
+
+        function login() {
+            if (document.getElementById('username').value === 'sttakla' && 
+                document.getElementById('password').value === 'Takla@2026') {
+                grantSystemAccess();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        async function grantSystemAccess() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('app-section').style.display = 'block';
+            
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('meeting-date').value = today;
+            
+            await loadData();
+            checkBirthdays();
+            checkAlerts();
+            renderFamiliesList();
+        }
+
+        function showTab(tabId, clickedButton = null) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            const tab = document.getElementById(tabId);
+            if (!tab) return;
+            tab.classList.add('active');
+            
+            if(tabId === 'families') {
+                document.getElementById('tab-fam-btn').classList.add('active');
+                backToFamiliesList();
+            } else if(tabId === 'add-member') {
+                document.getElementById('tab-add-btn').classList.add('active');
+            } else if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            if(tabId === 'profiles') renderProfiles();
+            if(tabId === 'attendance') loadAttendanceForDate();
+            if(tabId === 'trips') renderTripTable();
+        }
+
+        /* ----- محرك QR Code القارئ والمولد ----- */
+        function showMemberQRCode(memberId) {
+            let m = db.members.find(item => item.id == memberId);
+            if(!m) return;
+            
+            document.getElementById('qr-display-name').innerText = m.name;
+            document.getElementById('qr-display-family').innerText = `أسرة: ${m.family || '-'}`;
+            
+            let qrContainer = document.getElementById('qrcode-box');
+            qrContainer.innerHTML = '';
+            
+            new QRCode(qrContainer, {
+                text: "TAKLA:" + m.id,
+                width: 200,
+                height: 200,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qr-display-modal').style.display = 'flex';
+        }
+
+        function closeQRDisplay() {
+            document.getElementById('qr-display-modal').style.display = 'none';
+        }
+
+        function openQRScanner(target) {
+            activeQRTarget = target;
+            document.getElementById('qr-scanner-modal').style.display = 'flex';
+            
+            if(!html5QrCode) {
+                html5QrCode = new Html5Qrcode("qr-scanner-view");
+            }
+            
+            const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                (decodedText) => {
+                    handleScannedQRCode(decodedText);
+                },
+                (errorMessage) => { /* تجاهل أخطاء البحث المستمر */ }
+            ).catch(err => {
+                alert("تعذر فتح الكاميرا: يرجى إعطاء الصلاحية للكاميرا.");
+                closeQRScanner();
+            });
+        }
+
+        function closeQRScanner() {
+            if(html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('qr-scanner-modal').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('qr-scanner-modal').style.display = 'none';
+                });
+            } else {
+                document.getElementById('qr-scanner-modal').style.display = 'none';
+            }
+        }
+
+        function handleScannedQRCode(codeStr) {
+            let memberId = codeStr.replace("TAKLA:", "").trim();
+            let member = db.members.find(m => m.id == memberId);
+            
+            if(!member) {
+                alert("رمز QR غير معروف أو المخدوم غير مسجل!");
+                return;
+            }
+
+            closeQRScanner();
+
+            if(activeQRTarget === 'attendance') {
+                addMemberToMeeting(member.id);
+                alert(`✅ تم تسجيل حضور: ${member.name}`);
+            } else if(activeQRTarget === 'trip') {
+                addMemberToTrip(member.id);
+                alert(`✅ تم إضافة: ${member.name} لقائمة الرحلة/الفعالية`);
+            } else if(activeQRTarget === 'profile') {
+                document.getElementById('search-filter').value = 'name';
+                document.getElementById('search-term').value = member.name;
+                renderProfiles();
+            }
+        }
+
+        /* ----- وظائف المخدومين والبيانات ----- */
+        function saveMember() {
+            let name = document.getElementById('m-name').value.trim();
+            if(!name) { alert('برجاء كتابة الاسم!'); return; }
+
+            let editId = document.getElementById('edit-id').value;
+            let familyInput = document.getElementById('m-family').value.trim() || 'أسرة عامة';
+            
+            let memberData = {
+                name: name,
+                gender: document.getElementById('m-gender').value,
+                stage: document.getElementById('m-stage').value,
+                family: familyInput,
+                birthdate: document.getElementById('m-birthdate').value,
+                address: document.getElementById('m-address').value,
+                phone: document.getElementById('m-phone').value,
+                father: document.getElementById('m-father').value,
+                notes: document.getElementById('m-notes').value
+            };
+
+            if (editId) {
+                let index = db.members.findIndex(m => m.id == editId);
+                if (index > -1) {
+                    memberData.id = db.members[index].id;
+                    memberData.attendance = db.members[index].attendance;
+                    db.members[index] = memberData;
+                    alert('تم تعديل البيانات بنجاح!');
+                }
+            } else {
+                memberData.id = Date.now();
+                memberData.attendance = [];
+                db.members.push(memberData);
+                alert('تم تسجيل المخدوم الجديد بنجاح!');
+                showMemberQRCode(memberData.id);
+            }
+
+            saveData();
+            cancelEdit();
+        }
+
+        function editProfile(id) {
+            let member = db.members.find(m => m.id == id);
+            if(!member) return;
+            
+            document.getElementById('edit-id').value = member.id;
+            document.getElementById('m-name').value = member.name;
+            document.getElementById('m-gender').value = member.gender || 'شاب';
+            document.getElementById('m-stage').value = member.stage || '';
+            document.getElementById('m-family').value = member.family || '';
+            document.getElementById('m-birthdate').value = member.birthdate || '';
+            document.getElementById('m-address').value = member.address || '';
+            document.getElementById('m-phone').value = member.phone || '';
+            document.getElementById('m-father').value = member.father || '';
+            document.getElementById('m-notes').value = member.notes || '';
+
+            document.getElementById('form-title').innerText = 'تعديل بيانات: ' + member.name;
+            document.getElementById('btn-save-member').innerText = 'حفظ التعديلات 💾';
+            document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
+            
+            showTab('add-member');
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-id').value = '';
+            document.querySelectorAll('#add-member input, #add-member textarea').forEach(i => i.value = '');
+            document.getElementById('form-title').innerText = 'تسجيل بيانات مخدوم جديد';
+            document.getElementById('btn-save-member').innerText = 'حفظ البيانات 💾';
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+        }
+
+        function renderFamiliesList() {
+            let youthListDiv = document.getElementById('youth-families-list');
+            let girlsListDiv = document.getElementById('girls-families-list');
+            
+            youthListDiv.innerHTML = '';
+            girlsListDiv.innerHTML = '';
+
+            let totalYouthCount = 0;
+            let totalGirlsCount = 0;
+
+            let youthFamilies = {};
+            let girlsFamilies = {};
+
+            db.members.forEach(m => {
+                let fam = m.family || 'أسرة عامة';
+                if(m.gender === 'شابة') {
+                    totalGirlsCount++;
+                    if(!girlsFamilies[fam]) girlsFamilies[fam] = [];
+                    girlsFamilies[fam].push(m);
+                } else {
+                    totalYouthCount++;
+                    if(!youthFamilies[fam]) youthFamilies[fam] = [];
+                    youthFamilies[fam].push(m);
+                }
+            });
+
+            document.getElementById('total-youth-count').innerText = totalYouthCount;
+            document.getElementById('total-girls-count').innerText = totalGirlsCount;
+            document.getElementById('total-all-count').innerText = totalYouthCount + totalGirlsCount;
+
+            let youthKeys = Object.keys(youthFamilies).sort();
+            let girlsKeys = Object.keys(girlsFamilies).sort();
+
+            if(youthKeys.length === 0) {
+                youthListDiv.innerHTML = '<p style="font-size:13.5px; color:var(--text-muted); padding:6px;">لا توجد أسر شباب مسجلة بعد.</p>';
+            } else {
+                youthKeys.forEach(fam => {
+                    let count = youthFamilies[fam].length;
+                    youthListDiv.innerHTML += `
+                        <div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شاب')">
+                            <div><strong style="font-size:16px; color:var(--primary);">🛡️ ${fam}</strong></div>
+                            <span style="background:#e0f2fe; color:#0369a1; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:bold;">${count} مخدوم</span>
+                        </div>
+                    `;
+                });
+            }
+
+            if(girlsKeys.length === 0) {
+                girlsListDiv.innerHTML = '<p style="font-size:13.5px; color:var(--text-muted); padding:6px;">لا توجد أسر شابات مسجلة بعد.</p>';
+            } else {
+                girlsKeys.forEach(fam => {
+                    let count = girlsFamilies[fam].length;
+                    girlsListDiv.innerHTML += `
+                        <div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شابة')" style="border-right-color: var(--secondary);">
+                            <div><strong style="font-size:16px; color:var(--secondary);">✨ ${fam}</strong></div>
+                            <span style="background:#fee2e2; color:#991b1b; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:bold;">${count} مخدومة</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function openFamilyDetail(familyName, gender) {
+            currentSelectedFamilyName = familyName;
+            currentFamilySearchTerm = '';
+            document.getElementById('fam-search-input').value = '';
+            
+            document.getElementById('families-main-view').style.display = 'none';
+            document.getElementById('family-detail-view').style.display = 'block';
+            
+            document.getElementById('btn-add-to-fam').setAttribute('onclick', `addMemberToSpecificFamily('${familyName}', '${gender}')`);
+            
+            renderFamilyMembersTable();
+        }
+
+        function backToFamiliesList() {
+            currentSelectedFamilyName = '';
+            document.getElementById('family-detail-view').style.display = 'none';
+            document.getElementById('families-main-view').style.display = 'block';
+            renderFamiliesList();
+        }
+
+        function renderFamilyMembersTable() {
+            let container = document.getElementById('family-members-container');
+            let headerText = document.getElementById('family-detail-header-text');
+            
+            let membersInFamily = db.members.filter(m => (m.family || 'أسرة عامة') === currentSelectedFamilyName);
+            let famType = membersInFamily.length > 0 && membersInFamily[0].gender === 'شابة' ? 'شابة' : 'شاب';
+
+            headerText.innerHTML = `
+                <h4 style="margin:0; color:var(--primary); font-size:17px;">أسرة: ${currentSelectedFamilyName}</h4>
+                <span style="font-size:13px; color:var(--text-muted);">التصنيف: ${famType === 'شابة' ? 'أسر الشابات' : 'أسر الشباب'} | العدد: ${membersInFamily.length}</span>
+            `;
+
+            let filteredMembers = membersInFamily.filter(m => {
+                if(!currentFamilySearchTerm) return true;
+                return m.name.toLowerCase().includes(currentFamilySearchTerm.toLowerCase()) || 
+                       (m.stage && m.stage.toLowerCase().includes(currentFamilySearchTerm.toLowerCase())) ||
+                       (m.phone && m.phone.includes(currentFamilySearchTerm));
+            });
+
+            if(filteredMembers.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد نتائج مطابقة للبحث داخل هذه الأسرة.</p>';
+                return;
+            }
+
+            let html = '<div class="table-responsive"><table class="custom-table"><thead><tr><th>الاسم</th><th>المرحلة</th><th>التليفون</th><th>أب الاعتراف</th><th>إجراء</th></tr></thead><tbody>';
+            filteredMembers.forEach(m => {
+                html += `
+                    <tr>
+                        <td><strong>${m.name}</strong></td>
+                        <td>${m.stage || '-'}</td>
+                        <td>${m.phone || '-'}</td>
+                        <td>${m.father || '-'}</td>
+                        <td>
+                            <button class="btn-qr" style="padding: 5px 10px; font-size: 12px;" onclick="showMemberQRCode(${m.id})">📇 QR</button>
+                            <button class="btn-edit" onclick="editProfile(${m.id})">تعديل ✏️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function updateFamilySearch(val) {
+            currentFamilySearchTerm = val;
+            renderFamilyMembersTable();
+        }
+
+        function addMemberToSpecificFamily(familyName, gender) {
+            showTab('add-member');
+            document.getElementById('tab-add-btn').classList.add('active');
+            
+            cancelEdit();
+            document.getElementById('m-family').value = familyName;
+            document.getElementById('m-gender').value = gender;
+            document.getElementById('m-name').focus();
+        }
+
+        function loadAttendanceForDate() {
+            currentMeetingDate = document.getElementById('meeting-date').value;
+            let controls = document.getElementById('attendance-controls');
+            let sheet = document.getElementById('attendance-sheet');
+            
+            if(!currentMeetingDate) {
+                controls.style.display = 'none';
+                sheet.style.display = 'none';
+                return;
+            }
+
+            controls.style.display = 'block';
+            sheet.style.display = 'block';
+            document.getElementById('search-attendance').value = '';
+            document.getElementById('autocomplete-results').innerHTML = '';
+
+            if(!db.attendanceRecords) db.attendanceRecords = {};
+            if(!db.attendanceRecords[currentMeetingDate]) db.attendanceRecords[currentMeetingDate] = {};
+
+            currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate][m.id]);
+            
+            if(!db.meetings.includes(currentMeetingDate)) {
+                db.meetings.push(currentMeetingDate);
+                db.meetings.sort();
+                saveData();
+            }
+
+            renderAttendanceTable();
+        }
+
+        function searchForAttendance(val) {
+            let resContainer = document.getElementById('autocomplete-results');
+            resContainer.innerHTML = '';
+            val = val.trim();
+            if(!val) return;
+
+            let matches = db.members.filter(m => 
+                m.name.includes(val) && (!db.attendanceRecords[currentMeetingDate] || !db.attendanceRecords[currentMeetingDate][m.id])
+            );
+
+            matches.forEach(m => {
+                let div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${m.name}</strong> - <small style="color:var(--text-muted);">${m.family || ''}</small>`;
+                div.onclick = () => addMemberToMeeting(m.id);
+                resContainer.appendChild(div);
+            });
+        }
+
+        function addMemberToMeeting(id) {
+            let member = db.members.find(m => m.id == id);
+            if(member) {
+                let now = new Date();
+                let timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                
+                if(!db.attendanceRecords[currentMeetingDate]) db.attendanceRecords[currentMeetingDate] = {};
+                db.attendanceRecords[currentMeetingDate][id] = timeStr;
+
+                if(!member.attendance) member.attendance = [];
+                if(!member.attendance.includes(currentMeetingDate)) member.attendance.push(currentMeetingDate);
+
+                saveData();
+                currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate][m.id]);
+                
+                document.getElementById('search-attendance').value = '';
+                document.getElementById('autocomplete-results').innerHTML = '';
+                renderAttendanceTable();
+            }
+        }
+
+        function removeMemberFromMeeting(id) {
+            let member = db.members.find(m => m.id == id);
+            if(db.attendanceRecords[currentMeetingDate]) {
+                delete db.attendanceRecords[currentMeetingDate][id];
+            }
+            if(member && member.attendance) {
+                member.attendance = member.attendance.filter(d => d !== currentMeetingDate);
+            }
+            saveData();
+            currentAttendees = currentAttendees.filter(m => m.id != id);
+            renderAttendanceTable();
+        }
+
+        function renderAttendanceTable() {
+            let tbody = document.getElementById('attendance-tbody');
+            tbody.innerHTML = '';
+            document.getElementById('attendees-count').innerText = currentAttendees.length;
+
+            currentAttendees.forEach(m => {
+                let attendTime = db.attendanceRecords[currentMeetingDate][m.id] || '-';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${m.name}</strong></td>
+                        <td>${m.family || '-'}</td>
+                        <td><span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:12.5px;">${attendTime}</span></td>
+                        <td><button class="btn-delete" onclick="removeMemberFromMeeting(${m.id})">إلغاء الحضور ✖️</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function getActiveTripKey() { return document.getElementById('trip-type').value; }
+        function getTripObj() {
+            let key = getActiveTripKey();
+            if(!db.tripsData[key]) db.tripsData[key] = { fee: 0, reservations: {} };
+            return db.tripsData[key];
+        }
+
+        function changeTripType() {
+            let trip = getTripObj();
+            document.getElementById('trip-fee').value = trip.fee || '';
+            renderTripTable();
+        }
+
+        function updateAllTripFees() {
+            let fee = parseFloat(document.getElementById('trip-fee').value) || 0;
+            let trip = getTripObj();
+            trip.fee = fee;
+            saveData();
+            renderTripTable();
+        }
+
+        function searchForTrip(val) {
+            let resContainer = document.getElementById('trip-autocomplete-results');
+            resContainer.innerHTML = '';
+            val = val.trim();
+            if(!val) return;
+
+            let trip = getTripObj();
+            let matches = db.members.filter(m => m.name.includes(val) && (!trip.reservations[m.id]));
+
+            matches.forEach(m => {
+                let div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${m.name}</strong> - <small style="color:var(--text-muted);">${m.family || ''}</small>`;
+                div.onclick = () => addMemberToTrip(m.id);
+                resContainer.appendChild(div);
+            });
+        }
+
+        function addMemberToTrip(id) {
+            let trip = getTripObj();
+            if(!trip.reservations[id]) {
+                trip.reservations[id] = { paid: 0, installments: [] };
+                saveData();
+            }
+            document.getElementById('search-trip').value = '';
+            document.getElementById('trip-autocomplete-results').innerHTML = '';
+            renderTripTable();
+        }
+
+        function removeMemberFromTrip(id) {
+            let trip = getTripObj();
+            delete trip.reservations[id];
+            saveData();
+            renderTripTable();
+        }
+
+        function addInstallment(id) {
+            let inputField = document.getElementById(`inst-input-${id}`);
+            let addVal = parseFloat(inputField.value);
+            
+            if(isNaN(addVal) || addVal <= 0) {
+                alert('برجاء إدخال مبلغ صحيح للإضافة!');
+                return;
+            }
+
+            let trip = getTripObj();
+            let fee = trip.fee || 0;
+            if(!trip.reservations[id]) trip.reservations[id] = { paid: 0, installments: [] };
+
+            let currentPaid = trip.reservations[id].paid || 0;
+            let newTotalPaid = currentPaid + addVal;
+
+            if(fee > 0 && newTotalPaid > fee) {
+                alert(`خطأ: إجمالي المدفوع (${newTotalPaid} ج.م) يتخطى قيمة الاشتراك الأساسية (${fee} ج.م)!`);
+                return;
+            }
+
+            let now = new Date();
+            let dateStr = now.toLocaleDateString('ar-EG') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            
+            trip.reservations[id].paid = newTotalPaid;
+            trip.reservations[id].installments.push({ amount: addVal, date: dateStr });
+
+            saveData();
+            renderTripTable();
+        }
+
+        function renderTripTable() {
+            let tbody = document.getElementById('trip-tbody');
+            tbody.innerHTML = '';
+            
+            let trip = getTripObj();
+            let fee = trip.fee || 0;
+            let reservations = trip.reservations || {};
+            let count = Object.keys(reservations).length;
+            document.getElementById('trip-count').innerText = count;
+
+            if(count === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">لا يوجد مخدومين مضافين لهذه الفعالية بعد.</td></tr>`;
+                return;
+            }
+
+            for(let id in reservations) {
+                let member = db.members.find(m => m.id == id);
+                if(!member) continue;
+
+                let res = reservations[id];
+                let paid = res.paid || 0;
+                let remaining = fee > 0 ? (fee - paid) : 0;
+                
+                let statusHtml = '';
+                if(fee > 0 && remaining <= 0) {
+                    statusHtml = `<span style="background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:12px;">تم السداد ✅</span>`;
+                } else if(fee > 0) {
+                    statusHtml = `<span style="background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:12px;">متبقي: ${remaining} ج.م</span>`;
+                } else {
+                    statusHtml = `<span style="background:#f1f5f9; color:#475569; padding:4px 10px; border-radius:8px; font-size:12px;">المدفوع: ${paid} ج.م</span>`;
+                }
+
+                let installmentsHtml = '';
+                if(res.installments && res.installments.length > 0) {
+                    installmentsHtml = '<div style="font-size:12px; color:var(--text-muted); margin-top:4px; max-height:60px; overflow-y:auto; line-height: 1.4;">';
+                    res.installments.forEach((inst, idx) => {
+                        installmentsHtml += `دفعة ${idx+1}: <strong>+${inst.amount}</strong> (${inst.date})<br>`;
+                    });
+                    installmentsHtml += '</div>';
+                } else {
+                    installmentsHtml = '<div style="font-size:12px; color:var(--text-muted);">لا توجد دفعات</div>';
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${member.name}</strong></td>
+                        <td>${member.family || '-'}</td>
+                        <td><strong style="color:var(--primary);">${fee} ج.م</strong></td>
+                        <td>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="inst-input-${member.id}" style="width:80px; padding:6px 10px; border:1px solid var(--border-color); border-radius:8px; background:#fff;" placeholder="المبلغ">
+                                <button class="btn-success" style="padding:6px 12px; font-size:12px;" onclick="addInstallment(${member.id})">إضافة</button>
+                            </div>
+                            <div style="font-size:12px; color:var(--success-dark); margin-top:4px; font-weight:bold;">المدفوع: ${paid} ج.م</div>
+                        </td>
+                        <td>${statusHtml}</td>
+                        <td>${installmentsHtml}</td>
+                        <td><button class="btn-delete" onclick="removeMemberFromTrip(${member.id})">حذف 🗑️</button></td>
+                    </tr>
+                `;
+            }
+        }
+
+        function clearTripSheet() {
+            let key = getActiveTripKey();
+            if(confirm(`هل أنت متأكد من تصفير شيت الحجز الخاص بـ (${key}) بالكامل؟`)) {
+                if(db.tripsData[key]) {
+                    db.tripsData[key].reservations = {};
+                    saveData();
+                    renderTripTable();
+                    alert('تم تصفير شيت الحجز بنجاح.');
+                }
+            }
+        }
+
+        function renderProfiles() {
+            let container = document.getElementById('profiles-container');
+            let filterType = document.getElementById('search-filter').value;
+            let searchTerm = document.getElementById('search-term').value.trim().toLowerCase();
+            
+            container.innerHTML = '';
+            let filteredMembers = db.members.filter(m => {
+                if(!searchTerm) return true;
+                let fieldVal = '';
+                if(filterType === 'name') fieldVal = m.name;
+                if(filterType === 'father') fieldVal = m.father;
+                if(filterType === 'family') fieldVal = m.family;
+                if(filterType === 'stage') fieldVal = m.stage;
+                if(filterType === 'birthdate') fieldVal = m.birthdate;
+                return (fieldVal && fieldVal.toLowerCase().includes(searchTerm));
+            });
+
+            if (filteredMembers.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد نتائج مطابقة للبحث.</p>';
+                return;
+            }
+
+            filteredMembers.forEach(m => {
+                let attCount = m.attendance ? m.attendance.length : 0;
+                let attDates = m.attendance ? m.attendance.sort().join(' ، ') : '';
+                
+                container.innerHTML += `
+                    <div class="profile-card">
+                        <h4>
+                            <span>${m.name} <span style="font-size:12px; font-weight:700; background:#e2e8f0; color:#334155; padding:3px 10px; border-radius:12px; margin-right:8px;">${m.gender}</span></span>
+                            <div>
+                                <button class="btn-qr" onclick="showMemberQRCode(${m.id})">📇 كارت QR</button>
+                                <button class="btn-edit" onclick="editProfile(${m.id})">✏️ تعديل</button>
+                                <button class="btn-delete" onclick="deleteProfile(${m.id})">🗑️ حذف</button>
+                            </div>
+                        </h4>
+                        <p><strong>المرحلة/السنة:</strong> ${m.stage || '-'} | <strong>الأسرة:</strong> ${m.family || '-'}</p>
+                        <p><strong>تاريخ الميلاد:</strong> ${m.birthdate || '-'} | <strong>التليفون:</strong> ${m.phone || '-'}</p>
+                        <p><strong>أب الاعتراف:</strong> ${m.father || '-'}</p>
+                        <p><strong>ملاحظات:</strong> ${m.notes || '-'}</p>
+                        <hr style="border:0; border-top:1px dashed var(--border-color); margin:12px 0;">
+                        <p style="margin-bottom:4px;"><strong>إجمالي مرات الحضور:</strong> <span style="color:var(--success-dark); font-weight:bold;">${attCount}</span> مرة</p>
+                        <p style="font-size:12.5px; color:var(--text-muted);"><strong>تواريخ الحضور:</strong> ${attDates || 'لم يحضر بعد'}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteProfile(id) {
+            if(confirm('هل أنت متأكد من حذف هذا المخدوم نهائياً؟')) {
+                db.members = db.members.filter(m => m.id !== id);
+                for(let k in db.tripsData) {
+                    if(db.tripsData[k].reservations && db.tripsData[k].reservations[id]) {
+                        delete db.tripsData[k].reservations[id];
+                    }
+                }
+                saveData();
+                renderProfiles();
+                renderFamiliesList();
+            }
+        }
+
+        function checkBirthdays() {
+            let container = document.getElementById('birthdays-container');
+            let btn = document.getElementById('tab-bday-btn');
+            container.innerHTML = '';
+            
+            let today = new Date();
+            let month = String(today.getMonth() + 1).padStart(2, '0');
+            let day = String(today.getDate()).padStart(2, '0');
+            let todayStr = `-${month}-${day}`;
+            let bdayCount = 0;
+
+            db.members.forEach(m => {
+                if (m.birthdate && m.birthdate.endsWith(todayStr)) {
+                    bdayCount++;
+                    container.innerHTML += `
+                        <div class="birthday-box">
+                            <strong>🎉 كل سنة وأنت طيب!</strong> اليوم عيد ميلاد: 
+                            <span style="font-size:16px; font-weight:bold;">${m.name}</span>
+                            <br><small style="margin-top:6px; display:inline-block;">المرحلة: ${m.stage || ''} | التليفون: ${m.phone || ''}</small>
+                        </div>
+                    `;
+                }
+            });
+
+            if (bdayCount === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد أعياد ميلاد مسجلة في تاريخ اليوم.</p>';
+                btn.innerHTML = 'أعياد ميلاد 🎂';
+            } else {
+                btn.innerHTML = `أعياد ميلاد (${bdayCount}) 🎂`;
+            }
+        }
+
+        function checkAlerts() {
+            let container = document.getElementById('alerts-container');
+            let alertBtn = document.getElementById('tab-alert-btn');
+            container.innerHTML = '';
+            let alertsCount = 0;
+
+            if (db.meetings.length < 5) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لم يتم تسجيل 5 اجتماعات حتى الآن لتقييم الغياب.</p>';
+                alertBtn.innerHTML = 'افتقاد 🔔';
+                return;
+            }
+
+            let last5Meetings = db.meetings.slice(-5);
+
+            db.members.forEach(member => {
+                let attendedInLast5 = false;
+                last5Meetings.forEach(date => {
+                    if(member.attendance && member.attendance.includes(date)) attendedInLast5 = true;
+                });
+
+                if (!attendedInLast5) {
+                    alertsCount++;
+                    container.innerHTML += `
+                        <div class="alert-box">
+                            <strong>⚠️ افتقاد عاجل:</strong> الشاب/ة (<strong style="font-size:15px;">${member.name}</strong>) غاب لمدة 5 مرات متتالية فأكثر. 
+                            <br><span style="display:inline-block; margin-top:6px;">رقم التليفون: ${member.phone || '-'} | أب الاعتراف: ${member.father || '-'}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            if (alertsCount === 0) {
+                container.innerHTML = '<p style="color:var(--success-dark); font-weight:bold; text-align:center; padding:30px;">لا يوجد مخدومين غابوا 5 مرات متتالية.</p>';
+                alertBtn.innerHTML = 'افتقاد 🔔';
+            } else {
+                alertBtn.innerHTML = `افتقاد (${alertsCount}) 🔴`;
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(db);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `Takla_Backup_${new Date().toISOString().split('T')[0]}.json`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData && importedData.members && importedData.meetings) {
+                        db = importedData;
+                        if(!db.tripsData) db.tripsData = {};
+                        saveData();
+                        alert('تم استرجاع البيانات بنجاح!');
+                        document.getElementById('import-file').value = '';
+                        showTab('profiles');
+                    } else {
+                        alert('ملف النسخة الاحتياطية غير صحيح.');
+                    }
+                } catch (error) {
+                    alert('حدث خطأ أثناء قراءة الملف.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function deleteYearAttendance() {
+            let year = document.getElementById('delete-year').value.trim();
+            if(!year || year.length !== 4) { alert('برجاء كتابة السنة بشكل صحيح (مثل: 2026)'); return; }
+            
+            if(confirm(`هل أنت متأكد من مسح جميع سجلات الحضور لعام ${year}؟`)) {
+                db.members.forEach(m => {
+                    if(m.attendance) m.attendance = m.attendance.filter(date => !date.startsWith(year));
+                });
+                db.meetings = db.meetings.filter(date => !date.startsWith(year));
+                if(db.attendanceRecords) {
+                    for(let d in db.attendanceRecords) {
+                        if(d.startsWith(year)) delete db.attendanceRecords[d];
+                    }
+                }
+                saveData();
+                alert('تم مسح حضور هذه السنة بنجاح.');
+                document.getElementById('delete-year').value = '';
+            }
+        }
+
+        function deleteFamilyMembers() {
+            let family = document.getElementById('delete-family-name').value.trim();
+            if(!family) { alert('برجاء كتابة اسم الأسرة!'); return; }
+            
+            if(confirm(`تحذير: هل أنت متأكد من مسح كل المخدومين المنضمين لأسرة "${family}" نهائياً؟`)) {
+                let initialCount = db.members.length;
+                db.members = db.members.filter(m => m.family !== family);
+                let deletedCount = initialCount - db.members.length;
+                
+                if(deletedCount > 0) {
+                    saveData();
+                    alert(`تم حذف ${deletedCount} مخدوم من هذه الأسرة بنجاح.`);
+                    renderFamiliesList();
+                } else {
+                    alert('لم يتم العثور على مخدومين بهذا الاسم للأسرة.');
+                }
+                document.getElementById('delete-family-name').value = '';
+            }
+        }
+
+        function clearFamilyAttendance() {
+            let family = document.getElementById('delete-family-name').value.trim();
+            if(!family) { alert('برجاء كتابة اسم الأسرة!'); return; }
+            
+            if(confirm(`هل أنت متأكد من تصفير حضور أفراد أسرة "${family}" فقط؟`)) {
+                let count = 0;
+                db.members.forEach(m => {
+                    if(m.family === family) {
+                        m.attendance = [];
+                        count++;
+                    }
+                });
+                
+                if(count > 0) {
+                    saveData();
+                    alert(`تم تصفير حضور ${count} مخدوم في هذه الأسرة بنجاح.`);
+                } else {
+                    alert('لم يتم العثور على مخدومين بهذه الأسرة.');
+                }
+                document.getElementById('delete-family-name').value = '';
+            }
+        }
+
+        function clearAllAttendance() {
+            if(confirm('تنبيه خطير! هل أنت متأكد من مسح كل تواريخ حضور جميع المخدومين للبدء في سنة جديدة؟')) {
+                db.members.forEach(m => m.attendance = []);
+                db.meetings = [];
+                db.attendanceRecords = {};
+                saveData();
+                alert('تم تصفير جميع التواريخ والحضور بنجاح.');
+            }
+        }
+    </script>
+</body>
+</html>
