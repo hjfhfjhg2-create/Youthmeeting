@@ -6,9 +6,12 @@
     <title>سجل الحضور والغياب الذكي - كنيسة الأنبا تكلا</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- مكتبات QR Code (مولد الـ QR وقارئ الكاميرا) -->
+    <!-- مكتبات QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- مكتبة Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -275,7 +278,7 @@
         <div class="header-content">
             <h1>كنيسة القديس العظيم الأنبا تكلا</h1>
             <h2>اجتماع الشبان والشابات</h2>
-            <h3>نظام الخدمة الذكي📱</h3>
+            <h3>نظام الخدمة الذكي ⚡ (Supabase)</h3>
         </div>
     </header>
 
@@ -502,18 +505,14 @@
             
             <div class="settings-card">
                 <h4>💾 الأمان والنسخ الاحتياطي</h4>
-                <p style="font-size: 14px; color: var(--text-muted);">قم بتحميل نسخة احتياطية بشكل دوري لضمان حفظ بيانات الاجتماع.</p>
+                <p style="font-size: 14px; color: var(--text-muted);">تحميل نسخة محلياً لاستخدامها في الأرشيف.</p>
                 <div class="action-row">
                     <button class="btn-success" onclick="exportData()">⬇️ تحميل نسخة احتياطية</button>
-                    <div style="position: relative;">
-                        <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
-                        <button class="btn-warning" onclick="document.getElementById('import-file').click()">⬆️ استرجاع البيانات (Restore)</button>
-                    </div>
                 </div>
             </div>
 
             <div class="settings-card">
-                <h4>🗑️ أدوات الحذف والتنظيف</h4>
+                <h4>🗑️ أدوات الحذف والتنظيف من Supabase</h4>
                 <div class="action-row">
                     <input type="number" id="delete-year" placeholder="أدخل السنة (مثال: 2026)">
                     <button class="btn-delete" onclick="deleteYearAttendance()">مسح حضور هذه السنة للجميع</button>
@@ -553,56 +552,97 @@
     </div>
 
     <script>
-        let db = { members: [], meetings: [], tripsData: {} };
+        // ==========================================
+        // ⚙️ إعدادات الاتصال المباشر بـ SUPABASE
+        // ==========================================
+        const SUPABASE_URL = 'https://uyoqcwtlxfuzvtpbfvml.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_RxDd9gplG9B2Fn_OxVRbBw_1l2Uy84E';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let db = { members: [], meetings: [], attendanceRecords: {}, tripsData: {} };
         let currentMeetingDate = '';
         let currentAttendees = [];
         let currentSelectedFamilyName = '';
         let currentFamilySearchTerm = '';
         let html5QrCode = null;
-        let activeQRTarget = ''; // 'attendance' | 'trip' | 'profile'
+        let activeQRTarget = '';
 
-        function loadData() {
-            let saved = localStorage.getItem('TaklaDataV5_Expanded');
-            if (saved) {
-                try {
-                    db = JSON.parse(saved);
-                    if(!db.tripsData) db.tripsData = {};
-                } catch(e) { console.error("Error loading data", e); }
-            }
-        }
-
-        function saveData() {
+        async function loadData() {
             try {
-                localStorage.setItem('TaklaDataV5_Expanded', JSON.stringify(db));
+                const { data: members, error: mErr } = await _supabase.from('members').select('*');
+                if (mErr) throw mErr;
+
+                const { data: attendance, error: aErr } = await _supabase.from('attendance').select('*');
+                if (aErr) throw aErr;
+
+                const { data: trips, error: tErr } = await _supabase.from('trips').select('*');
+                if (tErr) throw tErr;
+
+                db.members = members || [];
+                db.meetings = [];
+                db.attendanceRecords = {};
+                db.tripsData = {};
+
+                (attendance || []).forEach(record => {
+                    if (!db.meetings.includes(record.meeting_date)) {
+                        db.meetings.push(record.meeting_date);
+                    }
+                    if (!db.attendanceRecords[record.meeting_date]) {
+                        db.attendanceRecords[record.meeting_date] = {};
+                    }
+                    db.attendanceRecords[record.meeting_date][record.member_id] = record.attend_time;
+
+                    let m = db.members.find(x => x.id == record.member_id);
+                    if (m) {
+                        if (!m.attendance) m.attendance = [];
+                        if (!m.attendance.includes(record.meeting_date)) {
+                            m.attendance.push(record.meeting_date);
+                        }
+                    }
+                });
+                db.meetings.sort();
+
+                (trips || []).forEach(t => {
+                    if (!db.tripsData[t.trip_type]) {
+                        db.tripsData[t.trip_type] = { fee: t.fee || 0, reservations: {} };
+                    }
+                    if (t.fee > 0 || !db.tripsData[t.trip_type].fee) {
+                        db.tripsData[t.trip_type].fee = t.fee || 0;
+                    }
+                    if (t.member_id) {
+                        db.tripsData[t.trip_type].reservations[t.member_id] = {
+                            paid: t.paid || 0,
+                            installments: t.installments || []
+                        };
+                    }
+                });
+
                 checkBirthdays();
                 checkAlerts();
+                renderFamiliesList();
             } catch(e) {
-                alert('تحذير: مساحة التخزين المحلية قاربت على الامتلاء. يرجى أخذ نسخة احتياطية.');
+                console.error("Error loading data from Supabase", e);
+                alert("حدث خطأ أثناء تحميل البيانات من Supabase: " + (e.message || e));
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => { loadData(); });
-
-        function login() {
+        async function login() {
             if (document.getElementById('username').value === 'sttakla' && 
                 document.getElementById('password').value === 'Takla@2026') {
-                grantSystemAccess();
+                await grantSystemAccess();
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
         }
 
-        function grantSystemAccess() {
+        async function grantSystemAccess() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'block';
             
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('meeting-date').value = today;
             
-            loadData();
-            checkBirthdays();
-            checkAlerts();
-            renderFamiliesList();
+            await loadData();
         }
 
         function showTab(tabId, clickedButton = null) {
@@ -626,7 +666,7 @@
             if(tabId === 'trips') renderTripTable();
         }
 
-        /* ----- محرك QR Code القارئ والمولد ----- */
+        /* ----- QR Code ----- */
         function showMemberQRCode(memberId) {
             let m = db.members.find(item => item.id == memberId);
             if(!m) return;
@@ -669,7 +709,7 @@
                 (decodedText) => {
                     handleScannedQRCode(decodedText);
                 },
-                (errorMessage) => { /* تجاهل أخطاء البحث المستمر */ }
+                (errorMessage) => { }
             ).catch(err => {
                 alert("تعذر فتح الكاميرا: يرجى إعطاء الصلاحية للكاميرا.");
                 closeQRScanner();
@@ -688,7 +728,7 @@
             }
         }
 
-        function handleScannedQRCode(codeStr) {
+        async function handleScannedQRCode(codeStr) {
             let memberId = codeStr.replace("TAKLA:", "").trim();
             let member = db.members.find(m => m.id == memberId);
             
@@ -700,10 +740,10 @@
             closeQRScanner();
 
             if(activeQRTarget === 'attendance') {
-                addMemberToMeeting(member.id);
+                await addMemberToMeeting(member.id);
                 alert(`✅ تم تسجيل حضور: ${member.name}`);
             } else if(activeQRTarget === 'trip') {
-                addMemberToTrip(member.id);
+                await addMemberToTrip(member.id);
                 alert(`✅ تم إضافة: ${member.name} لقائمة الرحلة/الفعالية`);
             } else if(activeQRTarget === 'profile') {
                 document.getElementById('search-filter').value = 'name';
@@ -712,8 +752,8 @@
             }
         }
 
-        /* ----- وظائف المخدومين والبيانات ----- */
-        function saveMember() {
+        /* ----- البيانات والمخدومين (Supabase) ----- */
+        async function saveMember() {
             let name = document.getElementById('m-name').value.trim();
             if(!name) { alert('برجاء كتابة الاسم!'); return; }
 
@@ -733,22 +773,18 @@
             };
 
             if (editId) {
-                let index = db.members.findIndex(m => m.id == editId);
-                if (index > -1) {
-                    memberData.id = db.members[index].id;
-                    memberData.attendance = db.members[index].attendance;
-                    db.members[index] = memberData;
-                    alert('تم تعديل البيانات بنجاح!');
-                }
+                const { error } = await _supabase.from('members').update(memberData).eq('id', editId);
+                if (error) { alert('حدث خطأ أثناء التعديل: ' + error.message); return; }
+                alert('تم تعديل البيانات بنجاح في Supabase!');
             } else {
                 memberData.id = Date.now();
-                memberData.attendance = [];
-                db.members.push(memberData);
-                alert('تم تسجيل المخدوم الجديد بنجاح!');
+                const { error } = await _supabase.from('members').insert([memberData]);
+                if (error) { alert('حدث خطأ أثناء الحفظ: ' + error.message); return; }
+                alert('تم تسجيل المخدوم الجديد بنجاح في Supabase!');
                 showMemberQRCode(memberData.id);
             }
 
-            saveData();
+            await loadData();
             cancelEdit();
         }
 
@@ -938,17 +974,7 @@
             document.getElementById('search-attendance').value = '';
             document.getElementById('autocomplete-results').innerHTML = '';
 
-            if(!db.attendanceRecords) db.attendanceRecords = {};
-            if(!db.attendanceRecords[currentMeetingDate]) db.attendanceRecords[currentMeetingDate] = {};
-
-            currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate][m.id]);
-            
-            if(!db.meetings.includes(currentMeetingDate)) {
-                db.meetings.push(currentMeetingDate);
-                db.meetings.sort();
-                saveData();
-            }
-
+            currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate] && db.attendanceRecords[currentMeetingDate][m.id]);
             renderAttendanceTable();
         }
 
@@ -971,38 +997,37 @@
             });
         }
 
-        function addMemberToMeeting(id) {
+        async function addMemberToMeeting(id) {
             let member = db.members.find(m => m.id == id);
             if(member) {
                 let now = new Date();
                 let timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
                 
-                if(!db.attendanceRecords[currentMeetingDate]) db.attendanceRecords[currentMeetingDate] = {};
-                db.attendanceRecords[currentMeetingDate][id] = timeStr;
+                const { error } = await _supabase.from('attendance').insert([{
+                    meeting_date: currentMeetingDate,
+                    member_id: id,
+                    attend_time: timeStr
+                }]);
 
-                if(!member.attendance) member.attendance = [];
-                if(!member.attendance.includes(currentMeetingDate)) member.attendance.push(currentMeetingDate);
+                if(error) { alert('خطأ في تسجيل الحضور: ' + error.message); return; }
 
-                saveData();
-                currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate][m.id]);
-                
                 document.getElementById('search-attendance').value = '';
                 document.getElementById('autocomplete-results').innerHTML = '';
-                renderAttendanceTable();
+                await loadData();
+                loadAttendanceForDate();
             }
         }
 
-        function removeMemberFromMeeting(id) {
-            let member = db.members.find(m => m.id == id);
-            if(db.attendanceRecords[currentMeetingDate]) {
-                delete db.attendanceRecords[currentMeetingDate][id];
-            }
-            if(member && member.attendance) {
-                member.attendance = member.attendance.filter(d => d !== currentMeetingDate);
-            }
-            saveData();
-            currentAttendees = currentAttendees.filter(m => m.id != id);
-            renderAttendanceTable();
+        async function removeMemberFromMeeting(id) {
+            const { error } = await _supabase.from('attendance')
+                .delete()
+                .eq('meeting_date', currentMeetingDate)
+                .eq('member_id', id);
+
+            if(error) { alert('خطأ في إلغاء الحضور: ' + error.message); return; }
+
+            await loadData();
+            loadAttendanceForDate();
         }
 
         function renderAttendanceTable() {
@@ -1036,11 +1061,16 @@
             renderTripTable();
         }
 
-        function updateAllTripFees() {
+        async function updateAllTripFees() {
             let fee = parseFloat(document.getElementById('trip-fee').value) || 0;
-            let trip = getTripObj();
-            trip.fee = fee;
-            saveData();
+            let tripType = getActiveTripKey();
+            
+            const { error } = await _supabase.from('trips')
+                .update({ fee: fee })
+                .eq('trip_type', tripType);
+            
+            if(!db.tripsData[tripType]) db.tripsData[tripType] = { fee: fee, reservations: {} };
+            db.tripsData[tripType].fee = fee;
             renderTripTable();
         }
 
@@ -1062,25 +1092,41 @@
             });
         }
 
-        function addMemberToTrip(id) {
+        async function addMemberToTrip(id) {
+            let tripType = getActiveTripKey();
             let trip = getTripObj();
-            if(!trip.reservations[id]) {
-                trip.reservations[id] = { paid: 0, installments: [] };
-                saveData();
-            }
+            let fee = trip.fee || 0;
+
+            const { error } = await _supabase.from('trips').upsert([{
+                trip_type: tripType,
+                member_id: id,
+                fee: fee,
+                paid: 0,
+                installments: []
+            }], { onConflict: 'trip_type,member_id' });
+
+            if(error) { alert('حدث خطأ في الحجز: ' + error.message); return; }
+
             document.getElementById('search-trip').value = '';
             document.getElementById('trip-autocomplete-results').innerHTML = '';
+            await loadData();
             renderTripTable();
         }
 
-        function removeMemberFromTrip(id) {
-            let trip = getTripObj();
-            delete trip.reservations[id];
-            saveData();
+        async function removeMemberFromTrip(id) {
+            let tripType = getActiveTripKey();
+            const { error } = await _supabase.from('trips')
+                .delete()
+                .eq('trip_type', tripType)
+                .eq('member_id', id);
+
+            if(error) { alert('خطأ في الحذف: ' + error.message); return; }
+
+            await loadData();
             renderTripTable();
         }
 
-        function addInstallment(id) {
+        async function addInstallment(id) {
             let inputField = document.getElementById(`inst-input-${id}`);
             let addVal = parseFloat(inputField.value);
             
@@ -1089,11 +1135,12 @@
                 return;
             }
 
+            let tripType = getActiveTripKey();
             let trip = getTripObj();
             let fee = trip.fee || 0;
-            if(!trip.reservations[id]) trip.reservations[id] = { paid: 0, installments: [] };
+            let res = trip.reservations[id] || { paid: 0, installments: [] };
 
-            let currentPaid = trip.reservations[id].paid || 0;
+            let currentPaid = res.paid || 0;
             let newTotalPaid = currentPaid + addVal;
 
             if(fee > 0 && newTotalPaid > fee) {
@@ -1103,11 +1150,19 @@
 
             let now = new Date();
             let dateStr = now.toLocaleDateString('ar-EG') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            
-            trip.reservations[id].paid = newTotalPaid;
-            trip.reservations[id].installments.push({ amount: addVal, date: dateStr });
+            let updatedInstallments = [...(res.installments || []), { amount: addVal, date: dateStr }];
 
-            saveData();
+            const { error } = await _supabase.from('trips').upsert([{
+                trip_type: tripType,
+                member_id: id,
+                fee: fee,
+                paid: newTotalPaid,
+                installments: updatedInstallments
+            }], { onConflict: 'trip_type,member_id' });
+
+            if(error) { alert('حدث خطأ في إضافة الدفعة: ' + error.message); return; }
+
+            await loadData();
             renderTripTable();
         }
 
@@ -1174,15 +1229,14 @@
             }
         }
 
-        function clearTripSheet() {
+        async function clearTripSheet() {
             let key = getActiveTripKey();
             if(confirm(`هل أنت متأكد من تصفير شيت الحجز الخاص بـ (${key}) بالكامل؟`)) {
-                if(db.tripsData[key]) {
-                    db.tripsData[key].reservations = {};
-                    saveData();
-                    renderTripTable();
-                    alert('تم تصفير شيت الحجز بنجاح.');
-                }
+                const { error } = await _supabase.from('trips').delete().eq('trip_type', key);
+                if(error) { alert('خطأ أثناء المسح: ' + error.message); return; }
+                await loadData();
+                renderTripTable();
+                alert('تم تصفير شيت الحجز بنجاح.');
             }
         }
 
@@ -1234,15 +1288,11 @@
             });
         }
 
-        function deleteProfile(id) {
+        async function deleteProfile(id) {
             if(confirm('هل أنت متأكد من حذف هذا المخدوم نهائياً؟')) {
-                db.members = db.members.filter(m => m.id !== id);
-                for(let k in db.tripsData) {
-                    if(db.tripsData[k].reservations && db.tripsData[k].reservations[id]) {
-                        delete db.tripsData[k].reservations[id];
-                    }
-                }
-                saveData();
+                const { error } = await _supabase.from('members').delete().eq('id', id);
+                if(error) { alert('حدث خطأ أثناء الحذف: ' + error.message); return; }
+                await loadData();
                 renderProfiles();
                 renderFamiliesList();
             }
@@ -1330,100 +1380,62 @@
             linkElement.click();
         }
 
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData && importedData.members && importedData.meetings) {
-                        db = importedData;
-                        if(!db.tripsData) db.tripsData = {};
-                        saveData();
-                        alert('تم استرجاع البيانات بنجاح!');
-                        document.getElementById('import-file').value = '';
-                        showTab('profiles');
-                    } else {
-                        alert('ملف النسخة الاحتياطية غير صحيح.');
-                    }
-                } catch (error) {
-                    alert('حدث خطأ أثناء قراءة الملف.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function deleteYearAttendance() {
+        async function deleteYearAttendance() {
             let year = document.getElementById('delete-year').value.trim();
             if(!year || year.length !== 4) { alert('برجاء كتابة السنة بشكل صحيح (مثل: 2026)'); return; }
             
             if(confirm(`هل أنت متأكد من مسح جميع سجلات الحضور لعام ${year}؟`)) {
-                db.members.forEach(m => {
-                    if(m.attendance) m.attendance = m.attendance.filter(date => !date.startsWith(year));
-                });
-                db.meetings = db.meetings.filter(date => !date.startsWith(year));
-                if(db.attendanceRecords) {
-                    for(let d in db.attendanceRecords) {
-                        if(d.startsWith(year)) delete db.attendanceRecords[d];
-                    }
-                }
-                saveData();
-                alert('تم مسح حضور هذه السنة بنجاح.');
+                const { error } = await _supabase.from('attendance')
+                    .delete()
+                    .gte('meeting_date', `${year}-01-01`)
+                    .lte('meeting_date', `${year}-12-31`);
+                
+                if(error) { alert('خطأ أثناء المسح: ' + error.message); return; }
+
+                await loadData();
+                alert('تم مسح حضور هذه السنة بنجاح من Supabase.');
                 document.getElementById('delete-year').value = '';
             }
         }
 
-        function deleteFamilyMembers() {
+        async function deleteFamilyMembers() {
             let family = document.getElementById('delete-family-name').value.trim();
             if(!family) { alert('برجاء كتابة اسم الأسرة!'); return; }
             
             if(confirm(`تحذير: هل أنت متأكد من مسح كل المخدومين المنضمين لأسرة "${family}" نهائياً؟`)) {
-                let initialCount = db.members.length;
-                db.members = db.members.filter(m => m.family !== family);
-                let deletedCount = initialCount - db.members.length;
-                
-                if(deletedCount > 0) {
-                    saveData();
-                    alert(`تم حذف ${deletedCount} مخدوم من هذه الأسرة بنجاح.`);
-                    renderFamiliesList();
-                } else {
-                    alert('لم يتم العثور على مخدومين بهذا الاسم للأسرة.');
-                }
+                const { error } = await _supabase.from('members').delete().eq('family', family);
+                if(error) { alert('خطأ أثناء المسح: ' + error.message); return; }
+
+                await loadData();
+                alert(`تم حذف مخدومي الأسرة بنجاح.`);
+                renderFamiliesList();
                 document.getElementById('delete-family-name').value = '';
             }
         }
 
-        function clearFamilyAttendance() {
+        async function clearFamilyAttendance() {
             let family = document.getElementById('delete-family-name').value.trim();
             if(!family) { alert('برجاء كتابة اسم الأسرة!'); return; }
             
             if(confirm(`هل أنت متأكد من تصفير حضور أفراد أسرة "${family}" فقط؟`)) {
-                let count = 0;
-                db.members.forEach(m => {
-                    if(m.family === family) {
-                        m.attendance = [];
-                        count++;
-                    }
-                });
-                
-                if(count > 0) {
-                    saveData();
-                    alert(`تم تصفير حضور ${count} مخدوم في هذه الأسرة بنجاح.`);
-                } else {
-                    alert('لم يتم العثور على مخدومين بهذه الأسرة.');
-                }
+                let memberIds = db.members.filter(m => m.family === family).map(m => m.id);
+                if(memberIds.length === 0) { alert('لم يتم العثور على مخدومين بهذه الأسرة.'); return; }
+
+                const { error } = await _supabase.from('attendance').delete().in('member_id', memberIds);
+                if(error) { alert('خطأ أثناء المسح: ' + error.message); return; }
+
+                await loadData();
+                alert(`تم تصفير حضور مخدومي هذه الأسرة بنجاح.`);
                 document.getElementById('delete-family-name').value = '';
             }
         }
 
-        function clearAllAttendance() {
+        async function clearAllAttendance() {
             if(confirm('تنبيه خطير! هل أنت متأكد من مسح كل تواريخ حضور جميع المخدومين للبدء في سنة جديدة؟')) {
-                db.members.forEach(m => m.attendance = []);
-                db.meetings = [];
-                db.attendanceRecords = {};
-                saveData();
+                const { error } = await _supabase.from('attendance').delete().neq('id', 0);
+                if(error) { alert('خطأ أثناء المسح: ' + error.message); return; }
+
+                await loadData();
                 alert('تم تصفير جميع التواريخ والحضور بنجاح.');
             }
         }
