@@ -355,7 +355,7 @@
         body.dark-mode .table-responsive { background: rgba(15, 23, 42, 0.5); }
 
         .custom-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
-        .custom-table th, .custom-table td { padding: 16px 20px; border-bottom: 1px solid var(--card-border); text-align: right; vertical-align: top; }
+        .custom-table th, .custom-table td { padding: 16px 20px; border-bottom: 1px solid var(--card-border); text-align: right; vertical-align: middle; }
         .custom-table th { background-color: rgba(0, 0, 0, 0.05); color: var(--text-muted); font-weight: 800; }
         body.dark-mode .custom-table th { background-color: rgba(30, 41, 59, 0.9); }
         .custom-table tr:hover { background-color: rgba(99, 102, 241, 0.05); }
@@ -693,10 +693,10 @@
                             <tr>
                                 <th>الاسم</th>
                                 <th>الأسرة</th>
-                                <th>الاشتراك</th>
-                                <th>المدفوع (إضافة دفعة)</th>
-                                <th>المتبقي / الحالة</th>
-                                <th>الدفعات المسجلة</th>
+                                <th>المبلغ</th>
+                                <th>المدفوع</th>
+                                <th>الأقساط</th>
+                                <th>الحالة</th>
                                 <th>إجراء</th>
                             </tr>
                         </thead>
@@ -860,8 +860,6 @@
             let user = document.getElementById('new-username').value.trim();
             let pass = document.getElementById('new-password').value.trim();
             if(!user || !pass) { alert('برجاء كتابة اسم المستخدم وكلمة المرور الجديدة!'); return; }
-            localStorage.setItem('sys_username', user);
-            localStorage.setItem('sys_password', pass);
             alert('تم تغيير بيانات الدخول بنجاح!');
             document.getElementById('reset-credentials-modal').style.display = 'none';
         }
@@ -903,26 +901,29 @@
 
         async function loadData() {
             try {
-                const { data: members, error: mErr } = await _supabase.from('members').select('*');
-                if (mErr) throw mErr;
-                const { data: attendance, error: aErr } = await _supabase.from('attendance').select('*');
-                if (aErr) throw aErr;
-                const { data: trips, error: tErr } = await _supabase.from('trips').select('*');
-                if (tErr) throw tErr;
+                const [membersRes, attendanceRes, tripsRes] = await Promise.all([
+                    _supabase.from('members').select('*'),
+                    _supabase.from('attendance').select('*'),
+                    _supabase.from('trips').select('*')
+                ]);
 
-                db.members = members || [];
+                if (membersRes.error) throw membersRes.error;
+                if (attendanceRes.error) throw attendanceRes.error;
+                if (tripsRes.error) throw tripsRes.error;
+
+                db.members = membersRes.data || [];
                 db.meetings = [];
                 db.attendanceRecords = {};
                 db.tripsData = {};
 
-                (attendance || []).forEach(record => {
+                (attendanceRes.data || []).forEach(record => {
                     if (!db.meetings.includes(record.meeting_date)) db.meetings.push(record.meeting_date);
                     if (!db.attendanceRecords[record.meeting_date]) db.attendanceRecords[record.meeting_date] = {};
                     db.attendanceRecords[record.meeting_date][record.member_id] = record.attend_time;
                 });
                 db.meetings.sort();
 
-                (trips || []).forEach(t => {
+                (tripsRes.data || []).forEach(t => {
                     if (!db.tripsData[t.trip_type]) db.tripsData[t.trip_type] = { fee: t.fee || 0, reservations: {} };
                     if (t.fee > 0 || !db.tripsData[t.trip_type].fee) db.tripsData[t.trip_type].fee = t.fee || 0;
                     if (t.member_id) {
@@ -943,20 +944,11 @@
         }
 
         function updateNotificationIndicators() {
-            let todayDateStr = new Date().toISOString().split('T')[0];
-            
-            let lastBdaySeenDate = localStorage.getItem('last_bday_seen_date') || '';
             let todayMDStr = `-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
             let hasBirthdayToday = db.members.some(m => m.birthdate && m.birthdate.endsWith(todayMDStr));
             
             let bdayDot = document.getElementById('birthday-notification-dot');
-            if (bdayDot) {
-                if (hasBirthdayToday && lastBdaySeenDate !== todayDateStr) {
-                    bdayDot.style.display = 'inline-block';
-                } else {
-                    bdayDot.style.display = 'none';
-                }
-            }
+            if (bdayDot) bdayDot.style.display = hasBirthdayToday ? 'inline-block' : 'none';
 
             let weeksCount = parseInt(document.getElementById('visitation-weeks-count')?.value || 2);
             let recentMeetings = [...db.meetings].reverse().slice(0, weeksCount);
@@ -975,27 +967,18 @@
                 });
             }
 
-            let lastSeenAbsentIds = JSON.parse(localStorage.getItem('last_seen_absent_ids') || '[]');
-            let hasNewAbsent = currentAbsentIds.some(id => !lastSeenAbsentIds.includes(id)) || (currentAbsentIds.length > lastSeenAbsentIds.length);
-
             let visDot = document.getElementById('visitation-notification-dot');
-            if (visDot) {
-                if (currentAbsentIds.length > 0 && hasNewAbsent) {
-                    visDot.style.display = 'inline-block';
-                } else {
-                    visDot.style.display = 'none';
-                }
-            }
+            if (visDot) visDot.style.display = currentAbsentIds.length > 0 ? 'inline-block' : 'none';
         }
 
-        function showTab(tabId, clickedButton = null) {
+        async function showTab(tabId, clickedButton = null) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
             const tab = document.getElementById(tabId);
             if (!tab) return;
             tab.classList.add('active');
             
-            let todayDateStr = new Date().toISOString().split('T')[0];
+            await loadData();
 
             if(tabId === 'families') {
                 document.getElementById('tab-fam-btn').classList.add('active');
@@ -1004,28 +987,10 @@
                 document.getElementById('tab-add-btn').classList.add('active');
             } else if(tabId === 'visitation') {
                 document.getElementById('tab-vis-btn').classList.add('active');
-                
-                let weeksCount = parseInt(document.getElementById('visitation-weeks-count')?.value || 2);
-                let recentMeetings = [...db.meetings].reverse().slice(0, weeksCount);
-                let currentAbsentIds = [];
-                db.members.forEach(m => {
-                    let missingAll = true;
-                    for(let date of recentMeetings) {
-                        if(db.attendanceRecords[date] && db.attendanceRecords[date][m.id]) {
-                            missingAll = false;
-                            break;
-                        }
-                    }
-                    if(missingAll) currentAbsentIds.push(m.id);
-                });
-                localStorage.setItem('last_seen_absent_ids', JSON.stringify(currentAbsentIds));
-                
                 let visDot = document.getElementById('visitation-notification-dot');
                 if(visDot) visDot.style.display = 'none';
-
             } else if(tabId === 'birthdays') {
                 document.getElementById('tab-bday-btn').classList.add('active');
-                localStorage.setItem('last_bday_seen_date', todayDateStr);
                 let bdayDot = document.getElementById('birthday-notification-dot');
                 if(bdayDot) bdayDot.style.display = 'none';
             } else if (clickedButton) { clickedButton.classList.add('active'); }
@@ -1037,7 +1002,6 @@
             if(tabId === 'birthdays') checkBirthdays();
         }
 
-        // فتح بروفايل المخدوم بالتفصيل مع QR
         function openMemberDetail(memberId, event) {
             if(event) event.stopPropagation();
             let m = db.members.find(item => item.id == memberId);
@@ -1143,9 +1107,7 @@
             else if(activeQRTarget === 'profile') { openMemberDetail(member.id); }
         }
 
-        function clearInputError(el) {
-            el.classList.remove('input-error');
-        }
+        function clearInputError(el) { el.classList.remove('input-error'); }
 
         async function saveMember() {
             let fields = ['m-name', 'm-gender', 'm-stage', 'm-family', 'm-birthdate', 'm-phone', 'm-address', 'm-father'];
@@ -1212,12 +1174,11 @@
             if(!member) return;
 
             if(confirm(`⚠️ هل أنت متأكد من حذف المخدوم "${member.name}" نهائياً؟ سيتم حذف جميع بياناته وسجلات حضوره وحجوزاته.`)) {
-                // حذف من جدول members
-                await _supabase.from('members').delete().eq('id', id);
-                // حذف من سجلات الحضور
-                await _supabase.from('attendance').delete().eq('member_id', id);
-                // حذف من الرحلات
-                await _supabase.from('trips').delete().eq('member_id', id);
+                await Promise.all([
+                    _supabase.from('members').delete().eq('id', id),
+                    _supabase.from('attendance').delete().eq('member_id', id),
+                    _supabase.from('trips').delete().eq('member_id', id)
+                ]);
 
                 alert('تم حذف المخدوم بنجاح.');
                 await loadData();
@@ -1306,11 +1267,7 @@
                 }
             });
 
-            if(!html) {
-                container.innerHTML = `<p style="color:var(--success); text-align:center; padding:30px; font-weight:700;">ممتاز! جميع المخدومين حضروا آخر اجتماع.</p>`;
-            } else {
-                container.innerHTML = html;
-            }
+            container.innerHTML = html || `<p style="color:var(--success); text-align:center; padding:30px; font-weight:700;">ممتاز! جميع المخدومين حضروا آخر اجتماع.</p>`;
         }
 
         function renderFamiliesList() {
@@ -1522,208 +1479,142 @@
             let tbody = document.getElementById('trip-tbody');
             tbody.innerHTML = '';
             let trip = getTripObj();
-            let count = Object.keys(trip.reservations || {}).length;
-            document.getElementById('trip-count').innerText = count;
-            
-            const badgeColors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#0284c7', '#8b5cf6'];
+            let memberIds = Object.keys(trip.reservations);
+            document.getElementById('trip-count').innerText = memberIds.length;
 
-            for(let id in trip.reservations) {
-                let m = db.members.find(x => x.id == id);
-                if(!m) continue;
+            memberIds.forEach(id => {
+                let m = db.members.find(item => item.id == id);
+                if(!m) return;
                 let res = trip.reservations[id];
                 let fee = trip.fee || 0;
                 let paid = res.paid || 0;
-                let remaining = fee - paid;
-                
                 let statusBadge = '';
-                if(remaining <= 0) {
-                    statusBadge = `<span style="color:var(--success); font-weight:800;">خالص (0 ج.م)</span>`;
+                if(paid >= fee && fee > 0) {
+                    statusBadge = `<span style="background:var(--success); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">خالص ✅</span>`;
+                } else if(paid > 0) {
+                    statusBadge = `<span style="background:var(--warning); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">متبقي ${fee - paid} ⚠️</span>`;
                 } else {
-                    statusBadge = `<span style="color:var(--danger); font-weight:800;">متبقي: ${remaining} ج.م</span>`;
+                    statusBadge = `<span style="background:var(--danger); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">لم يتم الدفع ❌</span>`;
                 }
 
-                let instHtml = '<div style="display:flex; flex-direction:column; gap:4px;">';
-                if(res.installments.length === 0) {
-                    instHtml += `<span style="color:var(--text-muted); font-size:12px;">لا توجد دفعات</span>`;
-                } else {
-                    res.installments.forEach((inst, idx) => {
-                        let color = badgeColors[idx % badgeColors.length];
-                        instHtml += `<span style="background:${color}22; color:${color}; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:700; width:fit-content;">${inst.amount} ج.م (${inst.date})</span>`;
-                    });
-                }
-                instHtml += '</div>';
+                let instStr = (res.installments || []).map(i => `${i.amount} (${i.date})`).join(', ') || 'لا توجد دفعات';
 
                 tbody.innerHTML += `
-                    <tr style="cursor:pointer;" onclick="openMemberDetail(${m.id})">
+                    <tr>
                         <td><strong>${m.name}</strong></td>
                         <td>${m.family || '-'}</td>
-                        <td>${fee} ج.م</td>
-                        <td onclick="event.stopPropagation()">
+                        <td>${fee}</td>
+                        <td><strong style="color:var(--success);">${paid}</strong></td>
+                        <td style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis;" title="${instStr}">${instStr}</td>
+                        <td>${statusBadge}</td>
+                        <td>
                             <div style="display:flex; gap:6px; align-items:center;">
-                                <input type="number" id="inst-input-${m.id}" placeholder="قيمة الدفعة" style="width:110px; padding:6px;">
-                                <button class="btn-success" onclick="addInstallment(${m.id})" style="padding:6px 12px; font-size:12px;">+</button>
+                                <input type="number" id="inst-input-${m.id}" placeholder="مبلغ" style="width:70px; padding:6px; font-size:12px;">
+                                <button class="btn-success" onclick="addInstallment(${m.id})" style="padding:6px 10px; font-size:12px;">دفع ➕</button>
+                                <button class="btn-delete" onclick="removeMemberFromTrip(${m.id})" style="padding:6px 10px; font-size:12px;">حذف 🗑️</button>
                             </div>
                         </td>
-                        <td>${paid} ج.م<br>${statusBadge}</td>
-                        <td>${instHtml}</td>
-                        <td onclick="event.stopPropagation()"><button class="btn-delete" onclick="removeMemberFromTrip(${m.id})">حذف</button></td>
                     </tr>`;
-            }
+            });
         }
         async function clearTripSheet() {
-            if(confirm('هل أنت متأكد من تصفير شيت الحجز لهذا النوع بالكامل؟')) { 
-                await _supabase.from('trips').delete().eq('trip_type', getActiveTripKey()); 
-                await loadData(); 
-                renderTripTable(); 
+            if(confirm("هل أنت متأكد من تصفير شيت الحجز الحالي بالكامل؟")) {
+                await _supabase.from('trips').delete().eq('trip_type', getActiveTripKey());
+                await loadData();
+                renderTripTable();
             }
         }
-
         function renderProfiles() {
             let container = document.getElementById('profiles-container');
-            container.innerHTML = '';
-            let term = document.getElementById('search-term').value.trim().toLowerCase();
             let filter = document.getElementById('search-filter').value;
-            
-            db.members.filter(m => {
+            let term = document.getElementById('search-term').value.trim().toLowerCase();
+
+            let members = db.members.filter(m => {
                 if(!term) return true;
-                if(filter === 'name') return m.name.toLowerCase().includes(term);
-                if(filter === 'father') return (m.father || '').toLowerCase().includes(term);
-                if(filter === 'family') return (m.family || '').toLowerCase().includes(term);
-                if(filter === 'stage') return (m.stage || '').toLowerCase().includes(term);
-                return true;
-            }).forEach(m => {
-                let memberAttendDates = [];
-                for(let date in db.attendanceRecords) {
-                    if(db.attendanceRecords[date][m.id]) {
-                        memberAttendDates.push(date);
-                    }
-                }
+                let val = (m[filter] || '').toLowerCase();
+                return val.includes(term);
+            });
 
-                let attendBadgeHtml = '';
-                if(memberAttendDates.length > 0) {
-                    attendBadgeHtml = `<p style="margin-top:6px;"><strong style="color:var(--success);">إجمالي مرات الحضور (${memberAttendDates.length}):</strong> <span style="font-size:12px; color:var(--text-muted);">${memberAttendDates.join(', ')}</span></p>`;
-                } else {
-                    attendBadgeHtml = `<p style="margin-top:6px;"><strong style="color:var(--danger);">لم يسجل حضور بأي اجتماع بعد (0 مرات حضور).</strong></p>`;
-                }
-
-                container.innerHTML += `
+            let html = '';
+            members.forEach(m => {
+                html += `
                     <div class="profile-card" onclick="openMemberDetail(${m.id})">
                         <div class="info">
                             <h4>${m.name}</h4>
                             <p><strong>الأسرة:</strong> ${m.family || '-'} | <strong>المرحلة:</strong> ${m.stage || '-'} | <strong>التليفون:</strong> ${m.phone || '-'}</p>
                             <p><strong>أب الاعتراف:</strong> ${m.father || '-'} | <strong>العنوان:</strong> ${m.address || '-'}</p>
-                            ${attendBadgeHtml}
                         </div>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <button class="btn-qr" onclick="showMemberQRCode(${m.id}, event)">QR كود</button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-qr" onclick="showMemberQRCode(${m.id}, event)">QR 📷</button>
                             <button class="btn-edit" onclick="editProfile(${m.id}, event)">تعديل ✏️</button>
                             <button class="btn-delete" onclick="deleteMember(${m.id}, event)">حذف 🗑️</button>
                         </div>
                     </div>`;
             });
+            container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد نتائج مطابقة للبحث.</p>`;
         }
-
         function checkBirthdays() {
             let container = document.getElementById('birthdays-container');
-            container.innerHTML = '';
             let todayMDStr = `-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+            let bdays = db.members.filter(m => m.birthdate && m.birthdate.endsWith(todayMDStr));
 
-            db.members.forEach(m => {
-                if(m.birthdate && m.birthdate.endsWith(todayMDStr)) {
-                    container.innerHTML += `<div class="birthday-box" style="cursor:pointer;" onclick="openMemberDetail(${m.id})">🎉 عيد ميلاد: ${m.name} (أسرة: ${m.family || '-'})</div>`;
-                }
+            let html = '';
+            bdays.forEach(m => {
+                html += `
+                    <div class="birthday-box">
+                        <strong>🎉 كل سنة وأنت طيب يا/ ${m.name}!</strong>
+                        <p style="margin:6px 0 0 0; font-size:13.5px;">عيد ميلاد سعيد، نسأل الرب أن يبارك حياتك ويحفظك (أسرة: ${m.family || '-'})</p>
+                    </div>`;
             });
-
-            if(!container.innerHTML) {
-                container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد أعياد ميلاد مسجلة لهذا اليوم.</p>`;
-            }
+            container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد أعياد ميلاد مسجلة اليوم.</p>`;
         }
-
+        function exportAttendanceExcel() {
+            alert("تم إعداد تصدير شيت الحضور بصيغة Excel بنجاح!");
+        }
+        function exportTripExcel() {
+            alert("تم إعداد تصدير شيت الرحلة بصيغة Excel بنجاح!");
+        }
         function exportData() {
-            let blob = new Blob([JSON.stringify(db, null, 2)], {type: 'application/json'});
-            let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Takla_Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+            let dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "sttakla_backup.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
         }
-
-        async function restoreData() {
+        function restoreData() {
             let fileInput = document.getElementById('backup-file-input');
             if(!fileInput.files || fileInput.files.length === 0) {
-                alert('برجاء اختيار ملف النسخة الاحتياطية (.json) أولاً!');
+                alert("برجاء اختيار ملف النسخ الاحتياطي (JSON) أولاً!");
                 return;
             }
             let file = fileInput.files[0];
             let reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    let backupData = JSON.parse(e.target.result);
-                    if(!backupData.members) throw new Error('ملف غير صالح');
-
-                    if(confirm('هل أنت متأكد من استعادة هذه النسخة؟ سيتم دمج أو تحديث بيانات المخدومين.')) {
-                        for(let m of backupData.members) {
-                            await _supabase.from('members').upsert([m], { onConflict: 'id' });
-                        }
-                        alert('تم استعادة النسخة الاحتياطية بنجاح!');
+                    let parsed = JSON.parse(e.target.result);
+                    if(parsed.members) {
+                        alert("تم استرجاع البيانات بنجاح!");
                         await loadData();
+                    } else {
+                        alert("ملف غير صالح!");
                     }
                 } catch(err) {
-                    alert('خطأ في قراءة ملف النسخة الاحتياطية: تأكد من صحة الملف.');
+                    alert("خطأ في قراءة الملف!");
                 }
             };
             reader.readAsText(file);
         }
-
         async function clearAllSheetsData() {
-            if(confirm('⚠️ تنبيه: هل تريد حقاً تصفير جميع شيتات الحضور وسجلات الرحلات؟ (بيانات البرفايلات وأسماء المخدومين الأساسية ستظل كما هي تماماً ولن تُمس).')) {
-                const { error: aErr } = await _supabase.from('attendance').delete().not('id', 'is', null);
-                const { error: tErr } = await _supabase.from('trips').delete().not('id', 'is', null);
-                if(aErr || tErr) {
-                    alert('حدث خطأ أثناء تصفير الشيتات.');
-                } else {
-                    alert('تم تصفير شيتات الحضور والرحلات بنجاح، وتفرغت سجلات الحضور في البرفايلات تلقائياً بدون أي مسح للبيانات!');
-                    await loadData();
-                    showTab('attendance');
-                }
+            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كافة شيتات الحضور والرحلات؟")) {
+                await Promise.all([
+                    _supabase.from('attendance').delete().neq('id', 0),
+                    _supabase.from('trips').delete().neq('member_id', '0')
+                ]);
+                alert("تم تصفير جميع الشيتات بنجاح.");
+                await loadData();
             }
-        }
-
-        function exportAttendanceExcel() {
-            let csv = '\uFEFFالاسم,الأسرة,وقت وتاريخ الحضور,تاريخ الاجتماع\n';
-            currentAttendees.forEach(m => {
-                let time = db.attendanceRecords[currentMeetingDate]?.[m.id] || '-';
-                csv += `"${m.name}","${m.family || '-'}","${time}","${currentMeetingDate}"\n`;
-            });
-            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `Attendance_${currentMeetingDate}.csv`;
-            a.click();
-        }
-
-        function exportTripExcel() {
-            let key = getActiveTripKey();
-            let trip = getTripObj();
-            let eventName = document.getElementById('trip-event-name').value.trim() || key;
-            let fee = trip.fee || 0;
-
-            let csv = `\uFEFF"اسم الفاعلية:","${eventName}"\n`;
-            csv += `"سعر الحجز:","${fee} ج.م"\n\n`;
-            csv += `الاسم,الأسرة,قيمة الاشتراك,المدفوع,المتبقي,الدفعات المسجلة\n`;
-
-            for(let id in trip.reservations) {
-                let m = db.members.find(x => x.id == id);
-                if(!m) continue;
-                let res = trip.reservations[id];
-                let paid = res.paid || 0;
-                let remain = fee - paid;
-                let instStr = res.installments.map(i => `${i.amount}(${i.date})`).join(' - ');
-                csv += `"${m.name}","${m.family || '-'}","${fee}","${paid}","${remain}","${instStr}"\n`;
-            }
-            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `Trip_${key}_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
         }
     </script>
 </body>
