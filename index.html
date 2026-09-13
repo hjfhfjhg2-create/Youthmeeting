@@ -1482,6 +1482,14 @@
             let memberIds = Object.keys(trip.reservations);
             document.getElementById('trip-count').innerText = memberIds.length;
 
+            const instColors = [
+                { bg: '#dcfce7', color: '#166534', border: '#86efac' },
+                { bg: '#e0f2fe', color: '#0369a1', border: '#7dd3fc' },
+                { bg: '#f3e8ff', color: '#6b21a8', border: '#d8b4fe' },
+                { bg: '#fef3c7', color: '#b45309', border: '#fde047' },
+                { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' }
+            ];
+
             memberIds.forEach(id => {
                 let m = db.members.find(item => item.id == id);
                 if(!m) return;
@@ -1497,7 +1505,16 @@
                     statusBadge = `<span style="background:var(--danger); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">لم يتم الدفع ❌</span>`;
                 }
 
-                let instStr = (res.installments || []).map(i => `${i.amount} (${i.date})`).join(', ') || 'لا توجد دفعات';
+                let installmentsHtml = '<div style="display:flex; flex-direction:column; gap:4px; min-width:140px;">';
+                if (!res.installments || res.installments.length === 0) {
+                    installmentsHtml += '<span style="color:var(--text-muted); font-size:12px;">لا توجد دفعات</span>';
+                } else {
+                    res.installments.forEach((i, idx) => {
+                        let c = instColors[idx % instColors.length];
+                        installmentsHtml += `<div style="background:${c.bg}; color:${c.color}; border:1px solid ${c.border}; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:700; display:flex; justify-content:space-between;"><span>الدفعة ${idx+1}: ${i.amount} ج</span><span style="font-size:11px; opacity:0.8;">(${i.date})</span></div>`;
+                    });
+                }
+                installmentsHtml += '</div>';
 
                 tbody.innerHTML += `
                     <tr>
@@ -1505,7 +1522,7 @@
                         <td>${m.family || '-'}</td>
                         <td>${fee}</td>
                         <td><strong style="color:var(--success);">${paid}</strong></td>
-                        <td style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis;" title="${instStr}">${instStr}</td>
+                        <td style="white-space: normal; padding: 10px 15px;">${installmentsHtml}</td>
                         <td>${statusBadge}</td>
                         <td>
                             <div style="display:flex; gap:6px; align-items:center;">
@@ -1568,12 +1585,56 @@
             });
             container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد أعياد ميلاد مسجلة اليوم.</p>`;
         }
+
+        function downloadCSVFile(filename, csvContent) {
+            let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            let url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function exportAttendanceExcel() {
-            alert("تم إعداد تصدير شيت الحضور بصيغة Excel بنجاح!");
+            if(!currentMeetingDate || currentAttendees.length === 0) {
+                alert("لا توجد بيانات حضور مسجلة لهذا التاريخ لتصديرها!");
+                return;
+            }
+            let csv = "الاسم,الأسرة,تاريخ ووقت الحضور\n";
+            currentAttendees.forEach(m => {
+                let timeStr = db.attendanceRecords[currentMeetingDate][m.id] || '';
+                csv += `"${m.name}","${m.family || ''}","${timeStr}"\n`;
+            });
+            downloadCSVFile(`حضور_اجتماع_${currentMeetingDate}.csv`, csv);
         }
+
         function exportTripExcel() {
-            alert("تم إعداد تصدير شيت الرحلة بصيغة Excel بنجاح!");
+            let trip = getTripObj();
+            let memberIds = Object.keys(trip.reservations);
+            if(memberIds.length === 0) {
+                alert("لا توجد حجوزات مسجلة في هذا الشيت لتصديرها!");
+                return;
+            }
+            let eventName = document.getElementById('trip-event-name').value || getActiveTripKey();
+            let csv = `الفعالية:,"${eventName}"\n`;
+            csv += "الاسم,الأسرة,قيمة الاشتراك,إجمالي المدفوع,التفاصيل والدفعات,الحالة\n";
+            
+            memberIds.forEach(id => {
+                let m = db.members.find(item => item.id == id);
+                if(!m) return;
+                let res = trip.reservations[id];
+                let fee = trip.fee || 0;
+                let paid = res.paid || 0;
+                let status = paid >= fee ? "خالص" : (paid > 0 ? "متبقي" : "لم يتم الدفع");
+                let instText = (res.installments || []).map(i => `${i.amount} (${i.date})`).join(' - ');
+                csv += `"${m.name}","${m.family || ''}",${fee},${paid},"${instText}","${status}"\n`;
+            });
+            downloadCSVFile(`شيت_${getActiveTripKey()}_${Date.now()}.csv`, csv);
         }
+
         function exportData() {
             let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
             let dlAnchor = document.createElement('a');
