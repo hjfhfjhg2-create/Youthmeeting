@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سجل الحضور والغياب الذكي - كنيسة الأنبا تكلا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- مكتبة Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* الثيم الافتراضي (الوضع الفاتح - Light Mode) */
+        :root {
+            --bg-main: #f1f5f9;
+            --bg-radial: radial-gradient(circle at 50% 0%, #e2e8f0 0%, #cbd5e1 60%, #94a3b8 100%);
+            --card-glass: rgba(255, 255, 255, 0.88);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --primary: #6366f1;
+            --primary-depth: #3730a3;
+            --secondary: #ec4899;
+            --secondary-depth: #9d174d;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --success-depth: #047857;
+            --info: #0284c7;
+            --info-depth: #075985;
+            --warning: #f59e0b;
+            --warning-depth: #b45309;
+            --danger: #ef4444;
+            --danger-depth: #b91c1c;
+            
+            --radius-lg: 24px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            
+            --shadow-3d-card: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+        }
+
+        /* الثيم الداكن (Dark Mode) */
+        body.dark-mode {
+            --bg-main: #0b0f19;
+            --bg-radial: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #090d16 100%);
+            --card-glass: rgba(30, 41, 59, 0.8);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --shadow-3d-card: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        }
+
+        * { 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif; 
+            background: var(--bg-radial);
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0; 
+            padding: 0 0 50px 0; 
+            color: var(--text-main); 
+            line-height: 1.6;
+        }
+
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+            box-shadow: none;
+        }
+
+        .top-utility-bar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .utility-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .utility-btn:hover { filter: brightness(1.1); }
+
+        .dashboard-clock-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .clock-icon {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        .clock-display {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: monospace;
+        }
+
+        header { 
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            text-align: center; 
+            padding: 55px 20px 35px; 
+            border-bottom: 2px solid var(--card-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        header h1 { 
+            margin: 0; 
+            font-size: 26px; 
+            font-weight: 900; 
+            color: var(--text-main);
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+
+        header h2 { 
+            margin: 0; 
+            font-size: 17px; 
+            font-weight: 700; 
+            color: var(--primary); 
+        }
+
+        header h3 { 
+            margin: 8px 0 0 0; 
+            font-size: 13px; 
+            color: var(--warning-depth); 
+            font-weight: 800; 
+            background: rgba(245, 158, 11, 0.15); 
+            padding: 6px 20px; 
+            border-radius: 30px; 
+            border: 1px solid rgba(253, 224, 71, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        body.dark-mode header h3 { color: #fef08a; }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 25px auto; 
+            background: var(--card-glass); 
+            backdrop-filter: blur(20px);
+            padding: 20px; 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-3d-card); 
+            border: 1px solid var(--card-border);
+        }
+        @media(min-width: 768px) {
+            .container { padding: 35px; margin: 35px auto; }
+            header h1 { font-size: 30px; }
+            header h2 { font-size: 19px; }
+        }
+        
+        #login-section {
+            max-width: 440px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-3d-card);
+            border: 1px solid var(--card-border);
+        }
+        #login-section h3 { 
+            color: var(--primary); 
+            margin-bottom: 16px; 
+            font-size: 24px; 
+            font-weight: 900; 
+        }
+
+        .input-group { margin-bottom: 20px; text-align: right; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13.5px; color: var(--text-muted); }
+        
+        input[type="text"], input[type="password"], input[type="date"], input[type="number"], input[type="tel"], select, textarea { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid var(--card-border); 
+            border-radius: var(--radius-md); 
+            font-family: inherit; 
+            font-size: 16px; /* منع التكبير التلقائي في آيفون */
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        body.dark-mode input[type="text"], body.dark-mode input[type="password"], body.dark-mode input[type="date"], body.dark-mode input[type="number"], body.dark-mode input[type="tel"], body.dark-mode select, body.dark-mode textarea {
+            background: rgba(15, 23, 42, 0.6);
+            color: #ffffff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+        }
+
+        .input-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25) !important;
+        }
+
+        select option { background: var(--bg-main); color: var(--text-main); }
+
+        button { 
+            background: linear-gradient(135deg, #818cf8, var(--primary)); 
+            color: white; 
+            border: none; 
+            padding: 14px 22px; 
+            font-size: 14px; 
+            font-weight: 800;
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-family: inherit; 
+            box-shadow: 0 6px 0 var(--primary-depth), 0 10px 20px rgba(99, 102, 241, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            outline: none;
+            user-select: none;
+            transition: filter 0.1s, transform 0.1s;
+        }
+
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: translateY(4px) !important; box-shadow: 0 2px 0 var(--primary-depth), 0 4px 10px rgba(0, 0, 0, 0.3) !important; }
+
+        .btn-edit { background: linear-gradient(135deg, #38bdf8, var(--info)); font-size: 13px; padding: 8px 12px; box-shadow: 0 4px 0 var(--info-depth), 0 6px 12px rgba(2, 132, 199, 0.3); }
+        .btn-delete { background: linear-gradient(135deg, #f87171, var(--danger)); font-size: 13px; padding: 8px 12px; box-shadow: 0 4px 0 var(--danger-depth), 0 6px 12px rgba(239, 68, 68, 0.3); }
+        .btn-success { background: linear-gradient(135deg, #34d399, var(--success)); box-shadow: 0 6px 0 var(--success-depth), 0 10px 20px rgba(16, 185, 129, 0.35); }
+        .btn-warning { background: linear-gradient(135deg, #fbbf24, var(--warning)); color: #fff; box-shadow: 0 6px 0 var(--warning-depth), 0 10px 20px rgba(245, 158, 11, 0.35); }
+        .btn-qr { background: linear-gradient(135deg, #a78bfa, #7c3aed); color: white; box-shadow: 0 6px 0 #5b21b6, 0 10px 20px rgba(124, 58, 237, 0.35); }
+        .btn-excel { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 6px 0 #047857, 0 10px 20px rgba(5, 150, 105, 0.35); }
+
+        #app-section { display: none; }
+        
+        .nav-tabs { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin-bottom: 25px; 
+            background: rgba(0, 0, 0, 0.03); 
+            padding: 8px; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--card-border);
+        }
+        body.dark-mode .nav-tabs { background: rgba(15, 23, 42, 0.7); }
+
+        .nav-tabs button { 
+            flex: 1; 
+            min-width: 105px; 
+            background: transparent; 
+            color: var(--text-muted); 
+            border-radius: 10px; 
+            margin: 0; 
+            border: none; 
+            font-size: 13px; 
+            font-weight: 700;
+            padding: 10px 8px; 
+            box-shadow: none; 
+            text-align: center;
+        }
+        .nav-tabs button:hover { background: rgba(0, 0, 0, 0.05); color: var(--text-main); }
+        body.dark-mode .nav-tabs button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+        /* ألوان التبويبات المتناسقة المتميزة */
+        .nav-tabs button[data-tab="add-member"] { border-bottom: 3px solid #6366f1; }
+        .nav-tabs button[data-tab="add-member"].active { background: linear-gradient(135deg, #818cf8, #6366f1); color: white; box-shadow: 0 4px 0 #3730a3; }
+
+        .nav-tabs button[data-tab="attendance"] { border-bottom: 3px solid #0ea5e9; }
+        .nav-tabs button[data-tab="attendance"].active { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; box-shadow: 0 4px 0 #0369a1; }
+
+        .nav-tabs button[data-tab="visitation"] { border-bottom: 3px solid #f97316; }
+        .nav-tabs button[data-tab="visitation"].active { background: linear-gradient(135deg, #fb923c, #f97316); color: white; box-shadow: 0 4px 0 #c2410c; }
+
+        .nav-tabs button[data-tab="families"] { border-bottom: 3px solid #10b981; }
+        .nav-tabs button[data-tab="families"].active { background: linear-gradient(135deg, #34d399, #10b981); color: white; box-shadow: 0 4px 0 #047857; }
+
+        .nav-tabs button[data-tab="trips"] { border-bottom: 3px solid #8b5cf6; }
+        .nav-tabs button[data-tab="trips"].active { background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: white; box-shadow: 0 4px 0 #5b21b6; }
+
+        .nav-tabs button[data-tab="profiles"] { border-bottom: 3px solid #ec4899; }
+        .nav-tabs button[data-tab="profiles"].active { background: linear-gradient(135deg, #f472b6, #ec4899); color: white; box-shadow: 0 4px 0 #be185d; }
+
+        .nav-tabs button[data-tab="birthdays"] { border-bottom: 3px solid #eab308; }
+        .nav-tabs button[data-tab="birthdays"].active { background: linear-gradient(135deg, #facc15, #eab308); color: white; box-shadow: 0 4px 0 #a16207; }
+
+        .nav-tabs button[data-tab="settings"] { border-bottom: 3px solid #64748b; }
+        .nav-tabs button[data-tab="settings"].active { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; box-shadow: 0 4px 0 #334155; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .profile-card, .settings-card, .stat-card, .family-card-btn, .search-bar, .visitation-card {
+            border: 1px solid var(--card-border); 
+            border-radius: var(--radius-md); 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-3d-card); 
+        }
+        body.dark-mode .profile-card, body.dark-mode .settings-card, body.dark-mode .stat-card, body.dark-mode .family-card-btn, body.dark-mode .search-bar, body.dark-mode .visitation-card {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .profile-card, .visitation-card { 
+            padding: 16px; 
+            margin-bottom: 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .profile-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .profile-card .info, .visitation-card .info { flex-grow: 1; }
+        .profile-card h4, .visitation-card h4 { margin: 0 0 6px 0; color: var(--primary); font-size: 16px; }
+        .profile-card p, .visitation-card p { margin: 3px 0; font-size: 13px; color: var(--text-muted); }
+        
+        .search-bar { display: flex; gap: 10px; margin-bottom: 22px; padding: 16px; flex-wrap: wrap; }
+        
+        .autocomplete-container { position: relative; }
+        .autocomplete-results { 
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0; 
+            background: var(--bg-main); border: 1px solid var(--card-border); z-index: 99; 
+            max-height: 220px; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border-radius: var(--radius-md);
+        }
+        .autocomplete-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--card-border); font-size: 13.5px; color: var(--text-main); }
+        .autocomplete-item:hover { background-color: rgba(99, 102, 241, 0.15); color: var(--primary); }
+        
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 16px; border-radius: var(--radius-md); border: 1px solid var(--card-border); background: rgba(255, 255, 255, 0.4); box-shadow: var(--shadow-3d-card); -webkit-overflow-scrolling: touch; }
+        body.dark-mode .table-responsive { background: rgba(15, 23, 42, 0.5); }
+
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 13.5px; white-space: nowrap; }
+        .custom-table th, .custom-table td { padding: 14px 16px; border-bottom: 1px solid var(--card-border); text-align: right; vertical-align: middle; }
+        .custom-table th { background-color: rgba(0, 0, 0, 0.05); color: var(--text-muted); font-weight: 800; }
+        body.dark-mode .custom-table th { background-color: rgba(30, 41, 59, 0.9); }
+        .custom-table tr:hover { background-color: rgba(99, 102, 241, 0.05); }
+        
+        .birthday-box { padding: 18px; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid; font-size: 13.5px; box-shadow: var(--shadow-3d-card); background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3); border-right: 6px solid var(--success); }
+        
+        .settings-card { padding: 22px; margin-bottom: 20px; }
+        .settings-card h4 { margin-top: 0; color: var(--primary); border-bottom: 1px solid var(--card-border); padding-bottom: 10px; font-size: 17px; }
+        .action-row { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;}
+
+        .stats-summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        @media(max-width: 650px) { .stats-summary-box { grid-template-columns: 1fr; } }
+        
+        .stat-card { padding: 18px; text-align: center; }
+        .stat-card .stat-num { font-size: 24px; font-weight: 900; color: var(--primary); margin-top: 6px; }
+        .stat-card .stat-title { font-size: 13px; font-weight: 800; color: var(--text-muted); }
+
+        .family-card-btn { padding: 16px 20px; margin-bottom: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-right: 6px solid var(--primary); }
+        .family-section-title { font-size: 16px; font-weight: 800; color: var(--primary); margin: 26px 0 14px 0; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+
+        h3 { color: var(--primary); font-size: 20px; font-weight: 900; margin-top: 0; margin-bottom: 20px; }
+
+        /* زر المساعدة على شكل رجل آلي مع سحابة الكلام */
+        .robot-help-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .robot-btn {
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            color: #ffffff;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(2, 132, 199, 0.4);
+            font-size: 22px;
+            transition: transform 0.2s, filter 0.2s;
+            flex-shrink: 0;
+            animation: robotPulse 2s infinite;
+        }
+        .robot-btn:hover { transform: scale(1.1); filter: brightness(1.1); }
+
+        @keyframes robotPulse {
+            0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(2, 132, 199, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+        }
+
+        .speech-bubble {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--card-border);
+            padding: 10px 16px;
+            border-radius: 18px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-main);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            animation: bubbleFloat 3s ease-in-out infinite;
+        }
+        body.dark-mode .speech-bubble {
+            background: rgba(30, 41, 59, 0.95);
+            color: #f8fafc;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 8px 0 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent transparent rgba(255, 255, 255, 0.95);
+        }
+        body.dark-mode .speech-bubble::after {
+            border-color: transparent transparent transparent rgba(30, 41, 59, 0.95);
+        }
+
+        @keyframes bubbleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(12px);
+            padding: 15px;
+        }
+        .modal-body {
+            background: var(--card-glass); 
+            padding: 24px; 
+            border-radius: var(--radius-lg);
+            max-width: 480px; 
+            width: 100%; 
+            text-align: center;
+            box-shadow: var(--shadow-3d-card);
+            border: 1px solid var(--card-border);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #qr-scanner-view { width: 100%; max-width: 320px; margin: 0 auto; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="top-utility-bar">
+        <button class="utility-btn" onclick="toggleTheme()" id="theme-toggle-btn">🌙 الوضع الداكن</button>
+        <!-- ساعة الداشبورد العصرية -->
+        <div class="dashboard-clock-card">
+            <div class="clock-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <div class="clock-display" id="liveClock">00:00:00</div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <h1>كنيسة القديس العظيم الأنبا تكلا</h1>
+            <h2>اجتماع الشبان والشابات</h2>
+            <h3>نظام الخدمة الذكي⚡</h3>
+        </div>
+    </header>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-section">
+        <h3>تسجيل الدخول للإدارة 🔐</h3>
+        <div class="input-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="login-username" placeholder="اسم المستخدم">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="login-password" placeholder="كلمة المرور">
+        </div>
+        <button onclick="loginDirect()" style="width:100%; margin-top:10px;">دخول النظام 🚀</button>
+        <p id="direct-login-error" style="color:var(--danger); display:none; margin-top:14px; font-weight:700; font-size:13px;">اسم المستخدم أو كلمة المرور غير صحيحة!</p>
+
+        <div style="margin-top: 20px; border-top: 1px dashed var(--card-border); padding-top: 15px;">
+            <button onclick="openOtpModal()" style="background: transparent; color: var(--primary); box-shadow: none; padding: 5px; font-size: 13px; text-decoration: underline;">نسيت اسم المستخدم أو كلمة المرور؟</button>
+        </div>
+    </div>
+
+    <!-- نافذة OTP -->
+    <div id="otp-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3>استعادة بيانات الدخول 🔑</h3>
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">أدخل رمز الأمان (OTP) المعتمد لإعادة تعيين البيانات</p>
+            <div class="input-group">
+                <input type="password" id="otp-code-input" placeholder="أدخل رمز الأمان">
+            </div>
+            <button onclick="verifyOtpCode()" style="width:100%; margin-top:5px;">تحقق من الرمز ➡️</button>
+            <p id="otp-error" style="color:var(--danger); display:none; margin-top:14px; font-weight:700; font-size:13px;">رمز الأمان غير صحيح!</p>
+            <button onclick="closeOtpModal()" style="margin-top:15px; background:var(--text-muted); width:100%; box-shadow:0 6px 0 #475569;">إغلاق ✖️</button>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل الحساب -->
+    <div id="reset-credentials-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3>تعيين بيانات دخول جديدة 👤</h3>
+            <div class="input-group">
+                <label>اسم المستخدم الجديد</label>
+                <input type="text" id="new-username" placeholder="اسم المستخدم">
+            </div>
+            <div class="input-group">
+                <label>كلمة المرور الجديدة</label>
+                <input type="password" id="new-password" placeholder="كلمة المرور">
+            </div>
+            <button onclick="saveNewCredentials()" style="width:100%; margin-top:10px;" class="btn-success">حفظ ودخول 🚀</button>
+        </div>
+    </div>
+
+    <!-- نافذة المساعدة المنبثقة لكل تبويب -->
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-body">
+            <div style="font-size: 36px; margin-bottom: 10px;">🤖</div>
+            <h3 id="help-modal-title" style="color: var(--primary); margin-bottom: 12px;">مساعدة الشرح</h3>
+            <div id="help-modal-content" style="font-size: 14px; color: var(--text-muted); text-align: right; line-height: 1.8; margin-bottom: 22px; background: rgba(0,0,0,0.03); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);"></div>
+            <button onclick="closeHelpModal()" style="width: 100%; background: var(--text-muted); box-shadow: 0 6px 0 #475569;">فهمت 👏</button>
+        </div>
+    </div>
+
+    <!-- واجهة التطبيق الرئيسية -->
+    <div id="app-section" class="container">
+        <div class="nav-tabs">
+            <button class="active" onclick="showTab('add-member', this)" data-tab="add-member" id="tab-add-btn">إضافة مخدوم ✨</button>
+            <button onclick="showTab('attendance', this)" data-tab="attendance">شيت الحضور 📋</button>
+            <button onclick="showTab('visitation', this)" data-tab="visitation" id="tab-vis-btn">
+                <span>الافتقاد 📞</span>
+                <span id="visitation-notification-dot" style="display:none;" class="notification-dot"></span>
+            </button>
+            <button onclick="showTab('families', this)" data-tab="families" id="tab-fam-btn">الأسر 👥</button>
+            <button onclick="showTab('trips', this)" data-tab="trips">الرحلات 🚌</button>
+            <button onclick="showTab('profiles', this)" data-tab="profiles">بحث 🔍</button>
+            <button onclick="showTab('birthdays', this)" data-tab="birthdays" id="tab-bday-btn">
+                <span>أعياد ميلاد 🎂</span>
+                <span id="birthday-notification-dot" style="display:none;" class="notification-dot"></span>
+            </button>
+            <button onclick="showTab('settings', this)" data-tab="settings">الإعدادات ⚙️</button>
+        </div>
+
+        <!-- إضافة / تعديل مخدوم -->
+        <div id="add-member" class="tab-content active">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('add-member')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('add-member')">محتاج مساعدة في إضافة مخدوم؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
+            <input type="hidden" id="edit-id" value="">
+            
+            <div class="input-group">
+                <label>الاسم الرباعي *</label>
+                <input type="text" id="m-name" placeholder="أدخل الاسم رباعياً" required oninput="clearInputError(this)">
+            </div>
+            <div class="input-group">
+                <label>النوع (لتصنيف المخدوم ضمن أسر الشباب أو الشابات) *</label>
+                <select id="m-gender" required onchange="clearInputError(this)">
+                    <option value="شاب">شاب (أسر الشباب)</option>
+                    <option value="شابة">شابة (أسر الشابات)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>المرحلة الجامعية / السنة *</label>
+                <input type="text" id="m-stage" placeholder="مثال: فرقة أولى تجارة" required oninput="clearInputError(this)">
+            </div>
+            
+            <div class="input-group autocomplete-container">
+                <label>اسم الأسرة *</label>
+                <input type="text" id="m-family" placeholder="مثال: أسرة مارجرجس أو اكتب أسرة جديدة..." autocomplete="off" required oninput="clearInputError(this)">
+            </div>
+
+            <div class="input-group">
+                <label>تاريخ الميلاد *</label>
+                <input type="date" id="m-birthdate" required oninput="clearInputError(this)">
+            </div>
+            <div class="input-group">
+                <label>رقم التليفون *</label>
+                <input type="tel" id="m-phone" placeholder="01xxxxxxxx0" required oninput="clearInputError(this)">
+            </div>
+            <div class="input-group">
+                <label>العنوان *</label>
+                <input type="text" id="m-address" placeholder="العنوان بالتفصيل" required oninput="clearInputError(this)">
+            </div>
+            <div class="input-group">
+                <label>أب الاعتراف *</label>
+                <input type="text" id="m-father" placeholder="اسم أب الاعتراف" required oninput="clearInputError(this)">
+            </div>
+            <div class="input-group">
+                <label>ملاحظات</label>
+                <textarea id="m-notes" rows="3" placeholder="ملاحظات هامة..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 14px; margin-top: 30px;">
+                <button class="btn-success" onclick="saveMember()" id="btn-save-member" style="flex: 1;">حفظ البيانات 💾</button>
+                <button onclick="cancelEdit()" id="btn-cancel-edit" style="display:none; background:var(--text-muted); box-shadow:0 6px 0 #475569;">إلغاء التعديل ✖️</button>
+            </div>
+        </div>
+
+        <!-- شيت الحضور -->
+        <div id="attendance" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('attendance')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('attendance')">محتاج مساعدة في شيت الحضور؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3>تسجيل واسترجاع حضور الاجتماع</h3>
+            <div class="input-group">
+                <label>تاريخ الاجتماع</label>
+                <input type="date" id="meeting-date" onchange="loadAttendanceForDate()">
+            </div>
+            
+            <div id="attendance-controls" style="display:none; margin-bottom: 20px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
+                    <button class="btn-qr" onclick="openQRScanner('attendance')" style="flex:1; min-width:200px; padding:16px; font-size:15px;">📷 تسجيل سريع بمسح QR Code</button>
+                    <button class="btn-excel" onclick="exportAttendanceExcel()" style="padding:16px; font-size:15px;">📊 تحميل شيت الحضور Excel</button>
+                </div>
+                
+                <div class="input-group autocomplete-container">
+                    <label>أو ابحث يدوياً بالاسم لتسجيل الحضور:</label>
+                    <input type="text" id="search-attendance" placeholder="اكتب اسم المخدوم هنا..." oninput="searchForAttendance(this.value)">
+                    <div id="autocomplete-results" class="autocomplete-results"></div>
+                </div>
+            </div>
+
+            <div id="attendance-sheet" style="display:none; margin-top: 25px;">
+                <h4 style="border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 16px; font-size: 17px; color:var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <span>قائمة الحضور لهذا اليوم</span>
+                    <span style="background: rgba(99, 102, 241, 0.15); padding: 6px 14px; border-radius: 20px; font-size: 14px;">إجمالي الحضور: <strong id="attendees-count" style="color:var(--primary);">0</strong></span>
+                </h4>
+                <div class="table-responsive">
+                    <table class="custom-table" id="attendance-table">
+                        <thead><tr><th>مسلسل</th><th>الاسم</th><th>الأسرة</th><th>وقت وتاريخ الحضور</th><th>إجراء</th></tr></thead>
+                        <tbody id="attendance-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم الافتقاد ومتابعة الغياب -->
+        <div id="visitation" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('visitation')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('visitation')">محتاج مساعدة في شيت الافتقاد التلقائي؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3>متابعة الغياب والافتقاد التلقائي 📞</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">يتم هنا رصد المتغيبين أوتوماتيكياً وعرض آخر 4 اجتماعات بلون أحمر هادئ لتسهيل الافتقاد.</p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; background: rgba(0,0,0,0.03); border: 1px solid var(--card-border); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 22px; align-items: center; font-size: 13px;">
+                <span style="font-weight: 800; color: var(--text-main);">دليل الألوان:</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ffcccc; display: inline-block;"></span> أحمر خفيف جداً (آخر غياب)</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff9999; display: inline-block;"></span> أحمر خفيف (آخر غيابين)</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff6666; display: inline-block;"></span> أحمر متوسط (آخر 3 اجتماعات)</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff3333; display: inline-block;"></span> أحمر مائل لقوة الغياب (آخر 4 اجتماعات فأكثر)</span>
+            </div>
+
+            <div id="visitation-container" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- الأسر -->
+        <div id="families" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('families')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('families')">محتاج مساعدة في إدارة وتصدير الأسر؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <div id="families-main-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                    <h3 style="margin:0;">إدارة الأسر 👥</h3>
+                    <button class="btn-excel" onclick="exportAllFamiliesExcel()">📥 تصدير كل بيانات الأسر لملف Excel</button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">اختر أي أسرة من القائمة أدناه لعرض تفاصيل وأعضاء الأسرة بالكامل.</p>
+                
+                <div class="stats-summary-box">
+                    <div class="stat-card">
+                        <div class="stat-title">إجمالي الشباب </div>
+                        <div class="stat-num" id="total-youth-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title" style="color:var(--secondary);">إجمالي الشابات </div>
+                        <div class="stat-num" id="total-girls-count" style="color:var(--secondary);">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title" style="color: var(--primary);">الإجمالي الكلي 📊</div>
+                        <div class="stat-num" id="total-all-count" style="color:var(--primary);">0</div>
+                    </div>
+                </div>
+
+                <div class="family-section-title"><span> أسر الشباب</span></div>
+                <div id="youth-families-list"></div>
+
+                <div class="family-section-title" style="margin-top: 35px;"><span> أسر الشابات</span></div>
+                <div id="girls-families-list"></div>
+            </div>
+
+            <div id="family-detail-view" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px; flex-wrap: wrap; gap: 14px;">
+                    <button onclick="backToFamiliesList()" style="background: var(--text-muted); padding: 10px 20px; font-size: 13.5px; box-shadow: 0 5px 0 #475569;">⬅️ رجوع لقائمة الأسر</button>
+                    <div id="family-detail-header-text" style="text-align: right; flex-grow: 1;"></div>
+                    <button class="btn-success" id="btn-add-to-fam" onclick="">➕ إضافة مخدوم للأسرة</button>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="fam-search-input" placeholder="🔍 بحث سريع عن مخدوم داخل هذه الأسرة..." oninput="updateFamilySearch(this.value)">
+                </div>
+
+                <div id="family-members-container"></div>
+            </div>
+        </div>
+
+        <!-- حجز الرحلات -->
+        <div id="trips" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('trips')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('trips')">محتاج مساعدة في حجز الرحلات والمؤتمرات؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3>نظام حجز الرحلات والفعاليات الذكي</h3>
+            
+            <div style="padding:22px; border-radius:var(--radius-md); border:1px solid var(--card-border); margin-bottom:26px;">
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                        <label>نوع الحجز / الفعالية</label>
+                        <select id="trip-type" onchange="changeTripType()">
+                            <option value="رحلة">رحلة</option>
+                            <option value="مؤتمر">مؤتمر</option>
+                            <option value="يوم روحي">يوم روحي</option>
+                            <option value="اجتماع خارجي">اجتماع خارجي</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                        <label>قيمة الاشتراك (جنيه)</label>
+                        <input type="number" id="trip-fee" placeholder="مثال: 300" oninput="updateAllTripFees()">
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 16px; margin-bottom: 0;">
+                    <label>اسم الفاعلية (سيظهر في الإكسيل والمستندات)</label>
+                    <input type="text" id="trip-event-name" placeholder="مثال: رحلة دير الأنبا بيشوي - رحلة صيف 2026">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+                <button class="btn-qr" onclick="openQRScanner('trip')" style="flex:1; min-width:200px; padding:16px; font-size:15px;">📷 إضافة مخدوم للحجز بـ QR Code</button>
+                <button class="btn-excel" onclick="exportTripExcel()" style="padding:16px; font-size:15px;">📊 تحميل شيت الرحلة Excel</button>
+            </div>
+
+            <div class="input-group autocomplete-container">
+                <label>أو ابحث يدوياً بالإسم لإضافته للحجز:</label>
+                <input type="text" id="search-trip" placeholder="اكتب اسم المخدوم لإضافته للحجز..." oninput="searchForTrip(this.value)">
+                <div id="trip-autocomplete-results" class="autocomplete-results"></div>
+            </div>
+
+            <div id="trip-sheet" style="margin-top: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h4 style="margin:0; font-size: 17px; color:var(--primary);"><span>شيت حجز الفعالية</span></h4>
+                    <button class="btn-delete" onclick="clearTripSheet()">🗑️ تصفير شيت الحجز فقط</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>مسلسل</th>
+                                <th>الاسم</th>
+                                <th>الأسرة</th>
+                                <th>المبلغ</th>
+                                <th>المدفوع</th>
+                                <th>الأقساط</th>
+                                <th>الحالة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trip-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- البروفايلات والبحث -->
+        <div id="profiles" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('profiles')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('profiles')">محتاج مساعدة في البحث وملفات المخدومين؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:24px;">
+                <h3 style="margin:0;">بحث متقدم وملفات المخدومين</h3>
+                <button class="btn-qr" onclick="openQRScanner('profile')">📷 فتح بروفايل عبر QR Code</button>
+            </div>
+            
+            <div class="search-bar">
+                <select id="search-filter" style="width: auto; min-width: 180px;">
+                    <option value="name">الاسم</option>
+                    <option value="father">أب الاعتراف</option>
+                    <option value="family">اسم الأسرة</option>
+                    <option value="stage">المرحلة الجامعية</option>
+                </select>
+                <input type="text" id="search-term" placeholder="اكتب للبحث..." oninput="renderProfiles()" style="flex:1;">
+            </div>
+
+            <div id="profiles-container"></div>
+        </div>
+
+        <!-- أعياد الميلاد -->
+        <div id="birthdays" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('birthdays')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('birthdays')">محتاج مساعدة في أعياد الميلاد؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3>أعياد ميلاد اليوم 🎂</h3>
+            <div id="birthdays-container"></div>
+        </div>
+
+        <!-- الإعدادات -->
+        <div id="settings" class="tab-content">
+            <div class="robot-help-container">
+                <button class="robot-btn" onclick="openHelp('settings')">🤖</button>
+                <div class="speech-bubble" onclick="openHelp('settings')">محتاج مساعدة في الإعدادات والنسخ الاحتياطي؟ اضغط هنا لشرح التبويب 💡</div>
+            </div>
+
+            <h3>إدارة البيانات والإعدادات</h3>
+            <div class="settings-card">
+                <h4>💾 الأمان والنسخ الاحتياطي</h4>
+                <div class="action-row">
+                    <button class="btn-success" onclick="exportData()">⬇️ تحميل نسخة احتياطية</button>
+                </div>
+                <div class="action-row" style="margin-top: 15px;">
+                    <div style="flex:1; min-width:250px;">
+                        <label style="display:block; margin-bottom:6px; font-weight:700; font-size:13.5px;">استرجاع نسخة احتياطية (ملف JSON):</label>
+                        <input type="file" id="backup-file-input" accept=".json" style="padding:10px;">
+                    </div>
+                    <button class="btn-warning" onclick="restoreData()" style="margin-top:20px;">⬆️ استرجاع البيانات</button>
+                </div>
+            </div>
+
+            <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                <h4 style="color:var(--danger);">⚠️ منطقة الخطر والتصفير</h4>
+                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير جميع سجلات حضور الاجتماعات وشيتات الرحلات بالكامل وإرجاعها فارغة دون المساس ببيانات البرفايلات والمخدومين الأساسية.</p>
+                <div class="action-row">
+                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير شيتات الحضور والرحلات فقط</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة قارئ الـ QR Code Modal -->
+    <div id="qr-scanner-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 style="margin-bottom:10px;">وجه الكاميرا نحو كارت QR</h3>
+            <p id="qr-modal-hint" style="font-size:13.5px; color:var(--text-muted); margin-bottom:18px;">سيتم المسح تلقائياً عند التعرف عليه</p>
+            <div id="qr-scanner-view"></div>
+            <button onclick="closeQRScanner()" style="margin-top:22px; background:var(--text-muted); box-shadow:0 6px 0 #475569; width:100%;">إغلاق الكاميرا ✖️</button>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل البروفايل وQR للمخدوم -->
+    <div id="member-detail-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 id="modal-profile-name" style="margin-bottom: 4px; color:var(--primary);">اسم المخدوم</h3>
+            <p id="modal-profile-subtitle" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;"></p>
+            
+            <div style="background: rgba(0,0,0,0.03); border:1px solid var(--card-border); padding:16px; border-radius:var(--radius-md); text-align:right; font-size:13.5px; margin-bottom:18px;">
+                <p style="margin:4px 0;"><strong>النوع:</strong> <span id="modal-p-gender"></span></p>
+                <p style="margin:4px 0;"><strong>المرحلة الدراسية:</strong> <span id="modal-p-stage"></span></p>
+                <p style="margin:4px 0;"><strong>رقم التليفون:</strong> <span id="modal-p-phone"></span></p>
+                <p style="margin:4px 0;"><strong>العنوان:</strong> <span id="modal-p-address"></span></p>
+                <p style="margin:4px 0;"><strong>أب الاعتراف:</strong> <span id="modal-p-father"></span></p>
+                <p style="margin:4px 0;"><strong>تاريخ الميلاد:</strong> <span id="modal-p-birthdate"></span></p>
+                <p style="margin:4px 0;"><strong>ملاحظات:</strong> <span id="modal-p-notes"></span></p>
+            </div>
+
+            <div id="modal-qr-container" style="background:#ffffff; padding:15px; border-radius:12px; margin:0 auto 15px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:center;"></div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-edit" id="modal-btn-edit" onclick="" style="flex: 1;">تعديل البيانات ✏️</button>
+                <button class="btn-delete" id="modal-btn-delete" onclick="" style="flex: 1;">حذف المخدوم 🗑️</button>
+            </div>
+            <button onclick="closeMemberDetailModal()" style="margin-top: 12px; background: var(--text-muted); width: 100%; box-shadow: 0 6px 0 #475569;">إغلاق ✖️</button>
+        </div>
+    </div>
+
+    <!-- نافذة عرض وتنزيل كارت QR Code للمخدوم (احتياطية سريعة) -->
+    <div id="qr-display-modal" class="modal-overlay">
+        <div class="modal-body">
+            <h3 id="qr-display-name" style="margin-bottom:6px;">كارت المخدوم</h3>
+            <p id="qr-display-family" style="font-size:14px; color:var(--text-muted); margin-bottom:14px;"></p>
+            
+            <div id="qr-export-wrapper" style="background:#ffffff; padding:20px; border-radius:16px; margin:15px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <div id="qr-image-title" style="font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 12px; text-align: center; font-family: 'Cairo', sans-serif;"></div>
+                <div id="qrcode-box" style="display:flex; justify-content:center;"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-success" onclick="downloadQRCodeImage()" style="flex:1;">📥 حفظ الرمز كصورة</button>
+                <button onclick="closeQRDisplay()" style="background:var(--text-muted); box-shadow:0 6px 0 #475569; flex:1;">تم 💾</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://uyoqcwtlxfuzvtpbfvml.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_RxDd9gplG9B2Fn_OxVRbBw_1l2Uy84E';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const OTP_SECURITY_CODE = '2027';
+
+        let db = { members: [], meetings: [], attendanceRecords: {}, tripsData: {} };
+        let currentMeetingDate = '';
+        let currentAttendees = [];
+        let currentSelectedFamilyName = '';
+        let currentFamilySearchTerm = '';
+        let html5QrCode = null;
+        let activeQRTarget = '';
+        let activeQRMemberName = '';
+
+        // نصوص مساعدة لكل تبويب للرجل الآلي
+        const tabHelpData = {
+            'add-member': {
+                title: 'شرح تبويب (إضافة مخدوم)',
+                text: 'من خلال هذا التبويب يمكنك تسجيل بيانات مخدوم جديد بالكامل (الاسم، النوع، المرحلة، الأسرة، تاريخ الميلاد، الهاتف، العنوان، وأب الاعتراف). بمجرد الحفظ يتم توليد كارت QR Code خاص بالمخدوم يمكن مسحه لتسجيل حضوره أو الدخول لملفه مباشرة.'
+            },
+            'attendance': {
+                title: 'شرح تبويب (شيت الحضور)',
+                text: 'مخصص لتسجيل حضور الاجتماعات بناءً على التاريخ المختار. يظهر عمود "المسلسل" بترتيب تلقائي قبل الأسماء، بالإضافة إلى إجمالي عدد الحضور في الأعلى، وإمكانية المسح السريع عبر كاميرا الموبايل لـ QR Code أو البحث اليدوي.'
+            },
+            'visitation': {
+                title: 'شرح تبويب (الافتقاد التلقائي)',
+                text: 'يقوم هذا القسم برصد المتغيبين عن آخر الاجتماعات أوتوماتيكياً دون الحاجة للاختيار اليدوي. يعرض بجانب كل شخص عدد الاجتماعات التي غابها مع تلوين آخر 4 اجتماعات بأدرجات اللون الأحمر الهادئ (كلما زاد الغياب كلما غمق التدريج قليلاً لتسهيل المتابعة والافتقاد).'
+            },
+            'families': {
+                title: 'شرح تبويب (الأسر)',
+                text: 'يعرض تصنيف المخدومين إلى أسر الشباب وأسر الشابات مع إجمالي الأعداد. عند الضغط على أي أسرة تظهر تفاصيل أعضائها. يحتوي على زر مخصص لتصدير بيانات جميع الأسر إلى ملف Excel واحد مقسم لشيتات منفصلة لكل أسرة.'
+            },
+            'trips': {
+                title: 'شرح تبويب (الرحلات والفعاليات)',
+                text: 'من هنا يتم إدارة حجوزات الرحلات والمؤتمرات. يتضمن عمود المسلسل، وإجمالي الحجز والاشتراكات في الأعلى، مع تسجيل المبالغ، الأقساط، ودفعات المخدومين وحالة السداد (خالص، متبقي، لم يتم الدفع).'
+            },
+            'profiles': {
+                title: 'شرح تبويب (البحث والملفات)',
+                text: 'يتيح لك البحث المتقدم عن أي مخدوم بالاسم، أو أب الاعتراف، أو اسم الأسرة، أو المرحلة الدراسية، مع عرض كارت برفايل كامل وإمكانية التعديل أو الحذف أو فتح الكارت عبر QR.'
+            },
+            'birthdays': {
+                title: 'شرح تبويب (أعياد الميلاد)',
+                text: 'يعرض بشكل تلقائي أعياد ميلاد المخدومين الموافق تاريخ اليوم، لتتمكن من تقديم التهنئة لهم ومشاركتهم الفرحة.'
+            },
+            'settings': {
+                title: 'شرح تبويب (الإعدادات)',
+                text: 'يتيح لك عمل نسخ احتياطي للبيانات بصيغة JSON، أو استرجاعها، أو تصفير شيتات الحضور والرحلات فقط عند الحاجة.'
+            }
+        };
+
+        function openHelp(tabKey) {
+            let data = tabHelpData[tabKey] || { title: 'مساعدة النظام', text: 'لا توجد تفاصيل متاحة لهذا التبويب.' };
+            document.getElementById('help-modal-title').innerText = data.title;
+            document.getElementById('help-modal-content').innerText = data.text;
+            document.getElementById('help-modal').style.display = 'flex';
+        }
+        function closeHelpModal() {
+            document.getElementById('help-modal').style.display = 'none';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: true });
+            const clockEl = document.getElementById('liveClock');
+            if (clockEl) clockEl.textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            let isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('theme-toggle-btn').innerText = isDark ? '☀️ الوضع الساطع' : '🌙 الوضع الداكن';
+        }
+
+        function openOtpModal() {
+            document.getElementById('otp-code-input').value = '';
+            document.getElementById('otp-error').style.display = 'none';
+            document.getElementById('otp-modal').style.display = 'flex';
+        }
+        function closeOtpModal() { document.getElementById('otp-modal').style.display = 'none'; }
+        function verifyOtpCode() {
+            let code = document.getElementById('otp-code-input').value.trim();
+            if(code === OTP_SECURITY_CODE) {
+                document.getElementById('otp-modal').style.display = 'none';
+                document.getElementById('reset-credentials-modal').style.display = 'flex';
+            } else { document.getElementById('otp-error').style.display = 'block'; }
+        }
+        async function saveNewCredentials() {
+            let user = document.getElementById('new-username').value.trim();
+            let pass = document.getElementById('new-password').value.trim();
+            if(!user || !pass) { alert('برجاء كتابة اسم المستخدم وكلمة المرور الجديدة!'); return; }
+            alert('تم تغيير بيانات الدخول بنجاح!');
+            document.getElementById('reset-credentials-modal').style.display = 'none';
+        }
+
+        async function loginDirect() {
+            let username = document.getElementById('login-username').value.trim();
+            let password = document.getElementById('login-password').value.trim();
+
+            if (!username || !password) {
+                let errEl = document.getElementById('direct-login-error');
+                errEl.innerText = "برجاء ادخال اسم المستخدم وكلمة المرور!";
+                errEl.style.display = 'block';
+                return;
+            }
+
+            let email = username;
+            if (username === "sttakla") {
+                email = "sttakla@sttakla.com";
+            }
+
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                let errEl = document.getElementById('direct-login-error');
+                errEl.innerText = "خطأ في تسجيل الدخول: " + error.message;
+                errEl.style.display = 'block';
+            } else {
+                document.getElementById('direct-login-error').style.display = 'none';
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('app-section').style.display = 'block';
+                let today = new Date().toISOString().split('T')[0];
+                document.getElementById('meeting-date').value = today;
+                await loadData();
+            }
+        }
+
+        async function loadData() {
+            try {
+                const [membersRes, attendanceRes, tripsRes] = await Promise.all([
+                    _supabase.from('members').select('*'),
+                    _supabase.from('attendance').select('*'),
+                    _supabase.from('trips').select('*')
+                ]);
+
+                if (membersRes.error) throw membersRes.error;
+                if (attendanceRes.error) throw attendanceRes.error;
+                if (tripsRes.error) throw tripsRes.error;
+
+                db.members = membersRes.data || [];
+                db.meetings = [];
+                db.attendanceRecords = {};
+                db.tripsData = {};
+
+                (attendanceRes.data || []).forEach(record => {
+                    if (!db.meetings.includes(record.meeting_date)) db.meetings.push(record.meeting_date);
+                    if (!db.attendanceRecords[record.meeting_date]) db.attendanceRecords[record.meeting_date] = {};
+                    db.attendanceRecords[record.meeting_date][record.member_id] = record.attend_time;
+                });
+                db.meetings.sort();
+
+                (tripsRes.data || []).forEach(t => {
+                    if (!db.tripsData[t.trip_type]) db.tripsData[t.trip_type] = { fee: t.fee || 0, reservations: {} };
+                    if (t.fee > 0 || !db.tripsData[t.trip_type].fee) db.tripsData[t.trip_type].fee = t.fee || 0;
+                    if (t.member_id) {
+                        let parsedInst = [];
+                        try {
+                            parsedInst = typeof t.installments === 'string' ? JSON.parse(t.installments) : (t.installments || []);
+                        } catch(e) { parsedInst = []; }
+                        db.tripsData[t.trip_type].reservations[t.member_id] = { paid: t.paid || 0, installments: parsedInst };
+                    }
+                });
+
+                checkBirthdays();
+                renderFamiliesList();
+                updateNotificationIndicators();
+            } catch(e) {
+                console.error("Error loading data", e);
+            }
+        }
+
+        function updateNotificationIndicators() {
+            let todayMDStr = `-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+            let hasBirthdayToday = db.members.some(m => m.birthdate && m.birthdate.endsWith(todayMDStr));
+            
+            let bdayDot = document.getElementById('birthday-notification-dot');
+            if (bdayDot) bdayDot.style.display = hasBirthdayToday ? 'inline-block' : 'none';
+
+            let recentMeetings = [...db.meetings].reverse().slice(0, 1);
+            let currentAbsentIds = [];
+            if (recentMeetings.length > 0 && db.members.length > 0) {
+                db.members.forEach(m => {
+                    let missingAll = true;
+                    for(let date of recentMeetings) {
+                        if(db.attendanceRecords[date] && db.attendanceRecords[date][m.id]) {
+                            missingAll = false;
+                            break;
+                        }
+                    }
+                    if(missingAll) currentAbsentIds.push(m.id);
+                });
+            }
+
+            let visDot = document.getElementById('visitation-notification-dot');
+            if (visDot) visDot.style.display = currentAbsentIds.length > 0 ? 'inline-block' : 'none';
+        }
+
+        async function showTab(tabId, clickedButton = null) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            const tab = document.getElementById(tabId);
+            if (!tab) return;
+            tab.classList.add('active');
+            
+            await loadData();
+
+            let activeBtn = document.querySelector(`.nav-tabs button[data-tab="${tabId}"]`);
+            if(activeBtn) activeBtn.classList.add('active');
+            else if(clickedButton) clickedButton.classList.add('active');
+
+            if(tabId === 'families') {
+                backToFamiliesList();
+            } else if(tabId === 'visitation') {
+                let visDot = document.getElementById('visitation-notification-dot');
+                if(visDot) visDot.style.display = 'none';
+            } else if(tabId === 'birthdays') {
+                let bdayDot = document.getElementById('birthday-notification-dot');
+                if(bdayDot) bdayDot.style.display = 'none';
+            }
+
+            if(tabId === 'profiles') renderProfiles();
+            if(tabId === 'attendance') loadAttendanceForDate();
+            if(tabId === 'visitation') renderVisitationList();
+            if(tabId === 'trips') renderTripTable();
+            if(tabId === 'birthdays') checkBirthdays();
+        }
+
+        function openMemberDetail(memberId, event) {
+            if(event) event.stopPropagation();
+            let m = db.members.find(item => item.id == memberId);
+            if(!m) return;
+
+            document.getElementById('modal-profile-name').innerText = m.name;
+            document.getElementById('modal-profile-subtitle').innerText = `أسرة: ${m.family || '-'}`;
+            document.getElementById('modal-p-gender').innerText = m.gender || '-';
+            document.getElementById('modal-p-stage').innerText = m.stage || '-';
+            document.getElementById('modal-p-phone').innerText = m.phone || '-';
+            document.getElementById('modal-p-address').innerText = m.address || '-';
+            document.getElementById('modal-p-father').innerText = m.father || '-';
+            document.getElementById('modal-p-birthdate').innerText = m.birthdate || '-';
+            document.getElementById('modal-p-notes').innerText = m.notes || 'لا توجد ملاحظات';
+
+            let qrBox = document.getElementById('modal-qr-container');
+            qrBox.innerHTML = '';
+            new QRCode(qrBox, { text: "TAKLA:" + m.id, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+
+            document.getElementById('modal-btn-edit').setAttribute('onclick', `closeMemberDetailModal(); editProfile(${m.id})`);
+            document.getElementById('modal-btn-delete').setAttribute('onclick', `deleteMember(${m.id}); closeMemberDetailModal();`);
+
+            document.getElementById('member-detail-modal').style.display = 'flex';
+        }
+
+        function closeMemberDetailModal() {
+            document.getElementById('member-detail-modal').style.display = 'none';
+        }
+
+        function showMemberQRCode(memberId, event) {
+            if(event) event.stopPropagation();
+            let m = db.members.find(item => item.id == memberId);
+            if(!m) return;
+            activeQRMemberName = m.name;
+            document.getElementById('qr-display-name').innerText = m.name;
+            document.getElementById('qr-display-family').innerText = 'أسرة: ' + (m.family || '-');
+            document.getElementById('qr-image-title').innerText = m.name;
+            let qrContainer = document.getElementById('qrcode-box');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, { text: "TAKLA:" + m.id, width: 180, height: 180, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+            document.getElementById('qr-display-modal').style.display = 'flex';
+        }
+
+        function closeQRDisplay() { document.getElementById('qr-display-modal').style.display = 'none'; }
+
+        function downloadQRCodeImage() {
+            let qrCanvasSrc = document.querySelector('#qrcode-box canvas');
+            let qrImg = document.querySelector('#qrcode-box img');
+            let canvas = document.createElement('canvas');
+            canvas.width = 380;
+            canvas.height = 440;
+            let ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 20px 'Cairo', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(activeQRMemberName, canvas.width / 2, 45);
+            
+            let img = new Image();
+            if(qrCanvasSrc) {
+                img.src = qrCanvasSrc.toDataURL("image/png");
+                img.onload = function() {
+                    ctx.drawImage(img, (canvas.width - 260) / 2, 70, 260, 260);
+                    triggerCanvasDownload(canvas);
+                };
+            } else if(qrImg && qrImg.src) {
+                img.src = qrImg.src;
+                img.onload = function() {
+                    ctx.drawImage(img, (canvas.width - 260) / 2, 70, 260, 260);
+                    triggerCanvasDownload(canvas);
+                };
+            }
+        }
+
+        function triggerCanvasDownload(canvas) {
+            let link = document.createElement('a');
+            link.download = `QR_${activeQRMemberName}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        }
+
+        function openQRScanner(target) {
+            activeQRTarget = target;
+            document.getElementById('qr-scanner-modal').style.display = 'flex';
+            if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-scanner-view");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 200, height: 200 } }, (txt) => handleScannedQRCode(txt), () => {}).catch(() => closeQRScanner());
+        }
+        function closeQRScanner() {
+            if(html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => document.getElementById('qr-scanner-modal').style.display = 'none').catch(() => document.getElementById('qr-scanner-modal').style.display = 'none');
+            } else { document.getElementById('qr-scanner-modal').style.display = 'none'; }
+        }
+        async function handleScannedQRCode(codeStr) {
+            let memberId = codeStr.replace("TAKLA:", "").trim();
+            let member = db.members.find(m => m.id == memberId);
+            if(!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
+            closeQRScanner();
+            if(activeQRTarget === 'attendance') { await addMemberToMeeting(member.id); alert("✅ تسجيل حضور: " + member.name); }
+            else if(activeQRTarget === 'trip') { await addMemberToTrip(member.id); alert("✅ إضافة: " + member.name + " لقائمة الرحلة"); }
+            else if(activeQRTarget === 'profile') { openMemberDetail(member.id); }
+        }
+
+        function clearInputError(el) { el.classList.remove('input-error'); }
+
+        async function saveMember() {
+            let fields = ['m-name', 'm-gender', 'm-stage', 'm-family', 'm-birthdate', 'm-phone', 'm-address', 'm-father'];
+            let hasError = false;
+            fields.forEach(id => {
+                let el = document.getElementById(id);
+                if(!el.value.trim()) {
+                    el.classList.add('input-error');
+                    hasError = true;
+                } else {
+                    el.classList.remove('input-error');
+                }
+            });
+
+            if(hasError) {
+                alert('برجاء استكمال جميع الخانات الإلزامية المحددة باللون الأحمر!');
+                return;
+            }
+
+            let name = document.getElementById('m-name').value.trim();
+            let editId = document.getElementById('edit-id').value;
+            let familyInput = document.getElementById('m-family').value.trim();
+            let memberData = {
+                name: name, gender: document.getElementById('m-gender').value, stage: document.getElementById('m-stage').value,
+                family: familyInput, birthdate: document.getElementById('m-birthdate').value, address: document.getElementById('m-address').value,
+                phone: document.getElementById('m-phone').value, father: document.getElementById('m-father').value, notes: document.getElementById('m-notes').value
+            };
+            if (editId) {
+                await _supabase.from('members').update(memberData).eq('id', editId);
+                alert('تم تعديل البيانات بنجاح!');
+                await loadData();
+                cancelEdit();
+            } else {
+                memberData.id = Date.now();
+                await _supabase.from('members').insert([memberData]);
+                await loadData();
+                cancelEdit();
+                showMemberQRCode(memberData.id);
+            }
+        }
+
+        function editProfile(id, event) {
+            if(event) event.stopPropagation();
+            let member = db.members.find(m => m.id == id);
+            if(!member) return;
+            document.getElementById('edit-id').value = member.id;
+            document.getElementById('m-name').value = member.name;
+            document.getElementById('m-gender').value = member.gender || 'شاب';
+            document.getElementById('m-stage').value = member.stage || '';
+            document.getElementById('m-family').value = member.family || '';
+            document.getElementById('m-birthdate').value = member.birthdate || '';
+            document.getElementById('m-address').value = member.address || '';
+            document.getElementById('m-phone').value = member.phone || '';
+            document.getElementById('m-father').value = member.father || '';
+            document.getElementById('m-notes').value = member.notes || '';
+            document.getElementById('form-title').innerText = 'تعديل بيانات: ' + member.name;
+            document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
+            showTab('add-member');
+        }
+
+        async function deleteMember(id, event) {
+            if(event) event.stopPropagation();
+            let member = db.members.find(m => m.id == id);
+            if(!member) return;
+
+            if(confirm(`⚠️ هل أنت متأكد من حذف المخدوم "${member.name}" نهائياً؟ سيتم حذف جميع بياناته وسجلات حضوره وحجوزاته.`)) {
+                await Promise.all([
+                    _supabase.from('members').delete().eq('id', id),
+                    _supabase.from('attendance').delete().eq('member_id', id),
+                    _supabase.from('trips').delete().eq('member_id', id)
+                ]);
+
+                alert('تم حذف المخدوم بنجاح.');
+                await loadData();
+                if(document.getElementById('profiles').classList.contains('active')) renderProfiles();
+                if(document.getElementById('families').classList.contains('active') && document.getElementById('family-detail-view').style.display === 'block') {
+                    renderFamilyMembersTable();
+                }
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-id').value = '';
+            document.querySelectorAll('#add-member input, #add-member textarea').forEach(i => { i.value = ''; i.classList.remove('input-error'); });
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+            document.getElementById('form-title').innerText = 'تسجيل بيانات مخدوم جديد';
+        }
+
+        function renderVisitationList() {
+            let container = document.getElementById('visitation-container');
+            container.innerHTML = '';
+            
+            let allMeetings = [...db.meetings].sort();
+            if(allMeetings.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد اجتماعات مسجلة حتى الآن لحساب الغياب.</p>`;
+                return;
+            }
+
+            let html = '';
+            db.members.forEach(m => {
+                let consecutiveAbsences = 0;
+                for (let i = allMeetings.length - 1; i >= 0; i--) {
+                    let meetingDate = allMeetings[i];
+                    let attended = db.attendanceRecords[meetingDate] && db.attendanceRecords[meetingDate][m.id];
+                    if (!attended) {
+                        consecutiveAbsences++;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (consecutiveAbsences > 0) {
+                    let cardBg = 'rgba(255, 255, 255, 0.6)';
+                    let borderColor = 'var(--card-border)';
+                    let badgeColor = 'var(--text-muted)';
+                    let absenceText = `غاب آخر ${consecutiveAbsences} اجتماعات`;
+
+                    // تدرج ألوان آخر 4 اجتماعات (أحمر خفيف جداً إلى أحمر مائل أخف من الأحمر الصريح)
+                    if (consecutiveAbsences === 1) {
+                        cardBg = 'rgba(255, 204, 204, 0.25)';
+                        borderColor = '#ffcccc';
+                        badgeColor = '#990000';
+                        absenceText = 'غاب آخر اجتماع';
+                    } else if (consecutiveAbsences === 2) {
+                        cardBg = 'rgba(255, 153, 153, 0.3)';
+                        borderColor = '#ff9999';
+                        badgeColor = '#800000';
+                        absenceText = 'غاب آخر اجتماعين';
+                    } else if (consecutiveAbsences === 3) {
+                        cardBg = 'rgba(255, 102, 102, 0.35)';
+                        borderColor = '#ff6666';
+                        badgeColor = '#660000';
+                        absenceText = 'غاب آخر 3 اجتماعات';
+                    } else {
+                        cardBg = 'rgba(255, 51, 51, 0.4)';
+                        borderColor = '#ff3333';
+                        badgeColor = '#4d0000';
+                        absenceText = `غاب آخر ${consecutiveAbsences} اجتماعات`;
+                    }
+
+                    let phoneLink = m.phone ? `<a href="tel:${m.phone}" style="color:var(--success); text-decoration:none; font-weight:800;" onclick="event.stopPropagation()">📞 ${m.phone}</a>` : 'بدون رقم تليفون';
+
+                    html += `
+                        <div class="visitation-card" style="background: ${cardBg}; border-color: ${borderColor}; border-right: 6px solid ${borderColor};" onclick="openMemberDetail(${m.id})">
+                            <div class="info">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <h4 style="margin:0;">${m.name}</h4>
+                                    <span style="background: ${borderColor}; color: ${badgeColor}; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">${absenceText}</span>
+                                </div>
+                                <p><strong>الأسرة:</strong> ${m.family || '-'} | <strong>التليفون:</strong> ${phoneLink}</p>
+                                <p><strong>أب الاعتراف:</strong> ${m.father || '-'} | <strong>ملاحظات:</strong> ${m.notes || 'لا توجد'}</p>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-edit" onclick="editProfile(${m.id}, event)">تعديل ✏️</button>
+                                <button class="btn-delete" onclick="deleteMember(${m.id}, event)">حذف 🗑️</button>
+                            </div>
+                        </div>`;
+                }
+            });
+
+            container.innerHTML = html || `<p style="color:var(--success); text-align:center; padding:30px; font-weight:700;">ممتاز! جميع المخدومين حضروا آخر اجتماع.</p>`;
+        }
+
+        function renderFamiliesList() {
+            let youthListDiv = document.getElementById('youth-families-list');
+            let girlsListDiv = document.getElementById('girls-families-list');
+            youthListDiv.innerHTML = ''; girlsListDiv.innerHTML = '';
+            let totalYouth = 0, totalGirls = 0, youthFam = {}, girlsFam = {};
+
+            db.members.forEach(m => {
+                let fam = m.family || 'أسرة عامة';
+                if(m.gender === 'شابة') { totalGirls++; if(!girlsFam[fam]) girlsFam[fam] = []; girlsFam[fam].push(m); }
+                else { totalYouth++; if(!youthFam[fam]) youthFam[fam] = []; youthFam[fam].push(m); }
+            });
+
+            document.getElementById('total-youth-count').innerText = totalYouth;
+            document.getElementById('total-girls-count').innerText = totalGirls;
+            document.getElementById('total-all-count').innerText = totalYouth + totalGirls;
+
+            Object.keys(youthFam).sort().forEach(fam => {
+                youthListDiv.innerHTML += `<div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شاب')"><div><strong>🛡️ ${fam}</strong></div><span style="color:var(--primary); font-weight:800;">${youthFam[fam].length} مخدوم</span></div>`;
+            });
+            Object.keys(girlsFam).sort().forEach(fam => {
+                girlsListDiv.innerHTML += `<div class="family-card-btn" onclick="openFamilyDetail('${fam}', 'شابة')" style="border-right-color: var(--secondary);"><div><strong style="color:var(--secondary);">✨ ${fam}</strong></div><span style="color:var(--secondary); font-weight:800;">${girlsFam[fam].length} مخدومة</span></div>`;
+            });
+        }
+
+        function openFamilyDetail(familyName, gender) {
+            currentSelectedFamilyName = familyName;
+            currentFamilySearchTerm = '';
+            document.getElementById('fam-search-input').value = '';
+            document.getElementById('families-main-view').style.display = 'none';
+            document.getElementById('family-detail-view').style.display = 'block';
+            document.getElementById('family-detail-header-text').innerHTML = `<h4 style="margin:0; color:var(--primary);">أسرة: ${familyName}</h4>`;
+            document.getElementById('btn-add-to-fam').setAttribute('onclick', `addMemberToSpecificFamily('${familyName}', '${gender}')`);
+            renderFamilyMembersTable();
+        }
+
+        function backToFamiliesList() {
+            document.getElementById('family-detail-view').style.display = 'none';
+            document.getElementById('families-main-view').style.display = 'block';
+            renderFamiliesList();
+        }
+
+        function renderFamilyMembersTable() {
+            let container = document.getElementById('family-members-container');
+            let members = db.members.filter(m => {
+                let matchFam = (m.family || 'أسرة عامة') === currentSelectedFamilyName;
+                if(!currentFamilySearchTerm) return matchFam;
+                return matchFam && m.name.toLowerCase().includes(currentFamilySearchTerm.toLowerCase());
+            });
+
+            let html = `<div class="table-responsive"><table class="custom-table"><thead><tr><th>مسلسل</th><th>الاسم</th><th>المرحلة</th><th>التليفون</th><th>إجراء</th></tr></thead><tbody>`;
+            members.forEach((m, idx) => {
+                html += `<tr style="cursor:pointer;" onclick="openMemberDetail(${m.id})"><td>${idx + 1}</td><td><strong>${m.name}</strong></td><td>${m.stage || '-'}</td><td>${m.phone || '-'}</td><td><button class="btn-qr" onclick="showMemberQRCode(${m.id}, event)" style="padding:6px 10px; font-size:12px;">QR 📷</button> <button class="btn-edit" onclick="editProfile(${m.id}, event)">تعديل ✏️</button> <button class="btn-delete" onclick="deleteMember(${m.id}, event)">حذف 🗑️</button></td></tr>`;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function updateFamilySearch(val) { 
+            currentFamilySearchTerm = val; 
+            renderFamilyMembersTable();
+        }
+
+        function addMemberToSpecificFamily(familyName, gender) {
+            showTab('add-member');
+            cancelEdit();
+            document.getElementById('m-family').value = familyName;
+            document.getElementById('m-gender').value = gender;
+        }
+
+        function exportAllFamiliesExcel() {
+            let famMap = {};
+            db.members.forEach(m => {
+                let fam = m.family || 'أسرة عامة';
+                if(!famMap[fam]) famMap[fam] = [];
+                famMap[fam].push(m);
+            });
+
+            let famNames = Object.keys(famMap);
+            if(famNames.length === 0) {
+                alert("لا توجد أسر أو مخدومين لتصديرهم!");
+                return;
+            }
+
+            // يتم تصدير الأسر في ملف CSV أو عدة ملفات (هنا ملف موحد منسق بشيتات افتراضية / أقسام واضحة)
+            let csvContent = "";
+            famNames.forEach(fam => {
+                csvContent += `=== شيت أسرة: ${fam} ===\n`;
+                csvContent += "مسلسل,الاسم,النوع,المرحلة,التليفون,العنوان,أب الاعتراف\n";
+                famMap[fam].forEach((m, idx) => {
+                    csvContent += `${idx + 1},"${m.name}","${m.gender || ''}","${m.stage || ''}","${m.phone || ''}","${m.address || ''}","${m.father || ''}"\n`;
+                });
+                csvContent += "\n\n";
+            });
+
+            downloadCSVFile(`بيانات_جميع_الأسر_${Date.now()}.csv`, csvContent);
+        }
+
+        function loadAttendanceForDate() {
+            currentMeetingDate = document.getElementById('meeting-date').value;
+            if(!currentMeetingDate) return;
+            document.getElementById('attendance-controls').style.display = 'block';
+            document.getElementById('attendance-sheet').style.display = 'block';
+            currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate] && db.attendanceRecords[currentMeetingDate][m.id]);
+            renderAttendanceTable();
+        }
+
+        function searchForAttendance(val) {
+            let res = document.getElementById('autocomplete-results');
+            res.innerHTML = '';
+            if(!val.trim()) return;
+            db.members.filter(m => m.name.includes(val.trim()) && (!db.attendanceRecords[currentMeetingDate] || !db.attendanceRecords[currentMeetingDate][m.id])).forEach(m => {
+                let div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${m.name}</strong>`;
+                div.onclick = () => {
+                    addMemberToMeeting(m.id);
+                    document.getElementById('search-attendance').value = '';
+                    res.innerHTML = '';
+                };
+                res.appendChild(div);
+            });
+        }
+
+        async function addMemberToMeeting(id) {
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            let dateTimeFull = `${currentMeetingDate} | ${timeStr}`;
+
+            await _supabase.from('attendance').insert([{ meeting_date: currentMeetingDate, member_id: id, attend_time: dateTimeFull }]);
+            await loadData();
+            loadAttendanceForDate();
+        }
+
+        async function removeMemberFromMeeting(id) {
+            await _supabase.from('attendance').delete().eq('meeting_date', currentMeetingDate).eq('member_id', id);
+            await loadData();
+            loadAttendanceForDate();
+        }
+
+        function renderAttendanceTable() {
+            let tbody = document.getElementById('attendance-tbody');
+            tbody.innerHTML = '';
+            document.getElementById('attendees-count').innerText = currentAttendees.length;
+            currentAttendees.forEach((m, idx) => {
+                tbody.innerHTML += `<tr style="cursor:pointer;" onclick="openMemberDetail(${m.id})"><td>${idx + 1}</td><td><strong>${m.name}</strong></td><td>${m.family || '-'}</td><td>${db.attendanceRecords[currentMeetingDate][m.id]}</td><td><button class="btn-delete" onclick="removeMemberFromMeeting(${m.id}); event.stopPropagation();">إلغاء ✖️</button></td></tr>`;
+            });
+        }
+
+        function getActiveTripKey() { return document.getElementById('trip-type').value; }
+        function getTripObj() {
+            let key = getActiveTripKey();
+            if(!db.tripsData[key]) db.tripsData[key] = { fee: 0, reservations: {} };
+            return db.tripsData[key];
+        }
+        function changeTripType() { 
+            let trip = getTripObj();
+            document.getElementById('trip-fee').value = trip.fee || ''; 
+            renderTripTable(); 
+        }
+        async function updateAllTripFees() {
+            let fee = parseFloat(document.getElementById('trip-fee').value) || 0;
+            let key = getActiveTripKey();
+            db.tripsData[key].fee = fee;
+            let memberIds = Object.keys(db.tripsData[key].reservations);
+            for(let id of memberIds) {
+                let res = db.tripsData[key].reservations[id];
+                await _supabase.from('trips').upsert([{ 
+                    trip_type: key, 
+                    member_id: id, 
+                    fee: fee, 
+                    paid: res.paid, 
+                    installments: JSON.stringify(res.installments) 
+                }], { onConflict: 'trip_type,member_id' });
+            }
+            renderTripTable();
+        }
+        function searchForTrip(val) {
+            let res = document.getElementById('trip-autocomplete-results');
+            res.innerHTML = '';
+            if(!val.trim()) return;
+            let trip = getTripObj();
+            db.members.filter(m => m.name.includes(val.trim()) && !trip.reservations[m.id]).forEach(m => {
+                let div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${m.name}</strong>`;
+                div.onclick = () => {
+                    addMemberToTrip(m.id);
+                    document.getElementById('search-trip').value = '';
+                    res.innerHTML = '';
+                };
+                res.appendChild(div);
+            });
+        }
+        async function addMemberToTrip(id) {
+            let key = getActiveTripKey();
+            let fee = getTripObj().fee || 0;
+            await _supabase.from('trips').upsert([{ 
+                trip_type: key, 
+                member_id: id, 
+                fee: fee, 
+                paid: 0, 
+                installments: JSON.stringify([]) 
+            }], { onConflict: 'trip_type,member_id' });
+            await loadData();
+            renderTripTable();
+        }
+        async function removeMemberFromTrip(id) {
+            await _supabase.from('trips').delete().eq('trip_type', getActiveTripKey()).eq('member_id', id);
+            await loadData();
+            renderTripTable();
+        }
+        async function addInstallment(id) {
+            let amtInput = document.getElementById(`inst-input-${id}`);
+            let amt = parseFloat(amtInput.value);
+            if(isNaN(amt) || amt <= 0) return;
+            let key = getActiveTripKey();
+            let trip = getTripObj();
+            let res = trip.reservations[id] || { paid: 0, installments: [] };
+            let newPaid = (res.paid || 0) + amt;
+            let nowStr = new Date().toLocaleDateString('ar-EG');
+            let updatedInstallments = [...res.installments, { amount: amt, date: nowStr }];
+
+            await _supabase.from('trips').upsert([{ 
+                trip_type: key, 
+                member_id: id, 
+                fee: trip.fee, 
+                paid: newPaid, 
+                installments: JSON.stringify(updatedInstallments) 
+            }], { onConflict: 'trip_type,member_id' });
+            
+            amtInput.value = '';
+            await loadData();
+            renderTripTable();
+        }
+        function renderTripTable() {
+            let tbody = document.getElementById('trip-tbody');
+            tbody.innerHTML = '';
+            let trip = getTripObj();
+            let memberIds = Object.keys(trip.reservations);
+            
+            let totalTripFeesSum = memberIds.length * (trip.fee || 0);
+            let totalTripCollectedSum = 0;
+            memberIds.forEach(id => {
+                totalTripCollectedSum += (trip.reservations[id].paid || 0);
+            });
+
+            const instColors = [
+                { bg: '#dcfce7', color: '#166534', border: '#86efac' },
+                { bg: '#e0f2fe', color: '#0369a1', border: '#7dd3fc' },
+                { bg: '#f3e8ff', color: '#6b21a8', border: '#d8b4fe' },
+                { bg: '#fef3c7', color: '#b45309', border: '#fde047' },
+                { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' }
+            ];
+
+            memberIds.forEach((id, idx) => {
+                let m = db.members.find(item => item.id == id);
+                if(!m) return;
+                let res = trip.reservations[id];
+                let fee = trip.fee || 0;
+                let paid = res.paid || 0;
+                let statusBadge = '';
+                if(paid >= fee && fee > 0) {
+                    statusBadge = `<span style="background:var(--success); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">خالص ✅</span>`;
+                } else if(paid > 0) {
+                    statusBadge = `<span style="background:var(--warning); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">متبقي ${fee - paid} ⚠️</span>`;
+                } else {
+                    statusBadge = `<span style="background:var(--danger); color:#fff; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:800;">لم يتم الدفع ❌</span>`;
+                }
+
+                let installmentsHtml = '<div style="display:flex; flex-direction:column; gap:4px; min-width:130px;">';
+                if (!res.installments || res.installments.length === 0) {
+                    installmentsHtml += '<span style="color:var(--text-muted); font-size:12px;">لا توجد دفعات</span>';
+                } else {
+                    res.installments.forEach((i, iIdx) => {
+                        let c = instColors[iIdx % instColors.length];
+                        installmentsHtml += `<div style="background:${c.bg}; color:${c.color}; border:1px solid ${c.border}; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:700; display:flex; justify-content:space-between;"><span>الدفعة ${iIdx+1}: ${i.amount} ج</span><span style="font-size:11px; opacity:0.8;">(${i.date})</span></div>`;
+                    });
+                }
+                installmentsHtml += '</div>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${m.name}</strong></td>
+                        <td>${m.family || '-'}</td>
+                        <td>${fee}</td>
+                        <td><strong style="color:var(--success);">${paid}</strong></td>
+                        <td style="white-space: normal; padding: 10px 15px;">${installmentsHtml}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="inst-input-${m.id}" placeholder="مبلغ" style="width:65px; padding:6px; font-size:12px;">
+                                <button class="btn-success" onclick="addInstallment(${m.id})" style="padding:6px 10px; font-size:12px;">دفع ➕</button>
+                                <button class="btn-delete" onclick="removeMemberFromTrip(${m.id})" style="padding:6px 10px; font-size:12px;">حذف 🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+
+            // إضافة صف إجمالي الحجز في نهاية الجدول
+            if(memberIds.length > 0) {
+                tbody.innerHTML += `
+                    <tr style="background: rgba(99, 102, 241, 0.1); font-weight: 900;">
+                        <td colspan="3" style="text-align: left;">إجمالي الحجز والتحصيل:</td>
+                        <td>إجمالي المطلوب: ${totalTripFeesSum} ج</td>
+                        <td colspan="4" style="color: var(--success);">إجمالي المحصل: ${totalTripCollectedSum} ج (عدد الحجوزات: ${memberIds.length})</td>
+                    </tr>`;
+            }
+        }
+        async function clearTripSheet() {
+            if(confirm("هل أنت متأكد من تصفير شيت الحجز الحالي بالكامل؟")) {
+                await _supabase.from('trips').delete().eq('trip_type', getActiveTripKey());
+                await loadData();
+                renderTripTable();
+            }
+        }
+        function renderProfiles() {
+            let container = document.getElementById('profiles-container');
+            let filter = document.getElementById('search-filter').value;
+            let term = document.getElementById('search-term').value.trim().toLowerCase();
+
+            let members = db.members.filter(m => {
+                if(!term) return true;
+                let val = (m[filter] || '').toLowerCase();
+                return val.includes(term);
+            });
+
+            let html = '';
+            members.forEach(m => {
+                html += `
+                    <div class="profile-card" onclick="openMemberDetail(${m.id})">
+                        <div class="info">
+                            <h4>${m.name}</h4>
+                            <p><strong>الأسرة:</strong> ${m.family || '-'} | <strong>المرحلة:</strong> ${m.stage || '-'} | <strong>التليفون:</strong> ${m.phone || '-'}</p>
+                            <p><strong>أب الاعتراف:</strong> ${m.father || '-'} | <strong>العنوان:</strong> ${m.address || '-'}</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-qr" onclick="showMemberQRCode(${m.id}, event)">QR 📷</button>
+                            <button class="btn-edit" onclick="editProfile(${m.id}, event)">تعديل ✏️</button>
+                            <button class="btn-delete" onclick="deleteMember(${m.id}, event)">حذف 🗑️</button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد نتائج مطابقة للبحث.</p>`;
+        }
+        function checkBirthdays() {
+            let container = document.getElementById('birthdays-container');
+            let todayMDStr = `-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+            let bdays = db.members.filter(m => m.birthdate && m.birthdate.endsWith(todayMDStr));
+
+            let html = '';
+            bdays.forEach(m => {
+                html += `
+                    <div class="birthday-box">
+                        <strong>🎉 كل سنة وأنت طيب يا/ ${m.name}!</strong>
+                        <p style="margin:6px 0 0 0; font-size:13.5px;">عيد ميلاد سعيد، نسأل الرب أن يبارك حياتك ويحفظك (أسرة: ${m.family || '-'})</p>
+                    </div>`;
+            });
+            container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد أعياد ميلاد مسجلة اليوم.</p>`;
+        }
+
+        function downloadCSVFile(filename, csvContent) {
+            let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            let url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportAttendanceExcel() {
+            if(!currentMeetingDate || currentAttendees.length === 0) {
+                alert("لا توجد بيانات حضور مسجلة لهذا التاريخ لتصديرها!");
+                return;
+            }
+            let csv = "مسلسل,الاسم,الأسرة,تاريخ ووقت الحضور\n";
+            currentAttendees.forEach((m, idx) => {
+                let timeStr = db.attendanceRecords[currentMeetingDate][m.id] || '';
+                csv += `${idx + 1},"${m.name}","${m.family || ''}","${timeStr}"\n`;
+            });
+            downloadCSVFile(`حضور_اجتماع_${currentMeetingDate}.csv`, csv);
+        }
+
+        function exportTripExcel() {
+            let trip = getTripObj();
+            let memberIds = Object.keys(trip.reservations);
+            if(memberIds.length === 0) {
+                alert("لا توجد حجوزات مسجلة في هذا الشيت لتصديرها!");
+                return;
+            }
+            let eventName = document.getElementById('trip-event-name').value || getActiveTripKey();
+            let totalCollected = 0;
+            memberIds.forEach(id => { totalCollected += (trip.reservations[id].paid || 0); });
+
+            let csv = `الفعالية:,"${eventName}"\n`;
+            csv += `إجمالي المطلوب:,${memberIds.length * (trip.fee || 0)},إجمالي المحصل:,${totalCollected}\n`;
+            csv += "مسلسل,الاسم,الأسرة,قيمة الاشتراك,إجمالي المدفوع,التفاصيل والدفعات,الحالة\n";
+            
+            memberIds.forEach((id, idx) => {
+                let m = db.members.find(item => item.id == id);
+                if(!m) return;
+                let res = trip.reservations[id];
+                let fee = trip.fee || 0;
+                let paid = res.paid || 0;
+                let status = paid >= fee ? "خالص" : (paid > 0 ? "متبقي" : "لم يتم الدفع");
+                let instText = (res.installments || []).map(i => `${i.amount} (${i.date})`).join(' - ');
+                csv += `${idx + 1},"${m.name}","${m.family || ''}",${fee},${paid},"${instText}","${status}"\n`;
+            });
+            downloadCSVFile(`شيت_${getActiveTripKey()}_${Date.now()}.csv`, csv);
+        }
+
+
+        // ============================================================
+        // النسخ الاحتياطي الكامل والاسترجاع الكامل
+        // يحفظ كل البيانات الموجودة في Supabase:
+        // 1) المخدومين (members)
+        // 2) الحضور والاجتماعات (attendance)
+        // 3) الرحلات والحجوزات والدفعات (trips)
+        // والأسر محفوظة ضمن بيانات المخدومين في حقل family.
+        // ============================================================
+
+        async function exportData() {
+            try {
+                // نقرأ البيانات مباشرة من قاعدة البيانات قبل إنشاء النسخة،
+                // لضمان أن ملف JSON يحتوي على آخر نسخة فعلية وليس مجرد نسخة من الواجهة.
+                const [membersRes, attendanceRes, tripsRes] = await Promise.all([
+                    _supabase.from('members').select('*'),
+                    _supabase.from('attendance').select('*'),
+                    _supabase.from('trips').select('*')
+                ]);
+
+                if (membersRes.error) throw membersRes.error;
+                if (attendanceRes.error) throw attendanceRes.error;
+                if (tripsRes.error) throw tripsRes.error;
+
+                const backup = {
+                    backupVersion: 2,
+                    app: 'sttakla',
+                    createdAt: new Date().toISOString(),
+
+                    // بيانات المخدومين، وتشمل الأسرة وكل بيانات البروفايل.
+                    members: membersRes.data || [],
+
+                    // جميع سجلات الحضور لكل الاجتماعات والتواريخ.
+                    attendance: attendanceRes.data || [],
+
+                    // جميع الرحلات/الفعاليات والحجوزات والمدفوعات والأقساط.
+                    trips: tripsRes.data || [],
+
+                    // نسخة منظمة إضافية من البيانات الحالية للمحافظة على
+                    // نفس شكل db المستخدم داخل الموقع.
+                    dbSnapshot: {
+                        members: membersRes.data || [],
+                        meetings: [...new Set((attendanceRes.data || [])
+                            .map(r => r.meeting_date)
+                            .filter(Boolean))].sort(),
+                        attendanceRecords: {},
+                        tripsData: {}
+                    }
+                };
+
+                // بناء attendanceRecords
+                (attendanceRes.data || []).forEach(record => {
+                    if (!backup.dbSnapshot.attendanceRecords[record.meeting_date]) {
+                        backup.dbSnapshot.attendanceRecords[record.meeting_date] = {};
+                    }
+                    backup.dbSnapshot.attendanceRecords[record.meeting_date][record.member_id] =
+                        record.attend_time;
+                });
+
+                // بناء tripsData
+                (tripsRes.data || []).forEach(t => {
+                    if (!backup.dbSnapshot.tripsData[t.trip_type]) {
+                        backup.dbSnapshot.tripsData[t.trip_type] = {
+                            fee: t.fee || 0,
+                            reservations: {}
+                        };
+                    }
+
+                    if (t.fee > 0 || !backup.dbSnapshot.tripsData[t.trip_type].fee) {
+                        backup.dbSnapshot.tripsData[t.trip_type].fee = t.fee || 0;
+                    }
+
+                    if (t.member_id !== null && t.member_id !== undefined) {
+                        let parsedInst = [];
+                        try {
+                            parsedInst = typeof t.installments === 'string'
+                                ? JSON.parse(t.installments)
+                                : (t.installments || []);
+                        } catch (e) {
+                            parsedInst = [];
+                        }
+
+                        backup.dbSnapshot.tripsData[t.trip_type].reservations[t.member_id] = {
+                            paid: t.paid || 0,
+                            installments: parsedInst
+                        };
+                    }
+                });
+
+                const json = JSON.stringify(backup, null, 2);
+                const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const dlAnchor = document.createElement('a');
+                dlAnchor.href = url;
+                dlAnchor.download = `sttakla_full_backup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+                document.body.appendChild(dlAnchor);
+                dlAnchor.click();
+                dlAnchor.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                alert(
+                    `تم إنشاء نسخة احتياطية كاملة بنجاح ✅
+
+` +
+                    `المخدومين: ${backup.members.length}
+` +
+                    `سجلات الحضور: ${backup.attendance.length}
+` +
+                    `سجلات الرحلات والحجوزات: ${backup.trips.length}
+
+` +
+                    `الملف يحتوي على جميع البيانات ويمكن استرجاعها مرة أخرى.`
+                );
+            } catch (err) {
+                console.error('Backup export error:', err);
+                alert('حدث خطأ أثناء إنشاء النسخة الاحتياطية الكاملة: ' + (err.message || err));
+            }
+        }
+
+        async function restoreData() {
+            const fileInput = document.getElementById('backup-file-input');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('برجاء اختيار ملف النسخ الاحتياطي (JSON) أولاً!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            if (!file.name.toLowerCase().endsWith('.json')) {
+                alert('برجاء اختيار ملف بصيغة JSON فقط!');
+                return;
+            }
+
+            const confirmed = confirm(
+                '⚠️ استرجاع نسخة كاملة\n\n' +
+                'سيتم استبدال البيانات الحالية في الموقع ببيانات الملف المختار، ' +
+                'بما في ذلك:\n' +
+                '• جميع المخدومين والأسر\n' +
+                '• جميع سجلات الحضور والاجتماعات\n' +
+                '• جميع الرحلات والحجوزات والمدفوعات والأقساط\n\n' +
+                'تأكد أنك اخترت ملف النسخة الاحتياطية الصحيح.\n\n' +
+                'هل تريد المتابعة؟'
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const text = await file.text();
+                const parsed = JSON.parse(text);
+
+                // دعم النسخة الجديدة، مع دعم الملف القديم إن وُجد.
+                let members = [];
+                let attendance = [];
+                let trips = [];
+
+                if (Array.isArray(parsed.members)) {
+                    members = parsed.members;
+                } else if (parsed.dbSnapshot && Array.isArray(parsed.dbSnapshot.members)) {
+                    members = parsed.dbSnapshot.members;
+                }
+
+                if (Array.isArray(parsed.attendance)) {
+                    attendance = parsed.attendance;
+                }
+
+                if (Array.isArray(parsed.trips)) {
+                    trips = parsed.trips;
+                }
+
+                // لو كان الملف القديم يحتوي dbSnapshot فقط،
+                // نحوله مرة أخرى إلى صفوف Supabase.
+                if (attendance.length === 0 && parsed.dbSnapshot && parsed.dbSnapshot.attendanceRecords) {
+                    Object.entries(parsed.dbSnapshot.attendanceRecords).forEach(([meetingDate, records]) => {
+                        Object.entries(records || {}).forEach(([memberId, attendTime]) => {
+                            attendance.push({
+                                meeting_date: meetingDate,
+                                member_id: memberId,
+                                attend_time: attendTime
+                            });
+                        });
+                    });
+                }
+
+                if (trips.length === 0 && parsed.dbSnapshot && parsed.dbSnapshot.tripsData) {
+                    Object.entries(parsed.dbSnapshot.tripsData).forEach(([tripType, tripObj]) => {
+                        Object.entries((tripObj && tripObj.reservations) || {}).forEach(([memberId, reservation]) => {
+                            trips.push({
+                                trip_type: tripType,
+                                member_id: memberId,
+                                fee: tripObj.fee || 0,
+                                paid: reservation?.paid || 0,
+                                installments: JSON.stringify(reservation?.installments || [])
+                            });
+                        });
+                    });
+                }
+
+                // تحقق أساسي من أن الملف فعلاً نسخة بيانات.
+                if (!Array.isArray(members) || !Array.isArray(attendance) || !Array.isArray(trips)) {
+                    throw new Error('صيغة ملف النسخة الاحتياطية غير صحيحة.');
+                }
+
+                // التأكد أن سجلات الحضور والحجوزات تشير إلى مخدومين موجودين.
+                const memberIds = new Set(members.map(m => String(m.id)));
+
+                const invalidAttendance = attendance.filter(r =>
+                    r.member_id !== null &&
+                    r.member_id !== undefined &&
+                    !memberIds.has(String(r.member_id))
+                );
+
+                const invalidTrips = trips.filter(r =>
+                    r.member_id !== null &&
+                    r.member_id !== undefined &&
+                    !memberIds.has(String(r.member_id))
+                );
+
+                if (invalidAttendance.length > 0 || invalidTrips.length > 0) {
+                    throw new Error(
+                        'النسخة تحتوي على سجلات مرتبطة بمخدومين غير موجودين. لم يتم تغيير أي بيانات.'
+                    );
+                }
+
+                // حذف البيانات الحالية أولاً، ثم إعادة بناءها من النسخة.
+                // نحذف الحضور والرحلات قبل المخدومين لتفادي مشاكل العلاقات.
+                const deleteAttendance = await _supabase
+                    .from('attendance')
+                    .delete()
+                    .not('id', 'is', null);
+
+                if (deleteAttendance.error) throw deleteAttendance.error;
+
+                const deleteTrips = await _supabase
+                    .from('trips')
+                    .delete()
+                    .not('member_id', 'is', null);
+
+                if (deleteTrips.error) throw deleteTrips.error;
+
+                const deleteMembers = await _supabase
+                    .from('members')
+                    .delete()
+                    .not('id', 'is', null);
+
+                if (deleteMembers.error) throw deleteMembers.error;
+
+                // إدخال المخدومين.
+                if (members.length > 0) {
+                    const membersToInsert = members.map(m => ({ ...m }));
+                    const membersInsert = await _supabase
+                        .from('members')
+                        .insert(membersToInsert);
+
+                    if (membersInsert.error) throw membersInsert.error;
+                }
+
+                // إدخال كل سجلات الحضور.
+                if (attendance.length > 0) {
+                    const attendanceToInsert = attendance.map(r => ({
+                        ...r
+                    }));
+
+                    const attendanceInsert = await _supabase
+                        .from('attendance')
+                        .insert(attendanceToInsert);
+
+                    if (attendanceInsert.error) throw attendanceInsert.error;
+                }
+
+                // إدخال كل الرحلات والحجوزات والمدفوعات والأقساط.
+                if (trips.length > 0) {
+                    const tripsToInsert = trips.map(t => ({
+                        ...t
+                    }));
+
+                    const tripsInsert = await _supabase
+                        .from('trips')
+                        .insert(tripsToInsert);
+
+                    if (tripsInsert.error) throw tripsInsert.error;
+                }
+
+                // إعادة تحميل قاعدة البيانات من Supabase بعد الاسترجاع.
+                await loadData();
+
+                // تحديث الشاشات الحالية بدون الحاجة لإعادة فتح الموقع.
+                currentMeetingDate = document.getElementById('meeting-date').value || currentMeetingDate;
+                if (currentMeetingDate) {
+                    loadAttendanceForDate();
+                }
+
+                renderFamiliesList();
+                renderProfiles();
+                renderTripTable();
+                checkBirthdays();
+                updateNotificationIndicators();
+
+                // لا نمسح اختيار الملف، حتى يمكن الضغط على زر الاسترجاع مرة أخرى
+                // باستخدام نفس ملف JSON بدون الحاجة لاختياره من جديد.
+
+                alert(
+                    `تم استرجاع النسخة الاحتياطية الكاملة بنجاح ✅\n\n` +
+                    `المخدومين والأسر: ${members.length}\n` +
+                    `سجلات الحضور: ${attendance.length}\n` +
+                    `سجلات الرحلات والحجوزات: ${trips.length}\n\n` +
+                    `تمت إعادة تحميل البيانات من الموقع.`
+                );
+            } catch (err) {
+                console.error('Full restore error:', err);
+
+                alert(
+                    '❌ لم يتم استرجاع النسخة الاحتياطية.\n\n' +
+                    'السبب: ' + (err.message || err) + '\n\n' +
+                    'راجع ملف JSON وصلاحيات قاعدة البيانات.'
+                );
+
+                // محاولة إعادة تحميل الحالة الفعلية الموجودة على السيرفر.
+                try {
+                    await loadData();
+                } catch (reloadErr) {
+                    console.error('Reload after restore error:', reloadErr);
+                }
+            }
+        }
+
+        async function clearAllSheetsData() {
+            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كافة شيتات الحضور والرحلات؟")) {
+                await Promise.all([
+                    _supabase.from('attendance').delete().neq('id', 0),
+                    _supabase.from('trips').delete().neq('member_id', '0')
+                ]);
+                alert("تم تصفير جميع الشيتات بنجاح.");
+                await loadData();
+            }
+        }
+    </script>
+</body>
+</html>
