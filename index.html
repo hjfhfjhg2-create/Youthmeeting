@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="نظام الخدمة">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>سجل الحضور والغياب الذكي - كنيسة الأنبا تكلا</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
@@ -1871,38 +1878,334 @@
             downloadCSVFile(`شيت_${getActiveTripKey()}_${Date.now()}.csv`, csv);
         }
 
-        function exportData() {
-            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
-            let dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "sttakla_backup.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
+
+        // ============================================================
+        // النسخ الاحتياطي الكامل والاسترجاع الكامل
+        // يحفظ كل البيانات الموجودة في Supabase:
+        // 1) المخدومين (members)
+        // 2) الحضور والاجتماعات (attendance)
+        // 3) الرحلات والحجوزات والدفعات (trips)
+        // والأسر محفوظة ضمن بيانات المخدومين في حقل family.
+        // ============================================================
+
+        async function exportData() {
+            try {
+                // نقرأ البيانات مباشرة من قاعدة البيانات قبل إنشاء النسخة،
+                // لضمان أن ملف JSON يحتوي على آخر نسخة فعلية وليس مجرد نسخة من الواجهة.
+                const [membersRes, attendanceRes, tripsRes] = await Promise.all([
+                    _supabase.from('members').select('*'),
+                    _supabase.from('attendance').select('*'),
+                    _supabase.from('trips').select('*')
+                ]);
+
+                if (membersRes.error) throw membersRes.error;
+                if (attendanceRes.error) throw attendanceRes.error;
+                if (tripsRes.error) throw tripsRes.error;
+
+                const backup = {
+                    backupVersion: 2,
+                    app: 'sttakla',
+                    createdAt: new Date().toISOString(),
+
+                    // بيانات المخدومين، وتشمل الأسرة وكل بيانات البروفايل.
+                    members: membersRes.data || [],
+
+                    // جميع سجلات الحضور لكل الاجتماعات والتواريخ.
+                    attendance: attendanceRes.data || [],
+
+                    // جميع الرحلات/الفعاليات والحجوزات والمدفوعات والأقساط.
+                    trips: tripsRes.data || [],
+
+                    // نسخة منظمة إضافية من البيانات الحالية للمحافظة على
+                    // نفس شكل db المستخدم داخل الموقع.
+                    dbSnapshot: {
+                        members: membersRes.data || [],
+                        meetings: [...new Set((attendanceRes.data || [])
+                            .map(r => r.meeting_date)
+                            .filter(Boolean))].sort(),
+                        attendanceRecords: {},
+                        tripsData: {}
+                    }
+                };
+
+                // بناء attendanceRecords
+                (attendanceRes.data || []).forEach(record => {
+                    if (!backup.dbSnapshot.attendanceRecords[record.meeting_date]) {
+                        backup.dbSnapshot.attendanceRecords[record.meeting_date] = {};
+                    }
+                    backup.dbSnapshot.attendanceRecords[record.meeting_date][record.member_id] =
+                        record.attend_time;
+                });
+
+                // بناء tripsData
+                (tripsRes.data || []).forEach(t => {
+                    if (!backup.dbSnapshot.tripsData[t.trip_type]) {
+                        backup.dbSnapshot.tripsData[t.trip_type] = {
+                            fee: t.fee || 0,
+                            reservations: {}
+                        };
+                    }
+
+                    if (t.fee > 0 || !backup.dbSnapshot.tripsData[t.trip_type].fee) {
+                        backup.dbSnapshot.tripsData[t.trip_type].fee = t.fee || 0;
+                    }
+
+                    if (t.member_id !== null && t.member_id !== undefined) {
+                        let parsedInst = [];
+                        try {
+                            parsedInst = typeof t.installments === 'string'
+                                ? JSON.parse(t.installments)
+                                : (t.installments || []);
+                        } catch (e) {
+                            parsedInst = [];
+                        }
+
+                        backup.dbSnapshot.tripsData[t.trip_type].reservations[t.member_id] = {
+                            paid: t.paid || 0,
+                            installments: parsedInst
+                        };
+                    }
+                });
+
+                const json = JSON.stringify(backup, null, 2);
+                const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const dlAnchor = document.createElement('a');
+                dlAnchor.href = url;
+                dlAnchor.download = `sttakla_full_backup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+                document.body.appendChild(dlAnchor);
+                dlAnchor.click();
+                dlAnchor.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                alert(
+                    `تم إنشاء نسخة احتياطية كاملة بنجاح ✅
+
+` +
+                    `المخدومين: ${backup.members.length}
+` +
+                    `سجلات الحضور: ${backup.attendance.length}
+` +
+                    `سجلات الرحلات والحجوزات: ${backup.trips.length}
+
+` +
+                    `الملف يحتوي على جميع البيانات ويمكن استرجاعها مرة أخرى.`
+                );
+            } catch (err) {
+                console.error('Backup export error:', err);
+                alert('حدث خطأ أثناء إنشاء النسخة الاحتياطية الكاملة: ' + (err.message || err));
+            }
         }
-        function restoreData() {
-            let fileInput = document.getElementById('backup-file-input');
-            if(!fileInput.files || fileInput.files.length === 0) {
-                alert("برجاء اختيار ملف النسخ الاحتياطي (JSON) أولاً!");
+
+        async function restoreData() {
+            const fileInput = document.getElementById('backup-file-input');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('برجاء اختيار ملف النسخ الاحتياطي (JSON) أولاً!');
                 return;
             }
-            let file = fileInput.files[0];
-            let reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    let parsed = JSON.parse(e.target.result);
-                    if(parsed.members) {
-                        alert("تم استرجاع البيانات بنجاح!");
-                        await loadData();
-                    } else {
-                        alert("ملف غير صالح!");
-                    }
-                } catch(err) {
-                    alert("خطأ في قراءة الملف!");
+
+            const file = fileInput.files[0];
+
+            if (!file.name.toLowerCase().endsWith('.json')) {
+                alert('برجاء اختيار ملف بصيغة JSON فقط!');
+                return;
+            }
+
+            const confirmed = confirm(
+                '⚠️ استرجاع نسخة كاملة\n\n' +
+                'سيتم استبدال البيانات الحالية في الموقع ببيانات الملف المختار، ' +
+                'بما في ذلك:\n' +
+                '• جميع المخدومين والأسر\n' +
+                '• جميع سجلات الحضور والاجتماعات\n' +
+                '• جميع الرحلات والحجوزات والمدفوعات والأقساط\n\n' +
+                'تأكد أنك اخترت ملف النسخة الاحتياطية الصحيح.\n\n' +
+                'هل تريد المتابعة؟'
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const text = await file.text();
+                const parsed = JSON.parse(text);
+
+                // دعم النسخة الجديدة، مع دعم الملف القديم إن وُجد.
+                let members = [];
+                let attendance = [];
+                let trips = [];
+
+                if (Array.isArray(parsed.members)) {
+                    members = parsed.members;
+                } else if (parsed.dbSnapshot && Array.isArray(parsed.dbSnapshot.members)) {
+                    members = parsed.dbSnapshot.members;
                 }
-            };
-            reader.readAsText(file);
+
+                if (Array.isArray(parsed.attendance)) {
+                    attendance = parsed.attendance;
+                }
+
+                if (Array.isArray(parsed.trips)) {
+                    trips = parsed.trips;
+                }
+
+                // لو كان الملف القديم يحتوي dbSnapshot فقط،
+                // نحوله مرة أخرى إلى صفوف Supabase.
+                if (attendance.length === 0 && parsed.dbSnapshot && parsed.dbSnapshot.attendanceRecords) {
+                    Object.entries(parsed.dbSnapshot.attendanceRecords).forEach(([meetingDate, records]) => {
+                        Object.entries(records || {}).forEach(([memberId, attendTime]) => {
+                            attendance.push({
+                                meeting_date: meetingDate,
+                                member_id: memberId,
+                                attend_time: attendTime
+                            });
+                        });
+                    });
+                }
+
+                if (trips.length === 0 && parsed.dbSnapshot && parsed.dbSnapshot.tripsData) {
+                    Object.entries(parsed.dbSnapshot.tripsData).forEach(([tripType, tripObj]) => {
+                        Object.entries((tripObj && tripObj.reservations) || {}).forEach(([memberId, reservation]) => {
+                            trips.push({
+                                trip_type: tripType,
+                                member_id: memberId,
+                                fee: tripObj.fee || 0,
+                                paid: reservation?.paid || 0,
+                                installments: JSON.stringify(reservation?.installments || [])
+                            });
+                        });
+                    });
+                }
+
+                // تحقق أساسي من أن الملف فعلاً نسخة بيانات.
+                if (!Array.isArray(members) || !Array.isArray(attendance) || !Array.isArray(trips)) {
+                    throw new Error('صيغة ملف النسخة الاحتياطية غير صحيحة.');
+                }
+
+                // التأكد أن سجلات الحضور والحجوزات تشير إلى مخدومين موجودين.
+                const memberIds = new Set(members.map(m => String(m.id)));
+
+                const invalidAttendance = attendance.filter(r =>
+                    r.member_id !== null &&
+                    r.member_id !== undefined &&
+                    !memberIds.has(String(r.member_id))
+                );
+
+                const invalidTrips = trips.filter(r =>
+                    r.member_id !== null &&
+                    r.member_id !== undefined &&
+                    !memberIds.has(String(r.member_id))
+                );
+
+                if (invalidAttendance.length > 0 || invalidTrips.length > 0) {
+                    throw new Error(
+                        'النسخة تحتوي على سجلات مرتبطة بمخدومين غير موجودين. لم يتم تغيير أي بيانات.'
+                    );
+                }
+
+                // حذف البيانات الحالية أولاً، ثم إعادة بناءها من النسخة.
+                // نحذف الحضور والرحلات قبل المخدومين لتفادي مشاكل العلاقات.
+                const deleteAttendance = await _supabase
+                    .from('attendance')
+                    .delete()
+                    .not('id', 'is', null);
+
+                if (deleteAttendance.error) throw deleteAttendance.error;
+
+                const deleteTrips = await _supabase
+                    .from('trips')
+                    .delete()
+                    .not('member_id', 'is', null);
+
+                if (deleteTrips.error) throw deleteTrips.error;
+
+                const deleteMembers = await _supabase
+                    .from('members')
+                    .delete()
+                    .not('id', 'is', null);
+
+                if (deleteMembers.error) throw deleteMembers.error;
+
+                // إدخال المخدومين.
+                if (members.length > 0) {
+                    const membersToInsert = members.map(m => ({ ...m }));
+                    const membersInsert = await _supabase
+                        .from('members')
+                        .insert(membersToInsert);
+
+                    if (membersInsert.error) throw membersInsert.error;
+                }
+
+                // إدخال كل سجلات الحضور.
+                if (attendance.length > 0) {
+                    const attendanceToInsert = attendance.map(r => ({
+                        ...r
+                    }));
+
+                    const attendanceInsert = await _supabase
+                        .from('attendance')
+                        .insert(attendanceToInsert);
+
+                    if (attendanceInsert.error) throw attendanceInsert.error;
+                }
+
+                // إدخال كل الرحلات والحجوزات والمدفوعات والأقساط.
+                if (trips.length > 0) {
+                    const tripsToInsert = trips.map(t => ({
+                        ...t
+                    }));
+
+                    const tripsInsert = await _supabase
+                        .from('trips')
+                        .insert(tripsToInsert);
+
+                    if (tripsInsert.error) throw tripsInsert.error;
+                }
+
+                // إعادة تحميل قاعدة البيانات من Supabase بعد الاسترجاع.
+                await loadData();
+
+                // تحديث الشاشات الحالية بدون الحاجة لإعادة فتح الموقع.
+                currentMeetingDate = document.getElementById('meeting-date').value || currentMeetingDate;
+                if (currentMeetingDate) {
+                    loadAttendanceForDate();
+                }
+
+                renderFamiliesList();
+                renderProfiles();
+                renderTripTable();
+                checkBirthdays();
+                updateNotificationIndicators();
+
+                // لا نمسح اختيار الملف، حتى يمكن الضغط على زر الاسترجاع مرة أخرى
+                // باستخدام نفس ملف JSON بدون الحاجة لاختياره من جديد.
+
+                alert(
+                    `تم استرجاع النسخة الاحتياطية الكاملة بنجاح ✅\n\n` +
+                    `المخدومين والأسر: ${members.length}\n` +
+                    `سجلات الحضور: ${attendance.length}\n` +
+                    `سجلات الرحلات والحجوزات: ${trips.length}\n\n` +
+                    `تمت إعادة تحميل البيانات من الموقع.`
+                );
+            } catch (err) {
+                console.error('Full restore error:', err);
+
+                alert(
+                    '❌ لم يتم استرجاع النسخة الاحتياطية.\n\n' +
+                    'السبب: ' + (err.message || err) + '\n\n' +
+                    'راجع ملف JSON وصلاحيات قاعدة البيانات.'
+                );
+
+                // محاولة إعادة تحميل الحالة الفعلية الموجودة على السيرفر.
+                try {
+                    await loadData();
+                } catch (reloadErr) {
+                    console.error('Reload after restore error:', reloadErr);
+                }
+            }
         }
+
         async function clearAllSheetsData() {
             if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كافة شيتات الحضور والرحلات؟")) {
                 await Promise.all([
@@ -1914,5 +2217,6 @@
             }
         }
     </script>
+    <script>if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>
