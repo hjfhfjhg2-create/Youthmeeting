@@ -2972,7 +2972,7 @@ function openMemberDetail(memberId,event){
   });
   const flash=()=>document.querySelectorAll('.logo3d').forEach(l=>{l.classList.remove('shine');void l.offsetWidth;l.classList.add('shine')});
   setTimeout(flash,400);window.flashLogo=flash;
-  let dark=true;try{dark=localStorage.getItem('theme')!=='light'}catch(e){}
+  let dark=false;try{dark=localStorage.getItem('theme')==='dark'}catch(e){}
   if(dark){document.body.classList.add('dark-mode');document.getElementById('theme-toggle-btn').innerText='☀️ الوضع الساطع'}
   const _t=toggleTheme;toggleTheme=function(){_t();try{localStorage.setItem('theme',document.body.classList.contains('dark-mode')?'dark':'light')}catch(e){}};
   addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay').forEach(m=>{if(m.style.display==='flex'&&m.id!=='qr-scanner-modal')m.style.display='none'})});
