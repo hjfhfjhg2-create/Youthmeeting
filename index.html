@@ -195,6 +195,8 @@
             header h2 { font-size: 19px; }
         }
         
+        body.restoring #login-section{display:none!important}
+        body.in-app #logout-btn{display:inline-flex!important}
         #login-section {
             max-width: 440px;
             margin: 60px auto;
@@ -954,7 +956,7 @@ header{padding-top:72px!important}body.in-app header{padding-top:62px!important}
 .toast{background:#14213d}
 </style>
 <style id="robot-v2">
-/* ===== تكلا بوت: روبوت مساعد كيوت لكل تبويب ===== */
+/* ===== كوجي بوت: روبوت مساعد كيوت لكل تبويب ===== */
 .rb-wrap{--bd:color-mix(in srgb,var(--c) 45%,transparent);display:flex;align-items:center;gap:14px;margin-bottom:22px;position:relative}
 .rb-btn{all:unset;box-sizing:border-box;position:relative;width:84px;height:98px;flex-shrink:0;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent}
 .rb-btn:focus-visible{outline:3px solid var(--c);outline-offset:4px;border-radius:18px}
@@ -1184,6 +1186,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 #login-section .pw-eye:hover{color:var(--pink)}
 #login-section>button[onclick="loginDirect()"]{height:52px;margin-top:6px!important;border-radius:14px!important;font-size:16px;font-weight:800;background:linear-gradient(120deg,#1d6fb8 0%,#6a5bd6 55%,#e0407f 100%)!important;box-shadow:0 16px 28px -14px rgba(224,64,127,.7)!important}
 @media(prefers-reduced-motion:reduce){.logo3d::before{animation:none}}
+
+/* أزرار الأعلى أصغر */
+.top-utility-bar .utility-btn{padding:3px 10px!important;font-size:11px!important;min-height:0!important;height:auto!important;line-height:1.4!important;width:auto!important;border-radius:14px!important;font-weight:700!important;margin:0!important}
 </style>
 </head>
 <body>
@@ -1192,16 +1197,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
     <div class="top-utility-bar">
         <button class="utility-btn" onclick="toggleTheme()" id="theme-toggle-btn">🌙 الوضع الداكن</button>
-        <!-- ساعة الداشبورد العصرية -->
-        <div class="dashboard-clock-card">
-            <div class="clock-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-            </div>
-            <div class="clock-display" id="liveClock">00:00:00</div>
-        </div>
+        <button class="utility-btn" id="logout-btn" onclick="logoutUser()" style="display:none">🚪 تسجيل خروج</button>
     </div>
 
     <header>
@@ -1266,7 +1262,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div class="modal-body" id="help-modal-body" style="--c:#6366f1">
             <div class="hm-top">
                 <div id="hm-robot"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">💡</i></span></div>
-                <div class="hm-title"><small>تكلا بوت بيشرحلك</small><h3 id="help-modal-title">مساعدة الشرح</h3></div>
+                <div class="hm-title"><small>كوجي بوت بيشرحلك</small><h3 id="help-modal-title">مساعدة الشرح</h3></div>
             </div>
             <div id="help-modal-content"></div>
             <div class="hm-actions">
@@ -1312,7 +1308,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="add-member" class="tab-content active">
             <div class="rb-wrap" style="--c:#6366f1">
                 <button class="rb-btn" onclick="openHelp('add-member')" aria-label="شرح تبويب إضافة مخدوم"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">➕</i></span></button>
-                <div class="rb-say" onclick="openHelp('add-member')"><b>تكلا بوت 🤖 · شرح «إضافة مخدوم»</b><span class="rb-line" data-text="هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.">هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('add-member')"><b>كوجي بوت 🤖 · شرح «إضافة مخدوم»</b><span class="rb-line" data-text="هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.">هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
@@ -1324,19 +1320,21 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
             </div>
             <div class="input-group">
                 <label>النوع (لتصنيف المخدوم ضمن أسر الشباب أو الشابات) *</label>
-                <select id="m-gender" required onchange="clearInputError(this)">
+                <select id="m-gender" required onchange="clearInputError(this); onGenderChange()">
                     <option value="شاب">شاب (أسر الشباب)</option>
                     <option value="شابة">شابة (أسر الشابات)</option>
                 </select>
             </div>
-            <div class="input-group">
+            <div class="input-group autocomplete-container">
                 <label>المرحلة الجامعية / السنة *</label>
-                <input type="text" id="m-stage" placeholder="مثال: فرقة أولى تجارة" required oninput="clearInputError(this)">
+                <input type="text" id="m-stage" placeholder="اختار المرحلة أو اكتبها" autocomplete="off" required oninput="clearInputError(this); showStageSuggest()" onfocus="showStageSuggest()" onclick="showStageSuggest()">
+                <div id="m-stage-results" class="autocomplete-results" style="display:none"></div>
             </div>
             
             <div class="input-group autocomplete-container">
                 <label>اسم الأسرة *</label>
-                <input type="text" id="m-family" placeholder="مثال: أسرة مارجرجس أو اكتب أسرة جديدة..." autocomplete="off" required oninput="clearInputError(this)">
+                <input type="text" id="m-family" placeholder="مثال: أسرة مارجرجس أو اكتب أسرة جديدة..." autocomplete="off" required oninput="clearInputError(this); showFamilySuggest()" onfocus="showFamilySuggest()" onclick="showFamilySuggest()">
+                <div id="m-family-results" class="autocomplete-results" style="display:none"></div>
             </div>
 
             <div class="input-group">
@@ -1370,7 +1368,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="attendance" class="tab-content">
             <div class="rb-wrap" style="--c:#0ea5e9">
                 <button class="rb-btn" onclick="openHelp('attendance')" aria-label="شرح تبويب شيت الحضور"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">📋</i></span></button>
-                <div class="rb-say" onclick="openHelp('attendance')"><b>تكلا بوت 🤖 · شرح «شيت الحضور»</b><span class="rb-line" data-text="اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.">اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('attendance')"><b>كوجي بوت 🤖 · شرح «شيت الحضور»</b><span class="rb-line" data-text="اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.">اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>تسجيل واسترجاع حضور الاجتماع</h3>
@@ -1427,7 +1425,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="visitation" class="tab-content">
             <div class="rb-wrap" style="--c:#ef4444">
                 <button class="rb-btn" onclick="openHelp('visitation')" aria-label="شرح تبويب الافتقاد"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">📞</i></span></button>
-                <div class="rb-say" onclick="openHelp('visitation')"><b>تكلا بوت 🤖 · شرح «الافتقاد»</b><span class="rb-line" data-text="أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.">أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('visitation')"><b>كوجي بوت 🤖 · شرح «الافتقاد»</b><span class="rb-line" data-text="أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.">أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>متابعة الغياب والافتقاد التلقائي 📞</h3>
@@ -1455,7 +1453,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="committed" class="tab-content">
             <div class="rb-wrap" style="--c:#f59e0b">
                 <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب الملتزمين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
-                <div class="rb-say" onclick="openHelp('committed')"><b>تكلا بوت 🤖 · شرح «الملتزمين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('committed')"><b>كوجي بوت 🤖 · شرح «الملتزمين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
@@ -1470,7 +1468,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="bonus" class="tab-content">
             <div class="rb-wrap" style="--c:#a855f7">
                 <button class="rb-btn" onclick="openHelp('bonus')" aria-label="شرح تبويب البونص"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🎁</i></span></button>
-                <div class="rb-say" onclick="openHelp('bonus')"><b>تكلا بوت 🤖 · شرح «البونص»</b><span class="rb-line" data-text="إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.">إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('bonus')"><b>كوجي بوت 🤖 · شرح «البونص»</b><span class="rb-line" data-text="إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.">إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>البونص 🎁</h3>
@@ -1486,7 +1484,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="families" class="tab-content">
             <div class="rb-wrap" style="--c:#10b981">
                 <button class="rb-btn" onclick="openHelp('families')" aria-label="شرح تبويب الأسر"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">👥</i></span></button>
-                <div class="rb-say" onclick="openHelp('families')"><b>تكلا بوت 🤖 · شرح «الأسر»</b><span class="rb-line" data-text="كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.">كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('families')"><b>كوجي بوت 🤖 · شرح «الأسر»</b><span class="rb-line" data-text="كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.">كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div id="families-main-view">
@@ -1540,6 +1538,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
                     <button onclick="backToFamiliesList()" style="background: var(--text-muted); padding: 10px 20px; font-size: 13.5px; box-shadow: 0 5px 0 #475569;">⬅️ رجوع لقائمة الأسر</button>
                     <div id="family-detail-header-text" style="text-align: right; flex-grow: 1;"></div>
                     <button class="btn-success" id="btn-add-to-fam" onclick="">➕ إضافة مخدوم للأسرة</button>
+                    <button class="btn-edit" id="btn-rename-fam" onclick="renameCurrentFamily()">✏️ تعديل اسم الأسرة</button>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -1554,7 +1553,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="trips" class="tab-content">
             <div class="rb-wrap" style="--c:#f97316">
                 <button class="rb-btn" onclick="openHelp('trips')" aria-label="شرح تبويب الرحلات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🚌</i></span></button>
-                <div class="rb-say" onclick="openHelp('trips')"><b>تكلا بوت 🤖 · شرح «الرحلات»</b><span class="rb-line" data-text="احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.">احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('trips')"><b>كوجي بوت 🤖 · شرح «الرحلات»</b><span class="rb-line" data-text="احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.">احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>نظام حجز الرحلات والفعاليات الذكي</h3>
@@ -1628,7 +1627,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="profiles" class="tab-content">
             <div class="rb-wrap" style="--c:#3b82f6">
                 <button class="rb-btn" onclick="openHelp('profiles')" aria-label="شرح تبويب البحث"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🔍</i></span></button>
-                <div class="rb-say" onclick="openHelp('profiles')"><b>تكلا بوت 🤖 · شرح «البحث»</b><span class="rb-line" data-text="دوّر على أي مخدوم وافتح ملفه الكامل.">دوّر على أي مخدوم وافتح ملفه الكامل.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('profiles')"><b>كوجي بوت 🤖 · شرح «البحث»</b><span class="rb-line" data-text="دوّر على أي مخدوم وافتح ملفه الكامل.">دوّر على أي مخدوم وافتح ملفه الكامل.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:24px;">
@@ -1655,7 +1654,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="birthdays" class="tab-content">
             <div class="rb-wrap" style="--c:#ec4899">
                 <button class="rb-btn" onclick="openHelp('birthdays')" aria-label="شرح تبويب أعياد الميلاد"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🎂</i></span></button>
-                <div class="rb-say" onclick="openHelp('birthdays')"><b>تكلا بوت 🤖 · شرح «أعياد الميلاد»</b><span class="rb-line" data-text="مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!">مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('birthdays')"><b>كوجي بوت 🤖 · شرح «أعياد الميلاد»</b><span class="rb-line" data-text="مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!">مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>أعياد الميلاد 🎂</h3>
@@ -1666,7 +1665,7 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <div id="settings" class="tab-content">
             <div class="rb-wrap" style="--c:#64748b">
                 <button class="rb-btn" onclick="openHelp('settings')" aria-label="شرح تبويب الإعدادات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">⚙️</i></span></button>
-                <div class="rb-say" onclick="openHelp('settings')"><b>تكلا بوت 🤖 · شرح «الإعدادات»</b><span class="rb-line" data-text="نسخة احتياطية، تقارير PDF، وتصفير الشيتات.">نسخة احتياطية، تقارير PDF، وتصفير الشيتات.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <div class="rb-say" onclick="openHelp('settings')"><b>كوجي بوت 🤖 · شرح «الإعدادات»</b><span class="rb-line" data-text="نسخة احتياطية، تقارير PDF، وتصفير الشيتات.">نسخة احتياطية، تقارير PDF، وتصفير الشيتات.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>إدارة البيانات والإعدادات</h3>
@@ -1754,19 +1753,21 @@ notify pgrst, 'reload schema';</pre>
     <script>
         const SUPABASE_URL = 'https://uyoqcwtlxfuzvtpbfvml.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_RxDd9gplG9B2Fn_OxVRbBw_1l2Uy84E';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        document.body.classList.add('restoring');
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storage: window.sessionStorage } });
         const OTP_SECURITY_CODE = '2027';
 
         let db = { members: [], meetings: [], attendanceRecords: {}, tripsData: {} };
         let currentMeetingDate = '';
         let currentAttendees = [];
         let currentSelectedFamilyName = '';
+        let currentSelectedFamilyGender = 'شاب';
         let currentFamilySearchTerm = '';
         let html5QrCode = null;
         let activeQRTarget = '';
         let activeQRMemberName = '';
 
-        // شرح كل تبويب بواسطة الروبوت (تكلا بوت)
+        // شرح كل تبويب بواسطة الروبوت (كوجي بوت)
         const tabHelpData = {
             'add-member': {
                 title: 'إضافة مخدوم', icon: '➕', color: '#6366f1',
@@ -3043,6 +3044,7 @@ notify pgrst, 'reload schema';</pre>
 
         function openFamilyDetail(familyName, gender) {
             currentSelectedFamilyName = familyName;
+            currentSelectedFamilyGender = gender;
             currentFamilySearchTerm = '';
             document.getElementById('fam-search-input').value = '';
             document.getElementById('families-main-view').style.display = 'none';
@@ -4251,7 +4253,131 @@ notify pgrst, 'reload schema';</pre>
                 await loadData();
             }
         }
-    </script>
+    
+/* استرجاع الجلسة بعد الريفريش من غير ما يطلب دخول تاني */
+
+
+/* اقتراحات الأسرة والمرحلة في تسجيل المخدوم */
+const STAGE_FIXED = ['أولى جامعة','تانية جامعة','ثالثة جامعة','رابعة جامعة','خامسة جامعة','كلية'];
+const _normS = x => String(x||'').trim().replace(/\s+/g,' ');
+const _escS = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+let _skipSuggest = false;
+
+function familiesForGender(g){
+  const isG = x => x === 'شابة';
+  const set = {};
+  (db.members||[]).forEach(m=>{
+    if(!m.family || isG(m.gender)!==isG(g)) return;
+    set[_normS(m.family)] = 1;
+  });
+  return Object.keys(set).sort((a,b)=>a.localeCompare(b,'ar'));
+}
+function customStages(){
+  const set = {};
+  (db.members||[]).forEach(m=>{
+    const v = _normS(m.stage);
+    if(v && !STAGE_FIXED.includes(v) && v!=='أخرى') set[v]=1;
+  });
+  return Object.keys(set).sort((a,b)=>a.localeCompare(b,'ar'));
+}
+function _renderSuggest(inputId, boxId, options, newLabel){
+  const box = document.getElementById(boxId), inp = document.getElementById(inputId);
+  if(!box || !inp) return;
+  const typed = _normS(inp.value);
+  const list = (!typed || options.includes(typed)) ? options : options.filter(f=>f.includes(typed));
+  let html = list.map(f=>`<div class="autocomplete-item" data-val="${_escS(f)}">${_escS(f)}</div>`).join('');
+  if(typed && !options.includes(typed)) html += `<div class="autocomplete-item" data-val="${_escS(typed)}">➕ ${newLabel}: ${_escS(typed)}</div>`;
+  html += `<div class="autocomplete-item" data-other="1" style="font-weight:800">✍️ أخرى (اكتب بنفسك)</div>`;
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+function showFamilySuggest(){
+  if(_skipSuggest) return;
+  _renderSuggest('m-family','m-family-results', familiesForGender(document.getElementById('m-gender').value), 'أسرة جديدة');
+}
+function showStageSuggest(){
+  if(_skipSuggest) return;
+  _renderSuggest('m-stage','m-stage-results', STAGE_FIXED.concat(customStages()), 'مرحلة جديدة');
+}
+function hideFamilySuggest(){ ['m-family-results','m-stage-results'].forEach(id=>{ const b=document.getElementById(id); if(b) b.style.display='none'; }); }
+function onGenderChange(){
+  const inp = document.getElementById('m-family');
+  const g = document.getElementById('m-gender').value;
+  if(inp && _normS(inp.value) && !familiesForGender(g).includes(_normS(inp.value))){
+    const other = g==='شابة' ? 'شاب' : 'شابة';
+    if(familiesForGender(other).includes(_normS(inp.value))) inp.value = '';
+  }
+  hideFamilySuggest();
+}
+document.addEventListener('mousedown', function(e){
+  const item = e.target.closest && e.target.closest('#m-family-results .autocomplete-item, #m-stage-results .autocomplete-item');
+  if(item){
+    e.preventDefault();
+    const isStage = !!item.closest('#m-stage-results');
+    const inp = document.getElementById(isStage ? 'm-stage' : 'm-family');
+    if(item.getAttribute('data-other')){
+      inp.value = '';
+      hideFamilySuggest();
+      _skipSuggest = true;
+      inp.focus();
+      setTimeout(()=>{ _skipSuggest = false; }, 0);
+      inp.placeholder = isStage ? 'اكتب المرحلة اللي عايزها...' : 'اكتب اسم الأسرة الجديدة...';
+      return;
+    }
+    inp.value = item.getAttribute('data-val');
+    clearInputError(inp);
+    hideFamilySuggest();
+    return;
+  }
+  if(!e.target.closest || !e.target.closest('#m-family, #m-stage')) hideFamilySuggest();
+});
+
+async function renameCurrentFamily(){
+  const oldName = currentSelectedFamilyName;
+  const isG = currentSelectedFamilyGender === 'شابة';
+  const norm = x => String(x||'').trim().replace(/\s+/g,' ');
+  const inFam = db.members.filter(m => (m.gender==='شابة')===isG && (norm(m.family)||'أسرة عامة')===norm(oldName));
+  if(!inFam.length){ alert('الأسرة مفيهاش مخدومين.'); return; }
+  let newName = prompt('اكتب الاسم الجديد للأسرة:', oldName);
+  if(newName===null) return;
+  newName = norm(newName);
+  if(!newName){ alert('لازم تكتب اسم للأسرة.'); return; }
+  if(newName===norm(oldName)) return;
+  const exists = db.members.some(m => (m.gender==='شابة')===isG && norm(m.family)===newName);
+  let msg = `هيتغير اسم الأسرة من "${oldName}" إلى "${newName}" لـ ${inFam.length} مخدوم.`;
+  if(exists) msg += `\n\nتنبيه: فيه أسرة بنفس الاسم ده، والأعضاء هيتدمجوا معاها.`;
+  if(!confirm(msg+'\n\nتكمل؟')) return;
+  const ids = inFam.map(m=>m.id);
+  const r = await _supabase.from('members').update({ family: newName }).in('id', ids).select('id');
+  if(r.error){ alert('تعذر تعديل الاسم: '+r.error.message); return; }
+  if(!r.data || r.data.length < ids.length) alert('اتحدّث '+(r.data?r.data.length:0)+' من '+ids.length+' مخدوم بس. راجع صلاحيات التعديل في قاعدة البيانات.');
+  if(typeof toast==='function') toast('تم تعديل اسم الأسرة ✅');
+  await loadData();
+  openFamilyDetail(newName, currentSelectedFamilyGender);
+}
+/* الجلسة بتتخزن في التبويب بس: ريفريش = يفضل داخل، فتح اللينك من جديد = تسجيل دخول */
+try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+async function logoutUser(){
+  try{ await _supabase.auth.signOut(); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  location.reload();
+}
+(async function restoreSession(){
+  try{
+    const { data } = await _supabase.auth.getSession();
+    if (data && data.session) {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('app-section').style.display = 'block';
+      document.body.classList.add('in-app');
+      setTimeout(()=>window.flashLogo&&window.flashLogo(),150);
+      const md = document.getElementById('meeting-date');
+      if (md && !md.value) md.value = new Date().toISOString().split('T')[0];
+      await loadData();
+    }
+  }catch(e){ console.error('restore session failed', e); }
+  finally{ document.body.classList.remove('restoring'); }
+})();
+</script>
 
 <script>
 /* ===== طبقة التحسينات: بيانات + بونص + بحث + بروفايل ===== */
@@ -4471,7 +4597,7 @@ function openMemberDetail(memberId,event){
 })();
 </script>
 <script>
-/* تكلا بوت: الروبوت بيكتب جملة التبويب لما تفتحه */
+/* كوجي بوت: الروبوت بيكتب جملة التبويب لما تفتحه */
 (function(){
   const timers={};
   window.rbSpeak=function(tabId){
