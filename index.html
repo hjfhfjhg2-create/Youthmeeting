@@ -1338,6 +1338,27 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 .dash-hero .kpi:hover,.dash-hero .kpi.act{border-color:#ffd56e!important;background:rgba(255,255,255,.22)!important}
 @media(max-width:380px){.dash-hero .kpi{padding:10px 8px;gap:6px}.dash-hero .kpi b{font-size:17px}}
 </style>
+<style>
+.hm-clock{font:800 40px/1 'Noto Kufi Arabic','Cairo',sans-serif;letter-spacing:1px;text-shadow:0 4px 18px rgba(0,0,0,.25)}
+.hm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+@media(max-width:800px){.hm-grid{grid-template-columns:repeat(2,1fr)}.hm-clock{font-size:30px}}
+.hm-tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--border);color:var(--text);transition:transform .15s,box-shadow .15s,border-color .15s}
+.hm-tile:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--k)}
+.hm-tile:hover,.hm-tile:focus-visible{transform:translateY(-3px);border-color:var(--k);box-shadow:0 12px 24px -14px var(--k)}
+.hm-tile:active{transform:scale(.96)}
+.hm-tile i{font-style:normal;font-size:26px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--k) 16%,transparent);margin-bottom:6px}
+.hm-tile b{font:800 14px 'Noto Kufi Arabic','Cairo',sans-serif}
+.hm-tile span{font-size:11.5px;font-weight:700;color:var(--text-muted)}
+.dh-msg{cursor:pointer;display:block!important;animation:none!important;transition:opacity .25s;line-height:1.9;margin-top:10px}
+.dh-msg .vs-h{display:block;font-size:11px;font-weight:800;color:#ffe9a8;letter-spacing:.5px;margin-bottom:2px}
+.dh-msg .vs-t{display:block;font-size:12px;font-weight:600;line-height:1.8}
+.dh-msg .vs-r{display:block;font-size:10.5px;opacity:.8;margin-top:2px}
+.art-clock{flex:0 0 auto;text-align:center;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+.art-clock svg{width:112px;height:112px;display:block}
+#ac-h,#ac-m,#ac-s{transition:transform .35s cubic-bezier(.4,2.2,.5,1)}
+.ac-dig{font:800 12px 'Noto Kufi Arabic','Cairo',sans-serif;color:#ffe9a8;letter-spacing:1.5px;margin-top:2px}
+@media(max-width:800px){.art-clock svg{width:92px;height:92px}}
+</style>
 </head>
 <body>
 <div class="bg-logo"></div>
@@ -1422,19 +1443,13 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
     <!-- واجهة التطبيق الرئيسية -->
     <div id="app-section" class="container">
-        <section id="dash" aria-label="لوحة المتابعة">
+        <section id="dash" aria-label="الرئيسية">
             <div class="dash-hero">
                 <div class="dh-top">
-                    <div class="dh-l"><h2 class="dh-hi" id="dh-hi">أهلاً بيك</h2><div class="dh-date" id="dh-date"></div><div class="dh-msg" id="dh-msg"></div></div>
-                    <div class="dh-ring" id="dh-ring"></div>
+                    <div class="dh-l"><h2 class="dh-hi" id="dh-hi">أهلاً بيك</h2><div class="dh-date" id="dh-date"></div><div class="dh-msg" id="dh-msg" role="button" tabindex="0" title="اضغط لرسالة جديدة"></div></div>
+                    <div class="art-clock" dir="ltr" aria-label="الساعة"><svg viewBox="0 0 120 120" id="ac-svg"><defs><linearGradient id="acg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".5" stop-color="#d9a441"/><stop offset="1" stop-color="#fff2c4"/></linearGradient><radialGradient id="acf" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></radialGradient></defs><circle cx="60" cy="60" r="57" fill="none" stroke="url(#acg)" stroke-width="2.6"/><circle cx="60" cy="60" r="52" fill="url(#acf)" stroke="rgba(255,255,255,.28)" stroke-width=".8"/><g id="ac-ticks"></g><g id="ac-nums" fill="#ffe9a8" font-size="9" font-weight="800" text-anchor="middle" font-family="Noto Kufi Arabic,Cairo,sans-serif"><text x="60" y="22">١٢</text><text x="98" y="63">٣</text><text x="60" y="102">٦</text><text x="22" y="63">٩</text></g><text x="60" y="44" text-anchor="middle" font-size="9" fill="#ffe9a8" opacity=".9">✝</text><line id="ac-h" x1="60" y1="60" x2="60" y2="35" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><line id="ac-m" x1="60" y1="60" x2="60" y2="22" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><line id="ac-s" x1="60" y1="68" x2="60" y2="19" stroke="#ff5c9a" stroke-width="1.1" stroke-linecap="round"/><circle cx="60" cy="60" r="3.6" fill="url(#acg)"/><circle cx="60" cy="60" r="1.4" fill="#0f3d6e"/></svg><div class="ac-dig" id="hm-clock">--:--</div></div>
                 </div>
-                <div class="dash-kpis" id="dash-kpis"></div>
-                <div class="dh-chips" id="dh-chips"></div>
-                <div class="dh-bars" id="dh-bars"></div>
-                <div class="dh-detail" id="dh-detail"></div>
             </div>
-            <div id="dash-panel"></div>
-            <div class="dash-cards" id="dash-cards"></div>
         </section>
 
         <div class="nav-tabs">
@@ -4677,163 +4692,43 @@ function openMemberDetail(memberId,event){
 </script>
 <script>
 (function(){
-  const $ = id => document.getElementById(id);
-  let range = 8, open = null, tm = null, animated = false, lastPct = null, celebrated = false, ctx = null;
-  const att = (d,m) => ((db.attendanceRecords||{})[d]||{})[m.id];
-  const elig = d => (db.members||[]).filter(m => att(d,m) || absenceCounts(m,d));
-  const stat = d => { const e = elig(d), a = e.filter(m=>att(d,m)); return {a:a.length, n:e.length, p:e.length?Math.round(a.length/e.length*100):0, e, att:a}; };
-  const isG = m => m.gender === 'شابة';
-  const col = p => p>=75 ? '#10b981' : p>=50 ? '#f59e0b' : '#ef4444';
-  const fdate = d => { const q=String(d).split('-'); return new Date(+q[0],+q[1]-1,+q[2]).toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'}); };
-  const E = t => (typeof esc==='function') ? esc(t) : String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const num = n => '<span class="cu" data-to="'+n+'">'+(animated?n:0)+'</span>';
-  const streak = (m, mt) => { let n=0; for(let i=mt.length-1;i>=0;i--){ if(att(mt[i],m)) n++; else break; } return n; };
-  const chip = (m,x) => '<span class="pchip'+(x?' x':isG(m)?' g':'')+'" onclick="event.stopPropagation();openMemberDetail('+m.id+')">'+E(m.name)+'</span>';
-  const chips = (arr,x) => arr.length ? '<div class="pchips">'+arr.map(m=>chip(m,x)).join('')+'</div>' : '<div class="dc-empty">لا أحد</div>';
-  const prow = (m,sub) => '<div class="pr" onclick="openMemberDetail('+m.id+')"><span class="av'+(isG(m)?' g':'')+'">'+E((m.name||'?').trim()[0])+'</span><div class="pi"><b>'+E(m.name)+'</b><small>'+E(sub||'')+'</small></div>'+(m.phone?'<a class="ph" href="tel:'+E(m.phone)+'" onclick="event.stopPropagation()">📞</a>':'')+'</div>';
-  const mini = (nm,p,c,vl) => '<div class="mini"><span class="nm">'+nm+'</span><span class="tk"><i style="width:'+p+'%;background:'+c+'"></i></span><span class="vl">'+vl+'</span></div>';
-
-  function confetti(){
-    const cs=['#ff5c9a','#ffd166','#4cc9f0','#7b5cd6','#10b981','#fff'];
-    for(let i=0;i<34;i++){ const e=document.createElement('i'); e.className='cf'; e.style.left=Math.random()*100+'vw'; e.style.background=cs[i%cs.length]; e.style.animationDelay=(Math.random()*.8)+'s'; e.style.animationDuration=(2+Math.random()*1.6)+'s'; document.body.appendChild(e); setTimeout(()=>e.remove(),4500); }
+  const $=id=>document.getElementById(id);
+  const V=[
+   ['لأَنَّهُ هكَذَا أَحَبَّ اللهُ الْعَالَمَ حَتَّى بَذَلَ ابْنَهُ الْوَحِيدَ، لِكَيْ لاَ يَهْلِكَ كُلُّ مَنْ يُؤْمِنُ بِهِ، بَلْ تَكُونُ لَهُ الْحَيَاةُ الأَبَدِيَّةُ.','يوحنا 3: 16'],
+   ['أَسْتَطِيعُ كُلَّ شَيْءٍ فِي الْمَسِيحِ الَّذِي يُقَوِّينِي.','فيلبي 4: 13'],
+   ['الرَّبُّ رَاعِيَّ فَلاَ يُعْوِزُنِي شَيْءٌ.','مزمور 23: 1'],
+   ['تَعَالَوْا إِلَيَّ يَا جَمِيعَ الْمُتْعَبِينَ وَالثَّقِيلِي الأَحْمَالِ، وَأَنَا أُرِيحُكُمْ.','متى 11: 28'],
+   ['تَوَكَّلْ عَلَى الرَّبِّ بِكُلِّ قَلْبِكَ، وَعَلَى فَهْمِكَ لاَ تَعْتَمِدْ.','أمثال 3: 5'],
+   ['لاَ تَخَفْ، لأَنِّي مَعَكَ. لاَ تَتَلَفَّتْ، لأَنِّي إِلهُكَ. قَدْ أَيَّدْتُكَ وَأَعَنْتُكَ وَعَضَدْتُكَ بِيَمِينِ بِرِّي.','إشعياء 41: 10'],
+   ['وَهَا أَنَا مَعَكُمْ كُلَّ الأَيَّامِ إِلَى انْقِضَاءِ الدَّهْرِ.','متى 28: 20'],
+   ['أَمَّا الآنَ فَيَثْبُتُ: الإِيمَانُ وَالرَّجَاءُ وَالْمَحَبَّةُ، هذِهِ الثَّلاَثَةُ، وَلكِنَّ أَعْظَمَهُنَّ الْمَحَبَّةُ.','1 كورنثوس 13: 13'],
+   ['فَلاَ نَفْشَلْ فِي عَمَلِ الْخَيْرِ، لأَنَّنَا سَنَحْصُدُ فِي وَقْتِهِ إِنْ كُنَّا لاَ نَكِلُّ.','غلاطية 6: 9'],
+   ['لاَ يَسْتَهِنْ أَحَدٌ بِحَدَاثَتِكَ، بَلْ كُنْ قُدْوَةً لِلْمُؤْمِنِينَ فِي الْكَلاَمِ، فِي التَّصَرُّفِ، فِي الْمَحَبَّةِ.','1 تيموثاوس 4: 12'],
+   ['رأيتُ فخاخَ إبليسَ منتشرةً على الأرض، فقلتُ: مَنْ يستطيعُ أن ينجوَ منها؟ فسمعتُ صوتًا يقول: التواضع.','القديس الأنبا أنطونيوس'],
+   ['اجلسْ في قلايتِكَ، وقلايتُكَ تعلّمُكَ كلَّ شيء.','القديس الأنبا موسى الأسود'],
+   ['تجسّدَ كلمةُ اللهِ لكي نصيرَ نحنُ متألّهين.','البابا أثناسيوس الرسولي']
+  ];
+  let vi=Math.floor(Math.random()*V.length), vt=null;
+  function tick(){
+    const d=new Date();
+    const c=$('hm-clock'); if(c) c.textContent=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const S=d.getSeconds()+d.getMilliseconds()/1000, M=d.getMinutes()+S/60, H=(d.getHours()%12)+M/60;
+    const rot=(id,deg)=>{const e=$(id); if(e) e.setAttribute('transform','rotate('+deg+' 60 60)');};
+    rot('ac-h',H*30); rot('ac-m',M*6); rot('ac-s',Math.floor(S)*6);
+    const dt=$('dh-date'); if(dt) dt.textContent=d.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const h=d.getHours(), hi=$('dh-hi');
+    if(hi) hi.textContent=(h<5||h>=18?'مساء الخير':'صباح الخير')+' 👋';
   }
-
-  function build(key){
-    const c = ctx; if(!c) return null;
-    const {ms,mt,last,L,bds,strk,absentList,boys,girls} = c;
-    if(key.indexOf('meet:')===0){
-      const d = key.slice(5), st = stat(d), ab = st.e.filter(m=>!att(d,m));
-      return {t:'📅 '+fdate(d)+' — '+st.p+'%', b:'<div class="dp-s">✅ حضروا ('+st.a+')</div>'+chips(st.att)+'<div class="dp-s">❌ غابوا ('+ab.length+')</div>'+chips(ab,1)};
-    }
-    if(key==='members'){
-      const fam={}; ms.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); fam[f]=(fam[f]||0)+1;});
-      const fl = Object.keys(fam).sort((a,b)=>fam[b]-fam[a]);
-      const mx = fl.length?fam[fl[0]]:1;
-      const newest = ms.filter(m=>Number(m.id)>1e12).sort((a,b)=>b.id-a.id).slice(0,4);
-      return {t:'👥 المخدومين ('+ms.length+')', b:mini('👦 شباب',ms.length?Math.round(boys/ms.length*100):0,'#1d6fb8',boys)+mini('👧 شابات',ms.length?Math.round(girls/ms.length*100):0,'#e0407f',girls)+
-        '<div class="dp-s">🏠 الأسر ('+fl.length+')</div>'+fl.map(f=>mini(E(f).slice(0,14),Math.round(fam[f]/mx*100),'#7b5cd6',fam[f])).join('')+
-        (newest.length?'<div class="dp-s">🆕 آخر المسجلين</div>'+newest.map(m=>prow(m,m.family||'')).join(''):'')};
-    }
-    if(key==='present'){
-      if(!L) return {t:'📋 حضور آخر اجتماع', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
-      const ab = L.e.filter(m=>!att(last,m));
-      const by=L.e.filter(m=>!isG(m)), gy=L.e.filter(isG);
-      const bp=by.length?Math.round(by.filter(m=>att(last,m)).length/by.length*100):0, gp=gy.length?Math.round(gy.filter(m=>att(last,m)).length/gy.length*100):0;
-      const fam={}; L.e.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); (fam[f]=fam[f]||{a:0,n:0}).n++; if(att(last,m)) fam[f].a++;});
-      const fl=Object.keys(fam).filter(f=>fam[f].n>=2).map(f=>({f,p:Math.round(fam[f].a/fam[f].n*100),a:fam[f].a,n:fam[f].n})).sort((x,y)=>y.p-x.p||y.n-x.n).slice(0,5);
-      return {t:'📋 '+fdate(last)+' — '+L.p+'%', b:mini('👦 شباب',bp,'#1d6fb8',bp+'%')+mini('👧 شابات',gp,'#e0407f',gp+'%')+
-        (fl.length?'<div class="dp-s">🏅 أنشط الأسر</div>'+fl.map(x=>mini(E(x.f).slice(0,14),x.p,col(x.p),x.a+'/'+x.n)).join(''):'')+
-        '<div class="dp-s">✅ حضروا ('+L.a+')</div>'+chips(L.att)+'<div class="dp-s">❌ غابوا ('+ab.length+')</div>'+chips(ab,1)};
-    }
-    if(key==='avg'){
-      const rec = mt.slice(-8).reverse();
-      return {t:'📈 آخر '+rec.length+' اجتماعات', b: rec.length ? rec.map(d=>{const p=stat(d).p; return mini(d.slice(5).replace('-','/'),p,col(p),p+'%');}).join('') : '<div class="dc-empty">لسه مفيش اجتماعات</div>'};
-    }
-    if(key==='absent'){
-      return {t:'📞 محتاجين افتقاد ('+absentList.length+')', b: absentList.length ? absentList.map(x=>prow(x.m,'غاب '+x.n+(x.n===1?' اجتماع':' اجتماعات')+' ورا بعض'+(x.m.address?' · '+x.m.address:''))).join('') : '<div class="dc-empty">الكل حاضر، ما شاء الله 🎉</div>'};
-    }
-    if(key==='bday'){
-      const dm = bd => { const q=String(bd).split('-'); return q[2]+'/'+q[1]; };
-      return {t:'🎂 أعياد الميلاد الجاية', b: bds.length ? bds.slice(0,10).map(x=>prow(x.m,dm(x.m.birthdate)+' · '+(x.d===0?'النهارده 🎉':x.d===1?'بكرة':'بعد '+x.d+' يوم'))).join('') : '<div class="dc-empty">مفيش أعياد ميلاد مسجلة</div>'};
-    }
-    if(key==='committed'){
-      const top = strk.filter(x=>x.s>=4); const list = top.length?top:strk.slice(0,5);
-      return {t:'🏆 الملتزمين', b:(top.length?'':'<div class="dc-empty">لسه محدش وصل ٤ اجتماعات، دول أقرب ناس:</div>')+(list.length?list.map(x=>prow(x.m,'🔥 '+x.s+' اجتماعات ورا بعض')).join(''):'<div class="dc-empty">لسه مفيش التزام متسجل</div>')};
-    }
-    if(key==='gender'){
-      if(!L) return {t:'📊 الحضور حسب النوع', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
-      const by=L.e.filter(m=>!isG(m)), gy=L.e.filter(isG);
-      return {t:'📊 الحضور حسب النوع', b:'<div class="dp-s">👦 شباب حضروا ('+by.filter(m=>att(last,m)).length+'/'+by.length+')</div>'+chips(by.filter(m=>att(last,m)))+'<div class="dp-s">👧 شابات حضروا ('+gy.filter(m=>att(last,m)).length+'/'+gy.length+')</div>'+chips(gy.filter(m=>att(last,m)))};
-    }
-    if(key==='fams'){
-      if(!L) return {t:'🏅 ترتيب الأسر', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
-      const fam={}; L.e.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); (fam[f]=fam[f]||{a:0,n:0}).n++; if(att(last,m)) fam[f].a++;});
-      const l=Object.keys(fam).map(f=>({f,p:Math.round(fam[f].a/fam[f].n*100),a:fam[f].a,n:fam[f].n})).sort((x,y)=>y.p-x.p||y.n-x.n);
-      return {t:'🏅 ترتيب الأسر — '+fdate(last), b:l.map(x=>mini(E(x.f).slice(0,14),x.p,col(x.p),x.a+'/'+x.n)).join('')};
-    }
-    return null;
+  function verse(){
+    const m=$('dh-msg'); if(!m) return;
+    const v=V[vi]; vi=(vi+1)%V.length;
+    m.style.opacity=0;
+    setTimeout(()=>{ m.innerHTML='<span class="vs-h">✦ رسالة اليوم ✦</span><span class="vs-t">«'+v[0]+'»</span><span class="vs-r">'+v[1]+'</span>'; m.style.opacity=1; },180);
+    clearInterval(vt); vt=setInterval(verse,15000);
   }
-
-  function renderPanels(){
-    let md = $('dash-modal');
-    if(!md){
-      md = document.createElement('div'); md.id = 'dash-modal';
-      md.addEventListener('click', e => { if(e.target === md) dashClose(); });
-      document.body.appendChild(md);
-      document.addEventListener('keydown', e => { if(e.key === 'Escape' && open) dashClose(); });
-    }
-    document.querySelectorAll('#dash .kpi').forEach(el=>el.classList.toggle('act', !!open && el.dataset.key===open));
-    if(!open){ md.classList.remove('on'); md.innerHTML = ''; return; }
-    const r = build(open); if(!r){ open=null; md.classList.remove('on'); return; }
-    const keep = md.querySelector('.dp-b') ? md.querySelector('.dp-b').scrollTop : 0;
-    md.innerHTML = '<div class="dp"><div class="dp-h"><b>'+r.t+'</b><button class="dp-x" onclick="dashClose()" aria-label="إغلاق">✕</button></div><div class="dp-b">'+r.b+'</div></div>';
-    md.classList.add('on');
-    const nb = md.querySelector('.dp-b'); if(nb) nb.scrollTop = keep;
-  }
-
-  window.dashClose = function(){ open = null; clearTimeout(tm); renderDash(); };
-  window.dashOpen = function(key){
-    if(open === key){ dashClose(); return; }
-    open = key; clearTimeout(tm); tm = setTimeout(()=>{ open=null; renderDash(); }, 60000);
-    renderDash();
-  };
-  window.dashRange = function(n){ range = n; renderDash(); };
-
-  window.renderDash = function(){
-    try{
-      if(!$('dash') || typeof db === 'undefined') return;
-      const ms = db.members||[], mt = (db.meetings||[]).slice().sort();
-      const last = mt[mt.length-1], prev = mt[mt.length-2];
-      const L = last ? stat(last) : null, P = prev ? stat(prev) : null;
-      const now = new Date(), h = now.getHours();
-      $('dh-hi').textContent = h < 12 ? 'صباح الخير 👋' : 'مساء الخير 👋';
-      $('dh-date').textContent = now.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
-
-      const boys = ms.filter(m=>!isG(m)).length, girls = ms.length - boys;
-      const W = typeof BDAY_WINDOW !== 'undefined' ? BDAY_WINDOW : 3;
-      const bds = ms.map(m=>({m, d:(typeof bdayDaysAhead==='function')?bdayDaysAhead(m.birthdate):null})).filter(x=>x.d!==null).sort((a,b)=>a.d-b.d);
-      const near = bds.filter(x=>x.d<=W).length, today = bds.filter(x=>x.d===0).length;
-      const absentList = L ? L.e.filter(m=>!att(last,m)).map(m=>{ let n=0; for(let i=mt.length-1;i>=0;i--){ if(att(mt[i],m)||!absenceCounts(m,mt[i])) break; n++; } return {m,n:n||1}; }).sort((a,b)=>b.n-a.n) : [];
-      const rec = mt.slice(-8); const avg = rec.length ? Math.round(rec.reduce((s,d)=>s+stat(d).p,0)/rec.length) : 0;
-      const strk = ms.map(m=>({m, s:streak(m,mt)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
-      ctx = {ms,mt,last,L,bds,strk,absentList,boys,girls};
-
-      const pct = L ? L.p : 0;
-      const mood = !L ? '✨' : pct>=85 ? '🤩' : pct>=70 ? '😃' : pct>=55 ? '🙂' : pct>=40 ? '😐' : '😴';
-      let msg = !L ? 'سجّل أول اجتماع وابدأ المتابعة' : pct>=80 ? 'حضور ممتاز، ما شاء الله' : pct>=60 ? 'حضور كويس، كمّل' : 'محتاجين افتقاد أكتر';
-      if(L && P){ const df = L.p - P.p; msg += df>0 ? ' · ▲ '+df+'%' : df<0 ? ' · ▼ '+(-df)+'%' : ' · ثابت'; }
-      if(today) msg += ' · 🎉 '+today+' عيد ميلاد النهارده';
-      $('dh-msg').textContent = mood+' '+msg;
-      const C = 2*Math.PI*38, off = C*(1-pct/100), fresh = lastPct !== pct;
-      $('dh-ring').innerHTML = '<svg viewBox="0 0 96 96"><circle class="tr" cx="48" cy="48" r="38"/><circle class="pg" cx="48" cy="48" r="38" stroke-dasharray="'+C+'" stroke-dashoffset="'+(fresh?C:off)+'"/></svg><b>'+(L?pct+'%':'–')+'</b><small>آخر اجتماع</small>';
-      if(fresh) requestAnimationFrame(()=>requestAnimationFrame(()=>{ const c=document.querySelector('#dh-ring .pg'); if(c) c.setAttribute('stroke-dashoffset', off); }));
-      lastPct = pct;
-      $('dh-ring').onclick = () => last && dashOpen('meet:'+last);
-
-      $('dh-chips').innerHTML = [4,8,12].map(n=>'<button class="'+(range===n?'on':'')+'" onclick="dashRange('+n+')">آخر '+n+'</button>').join('');
-      const shown = mt.slice(-range);
-      $('dh-bars').innerHTML = shown.length ? shown.map(d=>{
-        const p = stat(d).p;
-        return '<div class="dh-bar'+(open==='meet:'+d?' sel':(!open&&d===last?' on':''))+'" onclick="dashOpen(\'meet:'+d+'\')" title="'+d+' — '+p+'%"><span>'+p+'%</span><i style="height:'+Math.max(6,Math.round(p*0.55))+'px"></i><em>'+d.slice(5).replace('-','/')+'</em></div>';
-      }).join('') : '<div style="font-size:12.5px;opacity:.85">لسه مفيش اجتماعات مسجلة</div>';
-
-      const k = (key,c,ic,n,lbl,sub)=>'<div class="kpi" data-key="'+key+'" role="button" tabindex="0" style="--k:'+c+'" onclick="dashOpen(\''+key+'\')" onkeydown="if(event.key===\'Enter\')dashOpen(\''+key+'\')"><div class="ki">'+ic+'</div><div><b>'+n+'</b><span>'+lbl+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</div></div>';
-      $('dash-kpis').innerHTML =
-        k('members','#1d6fb8','👥',num(ms.length),'إجمالي المخدومين المسجلين','👦 '+boys+' · 👧 '+girls) +
-        k('avg','#8b5cf6','📈',num(avg)+'%','متوسط الحضور','آخر '+rec.length+' اجتماعات');
-      renderPanels();
-      document.querySelectorAll('#dash .cu').forEach(el=>{
-        const to = +el.dataset.to; if(animated){ el.textContent = to; return; }
-        const t0 = performance.now();
-        (function f(t){ const q=Math.min(1,(t-t0)/900); el.textContent = Math.round(to*(1-Math.pow(1-q,3))); if(q<1) requestAnimationFrame(f); })(t0);
-      });
-      if(ms.length||mt.length){ animated = true; if(!celebrated && ((L&&pct>=80)||today)){ celebrated = true; setTimeout(confetti,500); } }
-    }catch(e){ console.warn('dash', e); }
-  };
-  ['loadData','showTab'].forEach(n=>{
-    const f = window[n];
-    if(typeof f === 'function') window[n] = async function(...a){ const r = await f.apply(this,a); renderDash(); return r; };
-  });
+  tick(); verse(); (function(){const g=$('ac-ticks'); if(g){let h='';for(let i=0;i<60;i++){const big=i%5===0,a=i*6*Math.PI/180,r1=big?45:47.5,r2=50;h+='<line x1="'+(60+r1*Math.sin(a)).toFixed(2)+'" y1="'+(60-r1*Math.cos(a)).toFixed(2)+'" x2="'+(60+r2*Math.sin(a)).toFixed(2)+'" y2="'+(60-r2*Math.cos(a)).toFixed(2)+'" stroke="'+(big?'#ffe9a8':'rgba(255,255,255,.5)')+'" stroke-width="'+(big?1.6:.7)+'"/>';}g.innerHTML=h;}})();
+  setInterval(tick,1000);
+  const m=$('dh-msg'); if(m){ m.addEventListener('click',verse); m.addEventListener('keydown',e=>{if(e.key==='Enter')verse();}); }
 })();
 </script>
 <script>
