@@ -1325,10 +1325,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
                     <option value="شابة">شابة (أسر الشابات)</option>
                 </select>
             </div>
-            <div class="input-group autocomplete-container">
+            <div class="input-group">
                 <label>المرحلة الجامعية / السنة *</label>
-                <input type="text" id="m-stage" placeholder="اختار المرحلة أو اكتبها" autocomplete="off" required oninput="clearInputError(this); showStageSuggest()" onfocus="showStageSuggest()" onclick="showStageSuggest()">
-                <div id="m-stage-results" class="autocomplete-results" style="display:none"></div>
+                <input type="text" id="m-stage" placeholder="مثال: فرقة أولى تجارة" required oninput="clearInputError(this)">
             </div>
             
             <div class="input-group autocomplete-container">
@@ -4258,7 +4257,6 @@ notify pgrst, 'reload schema';</pre>
 
 
 /* اقتراحات الأسرة والمرحلة في تسجيل المخدوم */
-const STAGE_FIXED = ['أولى جامعة','تانية جامعة','ثالثة جامعة','رابعة جامعة','خامسة جامعة','كلية'];
 const _normS = x => String(x||'').trim().replace(/\s+/g,' ');
 const _escS = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 let _skipSuggest = false;
@@ -4269,14 +4267,6 @@ function familiesForGender(g){
   (db.members||[]).forEach(m=>{
     if(!m.family || isG(m.gender)!==isG(g)) return;
     set[_normS(m.family)] = 1;
-  });
-  return Object.keys(set).sort((a,b)=>a.localeCompare(b,'ar'));
-}
-function customStages(){
-  const set = {};
-  (db.members||[]).forEach(m=>{
-    const v = _normS(m.stage);
-    if(v && !STAGE_FIXED.includes(v) && v!=='أخرى') set[v]=1;
   });
   return Object.keys(set).sort((a,b)=>a.localeCompare(b,'ar'));
 }
@@ -4295,11 +4285,7 @@ function showFamilySuggest(){
   if(_skipSuggest) return;
   _renderSuggest('m-family','m-family-results', familiesForGender(document.getElementById('m-gender').value), 'أسرة جديدة');
 }
-function showStageSuggest(){
-  if(_skipSuggest) return;
-  _renderSuggest('m-stage','m-stage-results', STAGE_FIXED.concat(customStages()), 'مرحلة جديدة');
-}
-function hideFamilySuggest(){ ['m-family-results','m-stage-results'].forEach(id=>{ const b=document.getElementById(id); if(b) b.style.display='none'; }); }
+function hideFamilySuggest(){ ['m-family-results'].forEach(id=>{ const b=document.getElementById(id); if(b) b.style.display='none'; }); }
 function onGenderChange(){
   const inp = document.getElementById('m-family');
   const g = document.getElementById('m-gender').value;
@@ -4310,18 +4296,17 @@ function onGenderChange(){
   hideFamilySuggest();
 }
 document.addEventListener('mousedown', function(e){
-  const item = e.target.closest && e.target.closest('#m-family-results .autocomplete-item, #m-stage-results .autocomplete-item');
+  const item = e.target.closest && e.target.closest('#m-family-results .autocomplete-item');
   if(item){
     e.preventDefault();
-    const isStage = !!item.closest('#m-stage-results');
-    const inp = document.getElementById(isStage ? 'm-stage' : 'm-family');
+    const inp = document.getElementById('m-family');
     if(item.getAttribute('data-other')){
       inp.value = '';
       hideFamilySuggest();
       _skipSuggest = true;
       inp.focus();
       setTimeout(()=>{ _skipSuggest = false; }, 0);
-      inp.placeholder = isStage ? 'اكتب المرحلة اللي عايزها...' : 'اكتب اسم الأسرة الجديدة...';
+      inp.placeholder = 'اكتب اسم الأسرة الجديدة...';
       return;
     }
     inp.value = item.getAttribute('data-val');
@@ -4329,7 +4314,7 @@ document.addEventListener('mousedown', function(e){
     hideFamilySuggest();
     return;
   }
-  if(!e.target.closest || !e.target.closest('#m-family, #m-stage')) hideFamilySuggest();
+  if(!e.target.closest || !e.target.closest('#m-family')) hideFamilySuggest();
 });
 
 async function renameCurrentFamily(){
