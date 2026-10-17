@@ -1189,6 +1189,98 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
 /* أزرار الأعلى أصغر */
 .top-utility-bar .utility-btn{padding:3px 10px!important;font-size:11px!important;min-height:0!important;height:auto!important;line-height:1.4!important;width:auto!important;border-radius:14px!important;font-weight:700!important;margin:0!important}
+
+/* ===== داشبورد تفاعلي v2 ===== */
+.dash-hero{padding:18px 16px 14px!important}
+.dh-top{align-items:center!important}
+.dh-msg{margin-top:8px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.14);display:inline-block;padding:4px 10px;border-radius:12px}
+.dh-ring{position:relative;flex:0 0 96px;width:96px;height:96px;cursor:pointer}
+.dh-ring svg{width:96px;height:96px;transform:rotate(-90deg)}
+.dh-ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.dh-ring .tr{stroke:rgba(255,255,255,.2)}
+.dh-ring .pg{stroke:#ff5c9a;filter:drop-shadow(0 0 6px rgba(255,92,154,.8));transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.dh-ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 22px 'Noto Kufi Arabic','Cairo',sans-serif;color:#fff;direction:ltr}
+.dh-ring small{position:absolute;left:0;right:0;bottom:17px;text-align:center;font-size:9.5px;opacity:.8;color:#fff}
+.dh-chips{display:flex;gap:6px;margin-top:12px}
+.dh-chips button{all:unset;cursor:pointer;font-size:11.5px;font-weight:700;padding:3px 11px;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.dh-chips button.on{background:#fff;color:#0f3d6e}
+.dh-bars{overflow-x:auto;padding-bottom:2px;margin-top:10px!important;align-items:flex-end}
+.dh-bar{cursor:pointer;min-width:26px;transition:transform .15s}
+.dh-bar:hover{transform:translateY(-2px)}
+.dh-bar span{font-size:10px;font-weight:700;opacity:.9}
+.dh-bar i{transition:height .7s cubic-bezier(.2,.8,.2,1),background .2s}
+.dh-bar.sel i{background:#ff5c9a!important;box-shadow:0 0 18px rgba(255,92,154,.7)}
+.dh-bar.sel em{opacity:1;font-weight:800}
+.dh-detail{margin-top:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:10px 12px;font-size:12.5px;line-height:1.8;color:#fff}
+.dh-detail b{font-weight:800}
+.dh-detail .go{all:unset;cursor:pointer;float:left;font-size:11.5px;font-weight:800;background:#fff;color:#0f3d6e;padding:3px 10px;border-radius:10px}
+.dash-kpis{grid-template-columns:repeat(3,1fr)!important}
+@media(max-width:700px){.dash-kpis{grid-template-columns:repeat(2,1fr)!important}}
+.kpi small{display:block;font-size:10.5px;color:var(--text-muted);margin-top:1px}
+.dash-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+@media(max-width:700px){.dash-cards{grid-template-columns:1fr}}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px 14px}
+.dc h4{margin:0 0 10px;font:800 14px 'Noto Kufi Arabic','Cairo',sans-serif;color:var(--text)}
+.dc-row{display:flex;align-items:center;gap:8px;margin:7px 0;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text)}
+.dc-row .nm{flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dc-row .tk{flex:1;height:9px;border-radius:6px;background:var(--border);overflow:hidden}
+.dc-row .tk i{display:block;height:100%;width:0;border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.dc-row .vl{flex:0 0 auto;min-width:38px;text-align:left;color:var(--text-muted);font-size:11.5px}
+.dc-empty{font-size:12px;color:var(--text-muted);padding:6px 0}
+
+/* ===== لمسة إبداعية + لوحات التفاصيل ===== */
+@keyframes aur{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.25)}100%{transform:translate(0,0) scale(1)}}
+@keyframes pulseG{0%,100%{filter:drop-shadow(0 0 5px rgba(255,92,154,.7))}50%{filter:drop-shadow(0 0 14px rgba(255,92,154,1))}}
+@keyframes slideD{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes cfall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.dash-hero:after{content:"";position:absolute;right:-60px;top:-80px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(120,200,255,.45),transparent 68%);animation:aur 9s ease-in-out infinite;pointer-events:none}
+.dh-ring .pg{animation:pulseG 2.6s ease-in-out infinite}
+.dh-hi{font-size:20px!important}
+.dh-msg{animation:floaty 3.4s ease-in-out infinite}
+.dh-bar i{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.18))!important}
+.dh-bar.sel i{background:linear-gradient(180deg,#ff8fbd,#ff3d85)!important}
+.kpi{position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--k);opacity:.85}
+.kpi:hover{transform:translateY(-3px) rotate(-.4deg)}
+.kpi.act{border-color:var(--k);box-shadow:0 10px 24px -14px var(--k)}
+.dc{cursor:pointer;transition:transform .15s,border-color .15s}
+.dc:hover{transform:translateY(-2px);border-color:#1d6fb8}
+.dc.act{border-color:#e0407f}
+.dc h4 small{font-weight:600;font-size:10.5px;color:var(--text-muted);margin-right:6px}
+#dash-panel .dp,.dh-detail .dp{animation:slideD .25s both}
+#dash-panel .dp{margin-top:10px;background:var(--card);border:1.5px solid #1d6fb8;border-radius:18px;padding:12px 14px;box-shadow:0 14px 30px -20px rgba(29,111,184,.8)}
+.dp-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dp-h b{flex:1;font:800 14px 'Noto Kufi Arabic','Cairo',sans-serif}
+.dp-h small{font-size:10.5px;opacity:.65}
+.dp-x{all:unset;cursor:pointer;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:rgba(127,127,127,.2)}
+.dp-x:hover{background:#ef4444;color:#fff}
+.dp-b{max-height:46vh;overflow-y:auto}
+.dp-s{font-size:12px;font-weight:800;margin:10px 0 6px;opacity:.85}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;background:rgba(29,111,184,.14);cursor:pointer}
+.pchip.g{background:rgba(224,64,127,.15)}
+.pchip.x{background:rgba(239,68,68,.14)}
+.pr{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid var(--border);cursor:pointer}
+.pr:last-child{border-bottom:0}
+.pr .av{flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:#1d6fb8}
+.pr .av.g{background:#e0407f}
+.pr .pi{flex:1;min-width:0}.pr .pi b{display:block;font-size:13px}.pr .pi small{font-size:11px;color:var(--text-muted)}
+.pr .ph{text-decoration:none;font-size:16px;padding:4px 8px;border-radius:10px;background:rgba(16,185,129,.15)}
+.mini{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px;font-weight:700}
+.mini .nm{flex:0 0 76px}.mini .tk{flex:1;height:9px;border-radius:6px;background:var(--border);overflow:hidden}.mini .tk i{display:block;height:100%;border-radius:6px}.mini .vl{flex:0 0 42px;text-align:left;color:var(--text-muted)}
+.dh-detail .dp-h{color:#fff}.dh-detail .dp-x{background:rgba(255,255,255,.25);color:#fff}
+.dh-detail .pchip{background:rgba(255,255,255,.2);color:#fff}.dh-detail .pchip.g{background:rgba(255,120,175,.35)}.dh-detail .pchip.x{background:rgba(0,0,0,.25)}
+.dh-detail .dp-b{max-height:34vh}
+.cf{position:fixed;top:0;width:9px;height:14px;z-index:9999;pointer-events:none;border-radius:2px;animation:cfall 2.8s ease-in forwards}
+
+/* نافذة الداشبورد المنبثقة */
+#dash-modal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(10,20,40,.55);backdrop-filter:blur(4px)}
+#dash-modal.on{display:flex;animation:slideD .2s both}
+#dash-modal .dp{width:100%;max-width:440px;max-height:78vh;display:flex;flex-direction:column;background:var(--card);color:var(--text);border:1.5px solid #1d6fb8;border-radius:22px;padding:14px 16px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+#dash-modal .dp-b{flex:1;overflow-y:auto;max-height:none}
+#dash-modal .dp-h{margin-bottom:10px}
+.dash-cards,#dash-panel{display:none!important}
 </style>
 </head>
 <body>
@@ -1277,12 +1369,16 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
         <section id="dash" aria-label="لوحة المتابعة">
             <div class="dash-hero">
                 <div class="dh-top">
-                    <div><h2 class="dh-hi" id="dh-hi">أهلاً بيك</h2><div class="dh-date" id="dh-date"></div></div>
-                    <div class="dh-big"><b id="dh-pct">–</b><span id="dh-cap">نسبة حضور آخر اجتماع</span></div>
+                    <div class="dh-l"><h2 class="dh-hi" id="dh-hi">أهلاً بيك</h2><div class="dh-date" id="dh-date"></div><div class="dh-msg" id="dh-msg"></div></div>
+                    <div class="dh-ring" id="dh-ring"></div>
                 </div>
+                <div class="dh-chips" id="dh-chips"></div>
                 <div class="dh-bars" id="dh-bars"></div>
+                <div class="dh-detail" id="dh-detail"></div>
             </div>
             <div class="dash-kpis" id="dash-kpis"></div>
+            <div id="dash-panel"></div>
+            <div class="dash-cards" id="dash-cards"></div>
         </section>
 
         <div class="nav-tabs">
@@ -4526,36 +4622,161 @@ function openMemberDetail(memberId,event){
 <script>
 (function(){
   const $ = id => document.getElementById(id);
-  const cnt = d => Object.keys((db.attendanceRecords||{})[d]||{}).length;
-  function daysToBirthday(bd){
-    const p = String(bd||'').split('-'); if(p.length<3) return null;
-    const t = new Date(); t.setHours(0,0,0,0);
-    let n = new Date(t.getFullYear(), +p[1]-1, +p[2]);
-    if(n < t) n = new Date(t.getFullYear()+1, +p[1]-1, +p[2]);
-    return Math.round((n - t)/864e5);
+  let range = 8, open = null, tm = null, animated = false, lastPct = null, celebrated = false, ctx = null;
+  const att = (d,m) => ((db.attendanceRecords||{})[d]||{})[m.id];
+  const elig = d => (db.members||[]).filter(m => att(d,m) || absenceCounts(m,d));
+  const stat = d => { const e = elig(d), a = e.filter(m=>att(d,m)); return {a:a.length, n:e.length, p:e.length?Math.round(a.length/e.length*100):0, e, att:a}; };
+  const isG = m => m.gender === 'شابة';
+  const col = p => p>=75 ? '#10b981' : p>=50 ? '#f59e0b' : '#ef4444';
+  const fdate = d => { const q=String(d).split('-'); return new Date(+q[0],+q[1]-1,+q[2]).toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'}); };
+  const E = t => (typeof esc==='function') ? esc(t) : String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const num = n => '<span class="cu" data-to="'+n+'">'+(animated?n:0)+'</span>';
+  const streak = (m, mt) => { let n=0; for(let i=mt.length-1;i>=0;i--){ if(att(mt[i],m)) n++; else break; } return n; };
+  const chip = (m,x) => '<span class="pchip'+(x?' x':isG(m)?' g':'')+'" onclick="event.stopPropagation();openMemberDetail('+m.id+')">'+E(m.name)+'</span>';
+  const chips = (arr,x) => arr.length ? '<div class="pchips">'+arr.map(m=>chip(m,x)).join('')+'</div>' : '<div class="dc-empty">لا أحد</div>';
+  const prow = (m,sub) => '<div class="pr" onclick="openMemberDetail('+m.id+')"><span class="av'+(isG(m)?' g':'')+'">'+E((m.name||'?').trim()[0])+'</span><div class="pi"><b>'+E(m.name)+'</b><small>'+E(sub||'')+'</small></div>'+(m.phone?'<a class="ph" href="tel:'+E(m.phone)+'" onclick="event.stopPropagation()">📞</a>':'')+'</div>';
+  const mini = (nm,p,c,vl) => '<div class="mini"><span class="nm">'+nm+'</span><span class="tk"><i style="width:'+p+'%;background:'+c+'"></i></span><span class="vl">'+vl+'</span></div>';
+
+  function confetti(){
+    const cs=['#ff5c9a','#ffd166','#4cc9f0','#7b5cd6','#10b981','#fff'];
+    for(let i=0;i<34;i++){ const e=document.createElement('i'); e.className='cf'; e.style.left=Math.random()*100+'vw'; e.style.background=cs[i%cs.length]; e.style.animationDelay=(Math.random()*.8)+'s'; e.style.animationDuration=(2+Math.random()*1.6)+'s'; document.body.appendChild(e); setTimeout(()=>e.remove(),4500); }
   }
+
+  function build(key){
+    const c = ctx; if(!c) return null;
+    const {ms,mt,last,L,bds,strk,absentList,boys,girls} = c;
+    if(key.indexOf('meet:')===0){
+      const d = key.slice(5), st = stat(d), ab = st.e.filter(m=>!att(d,m));
+      return {t:'📅 '+fdate(d)+' — '+st.p+'%', b:'<div class="dp-s">✅ حضروا ('+st.a+')</div>'+chips(st.att)+'<div class="dp-s">❌ غابوا ('+ab.length+')</div>'+chips(ab,1)};
+    }
+    if(key==='members'){
+      const fam={}; ms.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); fam[f]=(fam[f]||0)+1;});
+      const fl = Object.keys(fam).sort((a,b)=>fam[b]-fam[a]);
+      const mx = fl.length?fam[fl[0]]:1;
+      const newest = ms.filter(m=>Number(m.id)>1e12).sort((a,b)=>b.id-a.id).slice(0,4);
+      return {t:'👥 المخدومين ('+ms.length+')', b:mini('👦 شباب',ms.length?Math.round(boys/ms.length*100):0,'#1d6fb8',boys)+mini('👧 شابات',ms.length?Math.round(girls/ms.length*100):0,'#e0407f',girls)+
+        '<div class="dp-s">🏠 الأسر ('+fl.length+')</div>'+fl.map(f=>mini(E(f).slice(0,14),Math.round(fam[f]/mx*100),'#7b5cd6',fam[f])).join('')+
+        (newest.length?'<div class="dp-s">🆕 آخر المسجلين</div>'+newest.map(m=>prow(m,m.family||'')).join(''):'')};
+    }
+    if(key==='present'){
+      if(!L) return {t:'📋 حضور آخر اجتماع', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
+      const ab = L.e.filter(m=>!att(last,m));
+      const by=L.e.filter(m=>!isG(m)), gy=L.e.filter(isG);
+      const bp=by.length?Math.round(by.filter(m=>att(last,m)).length/by.length*100):0, gp=gy.length?Math.round(gy.filter(m=>att(last,m)).length/gy.length*100):0;
+      const fam={}; L.e.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); (fam[f]=fam[f]||{a:0,n:0}).n++; if(att(last,m)) fam[f].a++;});
+      const fl=Object.keys(fam).filter(f=>fam[f].n>=2).map(f=>({f,p:Math.round(fam[f].a/fam[f].n*100),a:fam[f].a,n:fam[f].n})).sort((x,y)=>y.p-x.p||y.n-x.n).slice(0,5);
+      return {t:'📋 '+fdate(last)+' — '+L.p+'%', b:mini('👦 شباب',bp,'#1d6fb8',bp+'%')+mini('👧 شابات',gp,'#e0407f',gp+'%')+
+        (fl.length?'<div class="dp-s">🏅 أنشط الأسر</div>'+fl.map(x=>mini(E(x.f).slice(0,14),x.p,col(x.p),x.a+'/'+x.n)).join(''):'')+
+        '<div class="dp-s">✅ حضروا ('+L.a+')</div>'+chips(L.att)+'<div class="dp-s">❌ غابوا ('+ab.length+')</div>'+chips(ab,1)};
+    }
+    if(key==='avg'){
+      const rec = mt.slice(-8).reverse();
+      return {t:'📈 آخر '+rec.length+' اجتماعات', b: rec.length ? rec.map(d=>{const p=stat(d).p; return mini(d.slice(5).replace('-','/'),p,col(p),p+'%');}).join('') : '<div class="dc-empty">لسه مفيش اجتماعات</div>'};
+    }
+    if(key==='absent'){
+      return {t:'📞 محتاجين افتقاد ('+absentList.length+')', b: absentList.length ? absentList.map(x=>prow(x.m,'غاب '+x.n+(x.n===1?' اجتماع':' اجتماعات')+' ورا بعض'+(x.m.address?' · '+x.m.address:''))).join('') : '<div class="dc-empty">الكل حاضر، ما شاء الله 🎉</div>'};
+    }
+    if(key==='bday'){
+      const dm = bd => { const q=String(bd).split('-'); return q[2]+'/'+q[1]; };
+      return {t:'🎂 أعياد الميلاد الجاية', b: bds.length ? bds.slice(0,10).map(x=>prow(x.m,dm(x.m.birthdate)+' · '+(x.d===0?'النهارده 🎉':x.d===1?'بكرة':'بعد '+x.d+' يوم'))).join('') : '<div class="dc-empty">مفيش أعياد ميلاد مسجلة</div>'};
+    }
+    if(key==='committed'){
+      const top = strk.filter(x=>x.s>=4); const list = top.length?top:strk.slice(0,5);
+      return {t:'🏆 الملتزمين', b:(top.length?'':'<div class="dc-empty">لسه محدش وصل ٤ اجتماعات، دول أقرب ناس:</div>')+(list.length?list.map(x=>prow(x.m,'🔥 '+x.s+' اجتماعات ورا بعض')).join(''):'<div class="dc-empty">لسه مفيش التزام متسجل</div>')};
+    }
+    if(key==='gender'){
+      if(!L) return {t:'📊 الحضور حسب النوع', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
+      const by=L.e.filter(m=>!isG(m)), gy=L.e.filter(isG);
+      return {t:'📊 الحضور حسب النوع', b:'<div class="dp-s">👦 شباب حضروا ('+by.filter(m=>att(last,m)).length+'/'+by.length+')</div>'+chips(by.filter(m=>att(last,m)))+'<div class="dp-s">👧 شابات حضروا ('+gy.filter(m=>att(last,m)).length+'/'+gy.length+')</div>'+chips(gy.filter(m=>att(last,m)))};
+    }
+    if(key==='fams'){
+      if(!L) return {t:'🏅 ترتيب الأسر', b:'<div class="dc-empty">لسه مفيش اجتماعات</div>'};
+      const fam={}; L.e.forEach(m=>{const f=String(m.family||'أسرة عامة').trim(); (fam[f]=fam[f]||{a:0,n:0}).n++; if(att(last,m)) fam[f].a++;});
+      const l=Object.keys(fam).map(f=>({f,p:Math.round(fam[f].a/fam[f].n*100),a:fam[f].a,n:fam[f].n})).sort((x,y)=>y.p-x.p||y.n-x.n);
+      return {t:'🏅 ترتيب الأسر — '+fdate(last), b:l.map(x=>mini(E(x.f).slice(0,14),x.p,col(x.p),x.a+'/'+x.n)).join('')};
+    }
+    return null;
+  }
+
+  function renderPanels(){
+    let md = $('dash-modal');
+    if(!md){
+      md = document.createElement('div'); md.id = 'dash-modal';
+      md.addEventListener('click', e => { if(e.target === md) dashClose(); });
+      document.body.appendChild(md);
+      document.addEventListener('keydown', e => { if(e.key === 'Escape' && open) dashClose(); });
+    }
+    document.querySelectorAll('#dash .kpi').forEach(el=>el.classList.toggle('act', !!open && el.dataset.key===open));
+    if(!open){ md.classList.remove('on'); md.innerHTML = ''; return; }
+    const r = build(open); if(!r){ open=null; md.classList.remove('on'); return; }
+    const keep = md.querySelector('.dp-b') ? md.querySelector('.dp-b').scrollTop : 0;
+    md.innerHTML = '<div class="dp"><div class="dp-h"><b>'+r.t+'</b><button class="dp-x" onclick="dashClose()" aria-label="إغلاق">✕</button></div><div class="dp-b">'+r.b+'</div></div>';
+    md.classList.add('on');
+    const nb = md.querySelector('.dp-b'); if(nb) nb.scrollTop = keep;
+  }
+
+  window.dashClose = function(){ open = null; clearTimeout(tm); renderDash(); };
+  window.dashOpen = function(key){
+    if(open === key){ dashClose(); return; }
+    open = key; clearTimeout(tm); tm = setTimeout(()=>{ open=null; renderDash(); }, 60000);
+    renderDash();
+  };
+  window.dashRange = function(n){ range = n; renderDash(); };
+
   window.renderDash = function(){
     try{
       if(!$('dash') || typeof db === 'undefined') return;
-      const ms = db.members||[], mt = db.meetings||[], total = ms.length||1;
-      const last = mt[mt.length-1], lastN = last ? cnt(last) : 0;
+      const ms = db.members||[], mt = (db.meetings||[]).slice().sort();
+      const last = mt[mt.length-1], prev = mt[mt.length-2];
+      const L = last ? stat(last) : null, P = prev ? stat(prev) : null;
       const now = new Date(), h = now.getHours();
-      $('dh-hi').textContent = h < 12 ? 'صباح الخير' : 'مساء الخير';
+      $('dh-hi').textContent = h < 12 ? 'صباح الخير 👋' : 'مساء الخير 👋';
       $('dh-date').textContent = now.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
-      $('dh-pct').textContent = last ? Math.round(lastN/total*100)+'%' : '–';
-      $('dh-cap').textContent = last ? 'حضر '+lastN+' من '+ms.length+' في آخر اجتماع' : 'لسه مفيش اجتماعات مسجلة';
-      $('dh-bars').innerHTML = mt.slice(-8).map((d,i,a)=>{
-        const p = Math.round(cnt(d)/total*100);
-        return '<div class="dh-bar'+(i===a.length-1?' on':'')+'" title="'+d+' — '+p+'%"><i style="height:'+Math.max(6,Math.round(p*0.5))+'px"></i><em>'+d.slice(5).replace('-','/')+'</em></div>';
-      }).join('');
-      const bd = ms.map(m=>daysToBirthday(m.birthdate)).filter(x=>x!==null);
-      const W = typeof BDAY_WINDOW !== 'undefined' ? BDAY_WINDOW : 3, near = bd.filter(x=>x<=W).length;
-      const k = (tab,col,ic,num,lbl)=>'<div class="kpi" role="button" tabindex="0" style="--k:'+col+'" onclick="showTab(\''+tab+'\')" onkeydown="if(event.key===\'Enter\')showTab(\''+tab+'\')"><div class="ki">'+ic+'</div><div><b>'+num+'</b><span>'+lbl+'</span></div></div>';
+
+      const boys = ms.filter(m=>!isG(m)).length, girls = ms.length - boys;
+      const W = typeof BDAY_WINDOW !== 'undefined' ? BDAY_WINDOW : 3;
+      const bds = ms.map(m=>({m, d:(typeof bdayDaysAhead==='function')?bdayDaysAhead(m.birthdate):null})).filter(x=>x.d!==null).sort((a,b)=>a.d-b.d);
+      const near = bds.filter(x=>x.d<=W).length, today = bds.filter(x=>x.d===0).length;
+      const absentList = L ? L.e.filter(m=>!att(last,m)).map(m=>{ let n=0; for(let i=mt.length-1;i>=0;i--){ if(att(mt[i],m)||!absenceCounts(m,mt[i])) break; n++; } return {m,n:n||1}; }).sort((a,b)=>b.n-a.n) : [];
+      const rec = mt.slice(-8); const avg = rec.length ? Math.round(rec.reduce((s,d)=>s+stat(d).p,0)/rec.length) : 0;
+      const strk = ms.map(m=>({m, s:streak(m,mt)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+      ctx = {ms,mt,last,L,bds,strk,absentList,boys,girls};
+
+      const pct = L ? L.p : 0;
+      const mood = !L ? '✨' : pct>=85 ? '🤩' : pct>=70 ? '😃' : pct>=55 ? '🙂' : pct>=40 ? '😐' : '😴';
+      let msg = !L ? 'سجّل أول اجتماع وابدأ المتابعة' : pct>=80 ? 'حضور ممتاز، ما شاء الله' : pct>=60 ? 'حضور كويس، كمّل' : 'محتاجين افتقاد أكتر';
+      if(L && P){ const df = L.p - P.p; msg += df>0 ? ' · ▲ '+df+'%' : df<0 ? ' · ▼ '+(-df)+'%' : ' · ثابت'; }
+      if(today) msg += ' · 🎉 '+today+' عيد ميلاد النهارده';
+      $('dh-msg').textContent = mood+' '+msg;
+      const C = 2*Math.PI*38, off = C*(1-pct/100), fresh = lastPct !== pct;
+      $('dh-ring').innerHTML = '<svg viewBox="0 0 96 96"><circle class="tr" cx="48" cy="48" r="38"/><circle class="pg" cx="48" cy="48" r="38" stroke-dasharray="'+C+'" stroke-dashoffset="'+(fresh?C:off)+'"/></svg><b>'+(L?pct+'%':'–')+'</b><small>آخر اجتماع</small>';
+      if(fresh) requestAnimationFrame(()=>requestAnimationFrame(()=>{ const c=document.querySelector('#dh-ring .pg'); if(c) c.setAttribute('stroke-dashoffset', off); }));
+      lastPct = pct;
+      $('dh-ring').onclick = () => last && dashOpen('meet:'+last);
+
+      $('dh-chips').innerHTML = [4,8,12].map(n=>'<button class="'+(range===n?'on':'')+'" onclick="dashRange('+n+')">آخر '+n+'</button>').join('');
+      const shown = mt.slice(-range);
+      $('dh-bars').innerHTML = shown.length ? shown.map(d=>{
+        const p = stat(d).p;
+        return '<div class="dh-bar'+(open==='meet:'+d?' sel':(!open&&d===last?' on':''))+'" onclick="dashOpen(\'meet:'+d+'\')" title="'+d+' — '+p+'%"><span>'+p+'%</span><i style="height:'+Math.max(6,Math.round(p*0.55))+'px"></i><em>'+d.slice(5).replace('-','/')+'</em></div>';
+      }).join('') : '<div style="font-size:12.5px;opacity:.85">لسه مفيش اجتماعات مسجلة</div>';
+
+      const k = (key,c,ic,n,lbl,sub)=>'<div class="kpi" data-key="'+key+'" role="button" tabindex="0" style="--k:'+c+'" onclick="dashOpen(\''+key+'\')" onkeydown="if(event.key===\'Enter\')dashOpen(\''+key+'\')"><div class="ki">'+ic+'</div><div><b>'+n+'</b><span>'+lbl+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</div></div>';
       $('dash-kpis').innerHTML =
-        k('profiles','#1d6fb8','👥',ms.length,'مخدوم مسجل') +
-        k('attendance','#10b981','📋',last?lastN:0,'حضروا آخر اجتماع') +
-        k('birthdays','#e0407f','🎂',near,'أعياد ميلاد خلال '+W+' أيام') +
-        k('attendance','#f59e0b','🗓️',mt.length,'اجتماع اتسجل');
+        k('members','#1d6fb8','👥',num(ms.length),'مخدوم مسجل','👦 '+boys+' · 👧 '+girls) +
+        k('present','#10b981','📋',num(L?L.a:0),'حضروا آخر اجتماع',L?'من '+L.n:'') +
+        k('avg','#8b5cf6','📈',num(avg)+'%','متوسط الحضور','آخر '+rec.length+' اجتماعات') +
+        k('absent','#ef4444','📞',num(absentList.length),'محتاجين افتقاد','غابوا آخر اجتماع') +
+        k('bday','#e0407f','🎂',num(near),'أعياد ميلاد قريبة','خلال '+W+' أيام') +
+        k('committed','#f59e0b','🏆',num(strk.filter(x=>x.s>=4).length),'ملتزمين','٤ اجتماعات ورا بعض');
+
+      renderPanels();
+      document.querySelectorAll('#dash .cu').forEach(el=>{
+        const to = +el.dataset.to; if(animated){ el.textContent = to; return; }
+        const t0 = performance.now();
+        (function f(t){ const q=Math.min(1,(t-t0)/900); el.textContent = Math.round(to*(1-Math.pow(1-q,3))); if(q<1) requestAnimationFrame(f); })(t0);
+      });
+      if(ms.length||mt.length){ animated = true; if(!celebrated && ((L&&pct>=80)||today)){ celebrated = true; setTimeout(confetti,500); } }
     }catch(e){ console.warn('dash', e); }
   };
   ['loadData','showTab'].forEach(n=>{
