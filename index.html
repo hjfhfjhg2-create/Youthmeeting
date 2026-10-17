@@ -953,6 +953,85 @@ header{padding-top:72px!important}body.in-app header{padding-top:62px!important}
 .robot-help-container{gap:10px}
 .toast{background:#14213d}
 </style>
+<style id="robot-v2">
+/* ===== تكلا بوت: روبوت مساعد كيوت لكل تبويب ===== */
+.rb-wrap{--bd:color-mix(in srgb,var(--c) 45%,transparent);display:flex;align-items:center;gap:14px;margin-bottom:22px;position:relative}
+.rb-btn{all:unset;box-sizing:border-box;position:relative;width:84px;height:98px;flex-shrink:0;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent}
+.rb-btn:focus-visible{outline:3px solid var(--c);outline-offset:4px;border-radius:18px}
+.rb-btn::after{content:'';position:absolute;left:14px;bottom:0;width:50px;height:8px;border-radius:50%;background:radial-gradient(ellipse,rgba(18,49,92,.45),transparent 72%);filter:blur(2px);animation:rbShadow 3.2s ease-in-out infinite}
+.rb{position:relative;display:block;width:78px;height:92px;animation:rbFloat 3.2s ease-in-out infinite;transform-origin:50% 95%}
+.rb-btn .rb{margin-left:3px}
+.rb i{position:absolute;display:block}
+.rb-ant{left:37px;top:2px;width:4px;height:15px;background:linear-gradient(#b7c4d9,#8196b5);border-radius:2px;z-index:4}
+.rb-ant::before{content:'';position:absolute;left:-5px;top:-9px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c) 62%);box-shadow:0 0 10px var(--c),0 2px 0 rgba(0,0,0,.25);animation:rbGlow 1.6s ease-in-out infinite}
+.rb-band{left:6px;top:11px;width:66px;height:36px;border:4px solid var(--c);border-bottom:0;border-radius:36px 36px 0 0;z-index:2}
+.rb-hp{top:27px;width:10px;height:20px;border-radius:7px;z-index:4;background:var(--c);box-shadow:inset 0 2px 2px rgba(255,255,255,.55),inset 0 -4px 4px rgba(0,0,0,.2),0 2px 0 rgba(0,0,0,.28)}
+.rb-hp.l{left:2px}.rb-hp.r{left:66px}
+.rb-head{left:10px;top:15px;width:58px;height:42px;border-radius:22px 22px 18px 18px;z-index:3;background:linear-gradient(150deg,#fff,#dfe9f7 70%,#cfdcf0);box-shadow:0 2px 0 #c3d2e8,0 4px 0 #b3c6e0,0 6px 0 #a3b9d8,0 13px 14px rgba(18,49,92,.3),inset 0 2px 3px #fff}
+.rb-visor{left:6px;right:6px;top:7px;bottom:7px;border-radius:15px;background:linear-gradient(160deg,#22457f,#0e2145);box-shadow:inset 0 3px 5px rgba(0,0,0,.5),inset 0 -1px 2px rgba(120,180,255,.3);overflow:hidden}
+.rb-eye{top:5px;width:13px;height:13px;border-radius:50%;background:#eaf9ff;overflow:hidden;animation:rbBlink 4.6s infinite;transform-origin:50% 60%;box-shadow:0 0 8px rgba(120,220,255,.8)}
+.rb-eye.l{left:8px}.rb-eye.r{right:8px}
+.rb-eye i{left:3px;top:3px;width:7px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8fe6ff,#1a86d9 70%);animation:rbLook 7s ease-in-out infinite}
+.rb-cheek{top:15px;width:7px;height:4px;border-radius:50%;background:#ff7fb0;opacity:.8;filter:blur(.4px)}
+.rb-cheek.l{left:2px}.rb-cheek.r{right:2px}
+.rb-mouth{left:50%;margin-left:-6px;bottom:3px;width:12px;height:6px;border-bottom:3px solid #ff8db9;border-radius:0 0 12px 12px}
+.rb.talk .rb-mouth{animation:rbTalk .2s infinite alternate}
+.rb-body{left:19px;top:56px;width:40px;height:25px;border-radius:14px 14px 18px 18px;z-index:1;background:linear-gradient(145deg,rgba(255,255,255,.5),transparent 60%),var(--c);box-shadow:0 4px 0 rgba(0,0,0,.28),0 10px 12px rgba(18,49,92,.28),inset 0 2px 2px rgba(255,255,255,.5)}
+.rb-body::before,.rb-body::after{content:'';position:absolute;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,.9);animation:rbBeat 1.6s ease-in-out infinite}
+.rb-body::before{left:18px;top:6px;width:4px;height:13px}
+.rb-body::after{left:13.5px;top:10px;width:13px;height:4px}
+.rb-arm{top:62px;width:12px;height:12px;border-radius:50%;z-index:2;background:radial-gradient(circle at 35% 30%,#fff,#cfdcf0);box-shadow:0 2px 0 #9db3d3}
+.rb-arm.l{left:8px}.rb-arm.r{left:58px;animation:rbWave 5s ease-in-out infinite;transform-origin:50% 100%}
+.rb-prop{left:55px;top:-8px;z-index:6;width:28px;height:28px;border-radius:50%;background:#fff;border:2.5px solid var(--c);display:flex!important;align-items:center;justify-content:center;font-size:14px;line-height:1;box-shadow:0 4px 10px rgba(0,0,0,.2);animation:rbProp 2.4s ease-in-out infinite}
+.rb-btn:hover .rb,.rb-btn:active .rb{animation:rbHop .55s ease-in-out infinite}
+.rb-btn:hover .rb-mouth{width:14px;margin-left:-7px;height:8px}
+.rb-say{position:relative;flex:1;min-width:0;max-width:440px;display:flex;flex-direction:column;gap:4px;padding:11px 15px;border-radius:20px;cursor:pointer;background:var(--card-glass);border:1.5px solid var(--bd);box-shadow:0 8px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:rbSay 3.4s ease-in-out infinite}
+.rb-say::after{content:'';position:absolute;right:-7.5px;top:28px;width:13px;height:13px;background:var(--card-glass);border-top:1.5px solid var(--bd);border-right:1.5px solid var(--bd);transform:rotate(45deg);border-radius:0 3px 0 0}
+.rb-say b{font-size:11.5px;font-weight:800;color:var(--c);letter-spacing:.2px}
+.rb-line{font-size:14px;font-weight:700;line-height:1.7;color:var(--text-main);min-height:1.7em}
+.rb-line.typing::after{content:'▍';color:var(--c);margin-right:2px;animation:rbCaret .7s steps(1) infinite}
+.rb-say u{align-self:flex-start;text-decoration:none;margin-top:3px;padding:3px 13px;border-radius:14px;font-size:12px;font-weight:800;color:#fff;background:var(--c);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+/* نافذة الشرح */
+#help-modal .modal-body{--bd:color-mix(in srgb,var(--c) 40%,transparent);max-height:90vh;overflow-y:auto;text-align:right;padding-top:20px;scrollbar-width:thin}
+.hm-top{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1.5px dashed var(--bd)}
+#hm-robot{width:84px;height:98px;flex-shrink:0;padding:10px 0 0 6px}
+#hm-robot .rb{transform-origin:50% 95%}
+.hm-title small{display:block;font-size:12px;font-weight:800;color:var(--c)}
+.hm-title h3{margin:2px 0 0!important;font-size:19px!important;color:var(--text-main)!important;line-height:1.4}
+.hm-goal{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--c) 12%,transparent);border:1.5px solid var(--bd);border-radius:14px;padding:11px 13px;margin-bottom:14px}
+.hm-goal span{font-size:20px;line-height:1.5}
+.hm-goal p{margin:0;font-size:14px;font-weight:600;line-height:1.85;color:var(--text-main)}
+.hm-h,.hm-tips h5{margin:0 0 9px;font-size:13px;font-weight:800;color:var(--c)}
+.hm-steps{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:9px}
+.hm-steps li{display:flex;gap:11px;align-items:flex-start;background:rgba(0,0,0,.03);border:1px solid var(--card-border);border-radius:13px;padding:10px 12px;font-size:13.5px;line-height:1.85;color:var(--text-main);opacity:0;animation:hmIn .4s ease forwards}
+body.dark-mode .hm-steps li{background:rgba(255,255,255,.05)}
+.hm-steps em{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;font-style:normal;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.hm-steps b,.hm-goal b,.hm-tips b{color:var(--c)}
+.hm-tips{background:rgba(245,158,11,.12);border:1.5px dashed rgba(245,158,11,.55);border-radius:13px;padding:10px 13px;margin-bottom:16px}
+.hm-tips h5{color:#b45309}
+body.dark-mode .hm-tips h5{color:#fbbf24}
+.hm-tips p{margin:0 0 4px;font-size:13px;line-height:1.85;color:var(--text-main)}
+.hm-dot{display:inline-block!important;position:static!important;width:11px;height:11px;border-radius:50%;margin:0 0 -1px 4px;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.hm-actions{display:flex;gap:10px;flex-wrap:wrap;position:sticky;bottom:-1px;padding:10px 0 2px;background:linear-gradient(rgba(255,255,255,0),var(--card-glass) 40%)}
+.hm-actions button{flex:1;min-width:130px;white-space:nowrap}
+.hm-actions .hm-next{background:transparent!important;color:var(--c)!important;border:1.5px solid var(--bd)!important;box-shadow:none!important;font-size:13px}
+.hm-actions .hm-ok{background:var(--c)!important;box-shadow:0 6px 0 rgba(0,0,0,.28)!important}
+@keyframes rbFloat{0%,100%{transform:translateY(0) rotate(-2.5deg)}50%{transform:translateY(-5px) rotate(2.5deg)}}
+@keyframes rbShadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.8);opacity:.5}}
+@keyframes rbHop{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-12px) scale(.96,1.05) rotate(-6deg)}60%{transform:translateY(0) scale(1.05,.95) rotate(5deg)}}
+@keyframes rbBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes rbLook{0%,20%,100%{transform:translate(0,0)}30%,45%{transform:translate(2px,0)}55%,70%{transform:translate(-2px,1px)}80%{transform:translate(0,-1px)}}
+@keyframes rbGlow{0%,100%{opacity:.7;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes rbBeat{0%,100%{opacity:.8}50%{opacity:1;filter:drop-shadow(0 0 3px #fff)}}
+@keyframes rbWave{0%,70%,100%{transform:rotate(0) translateY(0)}76%{transform:translate(4px,-14px)}82%{transform:translate(0,-18px)}88%{transform:translate(5px,-14px)}94%{transform:translate(0,-16px)}}
+@keyframes rbProp{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-5px) rotate(8deg)}}
+@keyframes rbTalk{from{height:3px}to{height:9px}}
+@keyframes rbCaret{50%{opacity:0}}
+@keyframes rbSay{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes hmIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:420px){.rb-say{padding:10px 12px}.rb-line{font-size:13px}.rb-btn{width:76px}.rb-btn .rb{transform:scale(.92);transform-origin:0 0}}
+@media(prefers-reduced-motion:reduce){.rb,.rb *,.rb-say,.rb-btn::after{animation:none!important}}
+</style>
 <style id="report-css">
 #report-overlay{position:fixed;inset:0;z-index:99999;background:#e9edf3;overflow:auto;direction:rtl;color:#14213d;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'Cairo',Tahoma,sans-serif}
 #report-overlay .rp-bar{position:sticky;top:0;z-index:2;display:flex;gap:10px;justify-content:center;padding:10px;background:#12315c}
@@ -1183,12 +1262,17 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
     </div>
 
     <!-- نافذة المساعدة المنبثقة لكل تبويب -->
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-body">
-            <div style="display:flex;justify-content:center;margin-bottom:14px;"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></div>
-            <h3 id="help-modal-title" style="color: var(--primary); margin-bottom: 12px;">مساعدة الشرح</h3>
-            <div id="help-modal-content" style="font-size: 14px; color: var(--text-muted); text-align: right; line-height: 1.8; margin-bottom: 22px; background: rgba(0,0,0,0.03); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);"></div>
-            <button onclick="closeHelpModal()" style="width: 100%; background: var(--text-muted); box-shadow: 0 6px 0 #475569;">فهمت 👏</button>
+    <div id="help-modal" class="modal-overlay" onclick="if(event.target===this)closeHelpModal()">
+        <div class="modal-body" id="help-modal-body" style="--c:#6366f1">
+            <div class="hm-top">
+                <div id="hm-robot"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">💡</i></span></div>
+                <div class="hm-title"><small>تكلا بوت بيشرحلك</small><h3 id="help-modal-title">مساعدة الشرح</h3></div>
+            </div>
+            <div id="help-modal-content"></div>
+            <div class="hm-actions">
+                <button class="hm-next" id="hm-next" onclick="helpNext()"></button>
+                <button class="hm-ok" onclick="closeHelpModal()">فهمت 👏</button>
+            </div>
         </div>
     </div>
 
@@ -1226,9 +1310,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- إضافة / تعديل مخدوم -->
         <div id="add-member" class="tab-content active">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('add-member')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('add-member')">محتاج مساعدة في إضافة مخدوم؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#6366f1">
+                <button class="rb-btn" onclick="openHelp('add-member')" aria-label="شرح تبويب إضافة مخدوم"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">➕</i></span></button>
+                <div class="rb-say" onclick="openHelp('add-member')"><b>تكلا بوت 🤖 · شرح «إضافة مخدوم»</b><span class="rb-line" data-text="هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.">هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
@@ -1284,9 +1368,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- شيت الحضور -->
         <div id="attendance" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('attendance')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('attendance')">محتاج مساعدة في شيت الحضور؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#0ea5e9">
+                <button class="rb-btn" onclick="openHelp('attendance')" aria-label="شرح تبويب شيت الحضور"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">📋</i></span></button>
+                <div class="rb-say" onclick="openHelp('attendance')"><b>تكلا بوت 🤖 · شرح «شيت الحضور»</b><span class="rb-line" data-text="اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.">اختار تاريخ الاجتماع وسجّل مين حضر بالـ QR أو بالاسم.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>تسجيل واسترجاع حضور الاجتماع</h3>
@@ -1341,9 +1425,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- قسم الافتقاد ومتابعة الغياب -->
         <div id="visitation" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('visitation')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('visitation')">محتاج مساعدة في شيت الافتقاد التلقائي؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#ef4444">
+                <button class="rb-btn" onclick="openHelp('visitation')" aria-label="شرح تبويب الافتقاد"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">📞</i></span></button>
+                <div class="rb-say" onclick="openHelp('visitation')"><b>تكلا بوت 🤖 · شرح «الافتقاد»</b><span class="rb-line" data-text="أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.">أنا بجمعلك اللي غابوا لوحدي — اتصل بيهم واطمّن عليهم.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>متابعة الغياب والافتقاد التلقائي 📞</h3>
@@ -1369,6 +1453,11 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- تبويب الملتزمين -->
         <div id="committed" class="tab-content">
+            <div class="rb-wrap" style="--c:#f59e0b">
+                <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب الملتزمين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
+                <div class="rb-say" onclick="openHelp('committed')"><b>تكلا بوت 🤖 · شرح «الملتزمين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
                 <h3 style="margin:0;">الملتزمين 🏆</h3>
                 <a href="#" onclick="exportCommittedExcel(); return false;" style="color:#2e9e6b; font-weight:800; font-size:14px; text-decoration:underline;">📥 تصدير Excel</a>
@@ -1379,6 +1468,11 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- تبويب البونص -->
         <div id="bonus" class="tab-content">
+            <div class="rb-wrap" style="--c:#a855f7">
+                <button class="rb-btn" onclick="openHelp('bonus')" aria-label="شرح تبويب البونص"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🎁</i></span></button>
+                <div class="rb-say" onclick="openHelp('bonus')"><b>تكلا بوت 🤖 · شرح «البونص»</b><span class="rb-line" data-text="إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.">إجمالي بونص كل مخدوم — بيتجمع تلقائي من شيت الحضور.</span><u>اشرحلي بالتفصيل ◂</u></div>
+            </div>
+
             <h3>البونص 🎁</h3>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">بيتحدث تلقائياً من خانة البونص في شيت الحضور، وبيتجمع لكل مخدوم إجمالي اللي أخده.</p>
             <div class="stats-summary-box" id="bonus-summary"></div>
@@ -1390,9 +1484,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- الأسر -->
         <div id="families" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('families')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('families')">محتاج مساعدة في إدارة وتصدير الأسر؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#10b981">
+                <button class="rb-btn" onclick="openHelp('families')" aria-label="شرح تبويب الأسر"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">👥</i></span></button>
+                <div class="rb-say" onclick="openHelp('families')"><b>تكلا بوت 🤖 · شرح «الأسر»</b><span class="rb-line" data-text="كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.">كل الأسر وأعدادها، واضغط على أسرة تشوف أعضاءها.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div id="families-main-view">
@@ -1458,9 +1552,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- حجز الرحلات -->
         <div id="trips" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('trips')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('trips')">محتاج مساعدة في حجز الرحلات والمؤتمرات؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#f97316">
+                <button class="rb-btn" onclick="openHelp('trips')" aria-label="شرح تبويب الرحلات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🚌</i></span></button>
+                <div class="rb-say" onclick="openHelp('trips')"><b>تكلا بوت 🤖 · شرح «الرحلات»</b><span class="rb-line" data-text="احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.">احجز الرحلات والمؤتمرات وتابع مين دفع ومين لسه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>نظام حجز الرحلات والفعاليات الذكي</h3>
@@ -1532,9 +1626,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- البروفايلات والبحث -->
         <div id="profiles" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('profiles')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('profiles')">محتاج مساعدة في البحث وملفات المخدومين؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#3b82f6">
+                <button class="rb-btn" onclick="openHelp('profiles')" aria-label="شرح تبويب البحث"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🔍</i></span></button>
+                <div class="rb-say" onclick="openHelp('profiles')"><b>تكلا بوت 🤖 · شرح «البحث»</b><span class="rb-line" data-text="دوّر على أي مخدوم وافتح ملفه الكامل.">دوّر على أي مخدوم وافتح ملفه الكامل.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:24px;">
@@ -1559,9 +1653,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- أعياد الميلاد -->
         <div id="birthdays" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('birthdays')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('birthdays')">محتاج مساعدة في أعياد الميلاد؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#ec4899">
+                <button class="rb-btn" onclick="openHelp('birthdays')" aria-label="شرح تبويب أعياد الميلاد"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🎂</i></span></button>
+                <div class="rb-say" onclick="openHelp('birthdays')"><b>تكلا بوت 🤖 · شرح «أعياد الميلاد»</b><span class="rb-line" data-text="مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!">مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>أعياد الميلاد 🎂</h3>
@@ -1570,9 +1664,9 @@ body:not(.in-app) #login-section{max-width:400px;margin:14px auto 40px!important
 
         <!-- الإعدادات -->
         <div id="settings" class="tab-content">
-            <div class="robot-help-container">
-                <button class="robot-btn" onclick="openHelp('settings')"><span class="bot"><i class="b-ant"></i><i class="b-ear l"></i><i class="b-ear r"></i><i class="b-body"></i><i class="b-arm l"></i><i class="b-arm r"></i><i class="b-head"><i class="b-face"><i class="b-eye l"></i><i class="b-eye r"></i><i class="b-cheek l"></i><i class="b-cheek r"></i><i class="b-mouth"></i></i></i></span></button>
-                <div class="speech-bubble" onclick="openHelp('settings')">محتاج مساعدة في الإعدادات والنسخ الاحتياطي؟ اضغط هنا لشرح التبويب 💡</div>
+            <div class="rb-wrap" style="--c:#64748b">
+                <button class="rb-btn" onclick="openHelp('settings')" aria-label="شرح تبويب الإعدادات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">⚙️</i></span></button>
+                <div class="rb-say" onclick="openHelp('settings')"><b>تكلا بوت 🤖 · شرح «الإعدادات»</b><span class="rb-line" data-text="نسخة احتياطية، تقارير PDF، وتصفير الشيتات.">نسخة احتياطية، تقارير PDF، وتصفير الشيتات.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <h3>إدارة البيانات والإعدادات</h3>
@@ -1672,47 +1766,143 @@ notify pgrst, 'reload schema';</pre>
         let activeQRTarget = '';
         let activeQRMemberName = '';
 
-        // نصوص مساعدة لكل تبويب للرجل الآلي
+        // شرح كل تبويب بواسطة الروبوت (تكلا بوت)
         const tabHelpData = {
             'add-member': {
-                title: 'شرح تبويب (إضافة مخدوم)',
-                text: 'من خلال هذا التبويب يمكنك تسجيل بيانات مخدوم جديد بالكامل (الاسم، النوع، المرحلة، الأسرة، تاريخ الميلاد، الهاتف، العنوان، وأب الاعتراف). بمجرد الحفظ يتم توليد كارت QR Code خاص بالمخدوم يمكن مسحه لتسجيل حضوره أو الدخول لملفه مباشرة.'
+                title: 'إضافة مخدوم', icon: '➕', color: '#6366f1',
+                goal: 'هنا بتسجّل بيانات مخدوم جديد. أول ما تحفظ، بيتعملّه <b>كارت QR</b> تقدر تمسحه بعد كده لتسجيل حضوره أو فتح ملفه.',
+                steps: [
+                    'اكتب <b>الاسم الرباعي</b> واختار <b>النوع</b> (شاب / شابة) — ده اللي بيحدد هيدخل أسر الشباب ولا أسر الشابات.',
+                    'اكتب <b>المرحلة الجامعية</b> (مثال: فرقة أولى تجارة) و<b>اسم الأسرة</b>. لو الأسرة موجودة هتظهرلك اقتراحات، ولو جديدة اكتب اسمها وهتتضاف لوحدها.',
+                    'املا <b>تاريخ الميلاد</b> و<b>رقم التليفون</b> و<b>العنوان</b> و<b>أب الاعتراف</b>. كل الخانات إجبارية ماعدا الملاحظات.',
+                    'اضغط <b>«حفظ البيانات 💾»</b>. لو فيه خانة ناقصة هتتعلّم بالأحمر لحد ما تكتب فيها.'],
+                tips: [
+                    'لتعديل بيانات مخدوم موجود: افتح ملفه من تبويب <b>بحث</b> واضغط تعديل، وهتفتح هنا نفس الشاشة وفيها زرار «إلغاء التعديل».']
             },
             'attendance': {
-                title: 'شرح تبويب (شيت الحضور)',
-                text: 'مخصص لتسجيل حضور الاجتماعات بناءً على التاريخ المختار. يظهر عمود "المسلسل" بترتيب تلقائي قبل الأسماء، بالإضافة إلى إجمالي عدد الحضور في الأعلى، وإمكانية المسح السريع عبر كاميرا الموبايل لـ QR Code أو البحث اليدوي.'
+                title: 'شيت الحضور', icon: '📋', color: '#0ea5e9',
+                goal: 'هنا بتسجّل <b>مين حضر الاجتماع</b> في يوم معين وتتابع إجمالي الحضور والبونص.',
+                steps: [
+                    'اختار <b>«تاريخ الاجتماع»</b>. أول ما تختاره بتظهر أدوات التسجيل وقائمة حضور اليوم ده (ولو اليوم متسجل قبل كده بترجعلك أسماء اللي حضروا).',
+                    'سجّل الحضور بطريقتين: <b>«📷 تسجيل سريع بمسح QR Code»</b> بكاميرا الموبايل، أو اكتب أول حروف الاسم في خانة البحث واختاره من القائمة.',
+                    'في الجدول هتلاقي الاسم والأسرة ووقت الحضور. اكتب <b>البونص</b> قدام المخدوم لو أخد، ومن عمود <b>«إجراء»</b> تقدر تشيل حضور اتسجل بالغلط.',
+                    'فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
+                    '<b>«📑 تقارير الاجتماعات»</b> فيها كل الاجتماعات ونسب الحضور وتحميل تقرير سنوي، و<b>«📊 تحميل شيت الحضور Excel»</b> بينزّل شيت اليوم.'],
+                tips: [
+                    'لازم تكون سجّلت المخدومين الأول من تبويب «إضافة مخدوم» علشان يظهروا في البحث ويتمسح كارتهم.']
             },
             'visitation': {
-                title: 'شرح تبويب (الافتقاد التلقائي)',
-                text: 'يقوم هذا القسم برصد المتغيبين عن آخر الاجتماعات أوتوماتيكياً دون الحاجة للاختيار اليدوي. يعرض بجانب كل شخص عدد الاجتماعات التي غابها مع تلوين آخر 4 اجتماعات بأدرجات اللون الأحمر الهادئ (كلما زاد الغياب كلما غمق التدريج قليلاً لتسهيل المتابعة والافتقاد).'
+                title: 'الافتقاد', icon: '📞', color: '#ef4444',
+                goal: 'ده تبويب <b>المتابعة والافتقاد</b>: بيرصد لوحده اللي غابوا من آخر الاجتماعات علشان تتصل بيهم وتطمّن عليهم.',
+                steps: [
+                    'مش محتاج تدخّل أي حاجة — الأسماء بتظهر <b>أوتوماتيك</b> حسب الغياب المتتالي لحد آخر اجتماع.',
+                    'من أزرار الفلتر فوق اختار <b>عدد مرات الغياب</b> علشان تشوف اللي غابوها بس.',
+                    'قدام كل اسم <b>عدد الاجتماعات</b> اللي غابها، واللون بيوريك درجة الخطورة:<br><i class="hm-dot" style="background:#4caf7a"></i> اجتماع &nbsp;<i class="hm-dot" style="background:#ff9999"></i> اتنين &nbsp;<i class="hm-dot" style="background:#f25c5c"></i> تلاتة &nbsp;<i class="hm-dot" style="background:#b30000"></i> ٤–٥ ⚠️ &nbsp;<i class="hm-dot" style="background:#5a0000"></i> ٦ فأكتر 🚨',
+                    '<b>«📥 تصدير الافتقاد Excel»</b> بينزّل القائمة في ملف تطبعه أو تبعته لخدام الافتقاد.'],
+                tips: [
+                    'النقطة الحمراء جنب اسم التبويب معناها إن فيه ناس محتاجة افتقاد.']
+            },
+            'committed': {
+                title: 'الملتزمين', icon: '🏆', color: '#f59e0b',
+                goal: 'بيعرض <b>الملتزمين</b>: اللي حضروا ٤ أو ٥ اجتماعات ورا بعض من غير ما يغيبوا ولا مرة.',
+                steps: [
+                    'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، مفيش حاجة تكتبها هنا.',
+                    'استخدمها تشجّع وتكرّم المواظبين، وتعرف مين ثابت على الاجتماعات.',
+                    'من رابط <b>«📥 تصدير Excel»</b> فوق تنزّل القائمة في ملف.'],
+                tips: [
+                    'لو مخدوم غاب اجتماع هيخرج من القائمة لحد ما يرجع يواظب من جديد.']
+            },
+            'bonus': {
+                title: 'البونص', icon: '🎁', color: '#a855f7',
+                goal: 'بيعرض <b>إجمالي البونص</b> اللي أخده كل مخدوم.',
+                steps: [
+                    'مفيش إدخال هنا: البونص بتكتبه في <b>شيت الحضور</b> قدام اسم المخدوم، وهنا بيتجمع تلقائي.',
+                    'الملخص اللي فوق بيوريك الإجماليات.',
+                    'من القائمة المنسدلة تغيّر الفلتر علشان تعرض الفترة أو الفئة اللي عايزها.'],
+                tips: [
+                    'لو ظهرت رسالة «تفعيل خانة البونص»، انسخ الكود اللي فيها وشغّله مرة واحدة في Supabase ← SQL Editor، وبعدين جرّب تاني.']
             },
             'families': {
-                title: 'شرح تبويب (الأسر)',
-                text: 'يعرض تصنيف المخدومين إلى أسر الشباب وأسر الشابات مع إجمالي الأعداد. عند الضغط على أي أسرة تظهر تفاصيل أعضائها. يحتوي على زر مخصص لتصدير بيانات جميع الأسر إلى ملف Excel واحد مقسم لشيتات منفصلة لكل أسرة.'
+                title: 'الأسر', icon: '👥', color: '#10b981',
+                goal: 'بتشوف <b>كل الأسر</b> (شباب وشابات) وأعدادهم، وتدير أعضاء كل أسرة.',
+                steps: [
+                    'فوق بتلاقي <b>إجمالي الشباب</b> و<b>إجمالي الشابات</b> و<b>الإجمالي الكلي</b>.',
+                    'اضغط على أي أسرة علشان تفتح أعضاءها. جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
+                    '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
+                    '<b>«📥 تصدير كل بيانات الأسر»</b> بيطلعلك ملف Excel واحد وكل أسرة في شيت لوحدها.',
+                    'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.'],
+                tips: []
             },
             'trips': {
-                title: 'شرح تبويب (الرحلات والفعاليات)',
-                text: 'من هنا يتم إدارة حجوزات الرحلات والمؤتمرات. يتضمن عمود المسلسل، وإجمالي الحجز والاشتراكات في الأعلى، مع تسجيل المبالغ، الأقساط، ودفعات المخدومين وحالة السداد (خالص، متبقي، لم يتم الدفع).'
+                title: 'الرحلات', icon: '🚌', color: '#f97316',
+                goal: 'إدارة <b>حجز الرحلات والمؤتمرات والأيام الروحية</b> ومتابعة الفلوس: مين دفع ومين لسه.',
+                steps: [
+                    'اختار <b>نوع الفعالية</b> (رحلة / مؤتمر / يوم روحي / اجتماع خارجي)، واكتب <b>قيمة الاشتراك</b> و<b>اسم الفعالية</b>.',
+                    'ضيف المخدومين بـ <b>«📷 إضافة مخدوم للحجز بـ QR Code»</b> أو بالبحث بالاسم.',
+                    'في الشيت سجّل <b>المدفوع</b> والأقساط، والحالة بتتغير لوحدها: خالص / متبقي / لم يتم الدفع.',
+                    '<b>«🏷️ الخصومات»</b> لتطبيق خصم على مخدوم، وعمود <b>«استرداد»</b> لو حد لغى وفلوسه رجعتله.',
+                    '<b>«📅 رحلات السنة»</b> بتفتحلك الفعاليات السابقة، و<b>«📊 تحميل شيت الرحلة Excel»</b> بينزّل الشيت.'],
+                tips: [
+                    'زرار <b>«🗑️ تصفير شيت الحجز فقط»</b> بيمسح حجز الفعالية الحالية — خد بالك قبل ما تضغطه.']
             },
             'profiles': {
-                title: 'شرح تبويب (البحث والملفات)',
-                text: 'يتيح لك البحث المتقدم عن أي مخدوم بالاسم، أو أب الاعتراف، أو اسم الأسرة، أو المرحلة الدراسية، مع عرض كارت برفايل كامل وإمكانية التعديل أو الحذف أو فتح الكارت عبر QR.'
+                title: 'البحث', icon: '🔍', color: '#3b82f6',
+                goal: '<b>محرك البحث</b>: تلاقي أي مخدوم بسرعة وتفتح ملفه الكامل.',
+                steps: [
+                    'اكتب أول حرف من الاسم والنتايج بتظهر فوراً (وبـ Enter بيفتح أول نتيجة).',
+                    'من <b>«⚙️ بحث متقدم»</b> تحدد تدوّر في إيه (الاسم / أب الاعتراف / الأسرة / المرحلة)، وتفلتر بالنوع والأسرة، وترتّب بالاسم أو الأكثر حضوراً أو الأعلى بونص.',
+                    'اضغط على أي نتيجة يفتحلك <b>كارت الملف</b>: البيانات، الحضور، البونص، الرحلات، والـ QR.',
+                    'من الكارت تقدر <b>✏️ تعدّل</b> أو <b>🗑️ تحذف</b> أو تحفظ الـ QR.',
+                    '<b>«📷 فتح بروفايل عبر QR Code»</b> لو معاك كارت المخدوم وعايز تفتح ملفه من غير بحث.'],
+                tips: []
             },
             'birthdays': {
-                title: 'شرح تبويب (أعياد الميلاد)',
-                text: 'يعرض بشكل تلقائي أعياد ميلاد المخدومين الموافق تاريخ اليوم، لتتمكن من تقديم التهنئة لهم ومشاركتهم الفرحة.'
+                title: 'أعياد الميلاد', icon: '🎂', color: '#ec4899',
+                goal: 'بينبّهك بـ <b>أعياد الميلاد</b> علشان تهنّي المخدومين في وقتها.',
+                steps: [
+                    'اللي عيد ميلاده <b>النهارده</b> بيظهر في كارت تهنئة.',
+                    'تحت عنوان <b>«قريباً»</b> بتشوف اللي عيد ميلادهم خلال ٣ أيام جايين، مع التاريخ والسن اللي هيكملها وأسرته.',
+                    'النقطة الحمراء جنب اسم التبويب بتنبّهك لو فيه أعياد ميلاد قريبة.'],
+                tips: [
+                    'الظهور معتمد على <b>تاريخ الميلاد</b> المسجّل، فلو مخدوم تاريخه ناقص مش هيظهر هنا.']
             },
             'settings': {
-                title: 'شرح تبويب (الإعدادات)',
-                text: 'يتيح لك عمل نسخ احتياطي للبيانات بصيغة JSON، أو استرجاعها، أو تصفير شيتات الحضور والرحلات فقط عند الحاجة.'
+                title: 'الإعدادات', icon: '⚙️', color: '#64748b',
+                goal: '<b>أمان البيانات</b> والتقارير والتصفير في مكان واحد.',
+                steps: [
+                    '<b>«⬇️ تحميل نسخة احتياطية»</b> بينزّل ملف JSON فيه كل البيانات — اعمله بشكل دوري.',
+                    'للاسترجاع: اختار ملف الـ JSON واضغط <b>«⬆️ استرجاع البيانات»</b>.',
+                    '<b>التقارير PDF:</b> اختار الشهر أو السنة واضغط «عرض التقرير»، وبعدها «حفظ كـ PDF» واختار Save as PDF من نافذة الطباعة.',
+                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات وشيتات الرحلات فقط</b>، وبيانات المخدومين بتفضل زي ما هي.'],
+                tips: [
+                    'اعمل <b>نسخة احتياطية</b> قبل أي تصفير.']
             }
         };
+        const helpOrder = ['add-member', 'attendance', 'visitation', 'committed', 'bonus', 'families', 'trips', 'profiles', 'birthdays', 'settings'];
+        let helpCurrent = 'add-member';
 
         function openHelp(tabKey) {
-            let data = tabHelpData[tabKey] || { title: 'مساعدة النظام', text: 'لا توجد تفاصيل متاحة لهذا التبويب.' };
-            document.getElementById('help-modal-title').innerText = data.title;
-            document.getElementById('help-modal-content').innerText = data.text;
+            const d = tabHelpData[tabKey];
+            if (!d) return;
+            helpCurrent = tabKey;
+            const body = document.getElementById('help-modal-body');
+            body.style.setProperty('--c', d.color);
+            document.getElementById('help-modal-title').textContent = 'تبويب «' + d.title + '»';
+            const prop = body.querySelector('.rb-prop'); if (prop) prop.textContent = d.icon;
+            document.getElementById('help-modal-content').innerHTML =
+                '<div class="hm-goal"><span>🎯</span><p>' + d.goal + '</p></div>' +
+                '<h5 class="hm-h">إزاي تستخدمه خطوة بخطوة</h5>' +
+                '<ol class="hm-steps">' + d.steps.map((s, i) => '<li style="animation-delay:' + (i * 110) + 'ms"><em>' + (i + 1) + '</em><span>' + s + '</span></li>').join('') + '</ol>' +
+                (d.tips && d.tips.length ? '<div class="hm-tips"><h5>💡 معلومة تفيدك</h5>' + d.tips.map(t => '<p>' + t + '</p>').join('') + '</div>' : '');
+            const nk = helpOrder[(helpOrder.indexOf(tabKey) + 1) % helpOrder.length];
+            document.getElementById('hm-next').textContent = 'التالي: ' + tabHelpData[nk].title + ' ◂';
             document.getElementById('help-modal').style.display = 'flex';
+            body.scrollTop = 0;
+            const rb = document.querySelector('#hm-robot .rb');
+            if (rb) { rb.classList.add('talk'); clearTimeout(window._hmTalk); window._hmTalk = setTimeout(() => rb.classList.remove('talk'), 1600); }
+        }
+        function helpNext() {
+            openHelp(helpOrder[(helpOrder.indexOf(helpCurrent) + 1) % helpOrder.length]);
         }
         function closeHelpModal() {
             document.getElementById('help-modal').style.display = 'none';
@@ -4278,6 +4468,24 @@ function openMemberDetail(memberId,event){
   wrap.appendChild(b);
   [us, pw].forEach(el => el.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); if(typeof loginDirect === 'function') loginDirect(); } }));
   pw.setAttribute('autocomplete', 'current-password'); us.setAttribute('autocomplete', 'username');
+})();
+</script>
+<script>
+/* تكلا بوت: الروبوت بيكتب جملة التبويب لما تفتحه */
+(function(){
+  const timers={};
+  window.rbSpeak=function(tabId){
+    const w=document.querySelector('#'+tabId+' .rb-wrap'); if(!w) return;
+    const line=w.querySelector('.rb-line'), rb=w.querySelector('.rb'), txt=line.dataset.text||'';
+    clearInterval(timers[tabId]); line.textContent=''; line.classList.add('typing'); rb.classList.add('talk');
+    let i=0; timers[tabId]=setInterval(()=>{
+      line.textContent=txt.slice(0,++i);
+      if(i>=txt.length){clearInterval(timers[tabId]);line.classList.remove('typing');rb.classList.remove('talk');}
+    },28);
+  };
+  const f=window.showTab;
+  if(typeof f==='function'){ window.showTab=async function(...a){ const r=await f.apply(this,a); try{rbSpeak(a[0]);}catch(e){} return r; }; }
+  setTimeout(()=>{try{rbSpeak('add-member')}catch(e){}},700);
 })();
 </script>
 </body>
