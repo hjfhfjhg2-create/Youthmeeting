@@ -3099,54 +3099,63 @@ notify pgrst, 'reload schema';</pre>
             let st = rpStats(meetings);
             let months = [...new Set(meetings.map(d => d.slice(0, 7)))].sort();
             let monthRows = months.map(k => { let ms = meetings.filter(d => d.startsWith(k)); return { k, ms, s: rpStats(ms) }; });
+            const mName = r => AR_MONTHS[Number(r.k.slice(5)) - 1];
 
             let html = rpHead('التقرير السنوي للحضور', 'سنة ' + year);
-            html += rpKpis([[meetings.length, 'عدد الاجتماعات'], [st.totalAtt, 'إجمالي الحضور خلال السنة'], [st.avgPct + '%', 'متوسط نسبة الحضور'], [db.members.length, 'إجمالي المخدومين']]);
 
-            html += '<div class="rp-sec">نسبة الحضور شهرياً</div>';
-            html += `<div class="rp-chart">${monthRows.map(r => `<div><span>${r.s.avgPct}%</span><i style="height:${Math.max(2, r.s.avgPct * 1.1)}px;background:${rpCol(r.s.avgPct)}"></i></div>`).join('')}</div>`;
-            html += `<div class="rp-labels">${monthRows.map(r => `<span>${AR_MONTHS[Number(r.k.slice(5)) - 1]}</span>`).join('')}</div>`;
-            html += rpTable(['الشهر', 'الاجتماعات', 'إجمالي الحضور', 'متوسط الحضور', 'النسبة'], monthRows.map(r => [monthLabel(r.k), r.ms.length, r.s.totalAtt, r.s.avgN, r.s.avgPct + '%']));
+            // ---- نسبة الحضور لكل شهر ----
+            let best = null, worst = null;
+            monthRows.forEach(r => { if (!best || r.s.avgPct > best.s.avgPct) best = r; if (!worst || r.s.avgPct < worst.s.avgPct) worst = r; });
+            html += '<div class="rp-sec">نسبة الحضور في كل شهر</div>';
+            html += `<div class="rp-chart">${monthRows.map(r => `<div><span>${r.s.avgPct}%</span><i style="height:${Math.max(2, r.s.avgPct * 1.1)}px;background:${r === best ? '#2e9e6b' : rpCol(r.s.avgPct)}"></i></div>`).join('')}</div>`;
+            html += `<div class="rp-labels">${monthRows.map(r => `<span>${mName(r)}</span>`).join('')}</div>`;
+            html += rpTable(['الشهر', 'الاجتماعات', 'إجمالي الحضور', 'متوسط الحضور', 'النسبة', ''],
+                monthRows.map(r => [monthLabel(r.k) + (r === best && monthRows.length > 1 ? ' 🏆' : ''), r.ms.length, r.s.totalAtt, r.s.avgN, r.s.avgPct + '%', rpBar(r.s.avgPct)]));
+            if (best && monthRows.length > 1) html += `<div class="rp-note">🏆 أعلى شهر حضوراً: <b>${mName(best)}</b> (${best.s.avgPct}%)</div>`;
 
-            html += '<div class="rp-sec">نسبة حضور الأسر خلال السنة (بالشهور)</div>';
-            let famMonth = st.fams.map(f => {
-                let cells = monthRows.map(r => {
+            // ---- أكتر الأسر انتظاماً ----
+            html += '<div class="rp-sec">أكتر الأسر انتظاماً في الحضور</div>';
+            let famRows = st.fams.filter(f => f.total > 0).map(f => {
+                let good = monthRows.filter(r => {
                     let a = 0; r.ms.forEach(d => f.members.forEach(m => { if (rpAtt(d, m.id)) a++; }));
-                    let t = f.members.length * r.ms.length; let p = t ? Math.round(a / t * 100) : 0;
-                    return `<span style="color:${rpCol(p)};font-weight:800">${p}%</span>`;
-                });
-                return [esc(f.f) + ' <small>(' + f.g + ')</small>', f.members.length, ...cells, '<b>' + f.pct + '%</b>'];
+                    let t = f.members.length * r.ms.length; return t && Math.round(a / t * 100) >= 50;
+                }).length;
+                return { f, good };
             });
-            html += rpTable(['الأسرة', 'الأفراد', ...monthRows.map(r => AR_MONTHS[Number(r.k.slice(5)) - 1]), 'الإجمالي'], famMonth, [0]);
+            html += rpTable(['#', 'الأسرة', 'النوع', 'الأفراد', 'مرات الحضور', 'النسبة', '', 'شهور فوق ٥٠%'],
+                famRows.slice(0, 10).map((x, i) => [i + 1, esc(x.f.f), x.f.g, x.f.members.length, x.f.att + ' / ' + x.f.total, x.f.pct + '%', rpBar(x.f.pct), x.good + ' من ' + monthRows.length]), [1]);
 
-            const N = st.ms.length || 1, M = meetings.length || 1;
-            const buckets = [
-                ['٨٠% فأكثر (ملتزمين جداً)', x => x.pct >= 80, '#2e9e6b'],
-                ['من ٥٠% إلى أقل من ٨٠%', x => x.pct >= 50 && x.pct < 80, '#1d6fb8'],
-                ['من ٢٥% إلى أقل من ٥٠%', x => x.pct >= 25 && x.pct < 50, '#f59e0b'],
-                ['أقل من ٢٥% (محتاجين افتقاد)', x => x.pct < 25 && x.c > 0, '#e0463f'],
-                ['ما حضروش أي اجتماع', x => x.c === 0, '#8a94a6']
-            ];
-            html += '<div class="rp-sec">توزيع المخدومين حسب نسبة الالتزام خلال السنة</div>';
-            html += rpTable(['مستوى الالتزام', 'عدد المخدومين', 'من إجمالي المسجلين', ''], buckets.map(([l, f, col]) => {
-                const n = st.ms.filter(f).length, p = Math.round(n / N * 100);
-                return [l, n, p + '%', `<div class="rp-bar-cell"><i style="width:${p}%;background:${col}"></i></div>`];
-            }), [0]);
-
-            const gb = st.per.reduce((a, x) => a + x.boys, 0), gg = st.per.reduce((a, x) => a + x.girls, 0);
-            const nb = db.members.filter(m => m.gender !== 'شابة').length, ng = db.members.length - nb;
-            html += '<div class="rp-sec">الحضور حسب النوع</div>';
-            html += rpTable(['النوع', 'عدد المسجلين', 'إجمالي مرات الحضور', 'متوسط الحضور للاجتماع', 'متوسط النسبة'], [
-                ['شباب', nb, gb, Math.round(gb / M), nb ? Math.round(gb / (nb * M) * 100) + '%' : '0%'],
-                ['شابات', ng, gg, Math.round(gg / M), ng ? Math.round(gg / (ng * M) * 100) + '%' : '0%']
-            ], [0]);
-
-            const bonTotal = st.ms.reduce((a, x) => a + x.bonus, 0), bonN = st.ms.filter(x => x.bonus > 0).length;
-            html += '<div class="rp-sec">إحصائيات البونص</div>';
-            html += rpKpis([[bonTotal, 'إجمالي البونص خلال السنة'], [bonN, 'عدد اللي أخدوا بونص'], [bonN ? Math.round(bonTotal / bonN * 10) / 10 : 0, 'متوسط البونص للفرد'], [Math.round(bonN / N * 100) + '%', 'نسبة اللي أخدوا بونص']]);
-            
+            // ---- التفاصيل والخلاصة ----
+            const pts = monthRows.map(r => r.s.avgPct), n = pts.length;
+            const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
+            let lines = [];
+            lines.push(`إجمالي نسبة الحضور خلال سنة ${year}: <b>${st.avgPct}%</b> (${st.totalAtt} حضور في ${meetings.length} اجتماع، بمتوسط ${st.avgN} فرد في الاجتماع من ${db.members.length} مخدوم مسجل).`);
+            if (n > 1) {
+                lines.push(`أعلى شهر حضوراً: <b>${mName(best)}</b> (${best.s.avgPct}%)، وأقل شهر: <b>${mName(worst)}</b> (${worst.s.avgPct}%).`);
+            }
+            if (famRows.length) {
+                let top = famRows.slice(0, 3).map(x => esc(x.f.f) + ' (' + x.f.pct + '%)').join('، ');
+                lines.push(`أكتر الأسر انتظاماً: ${top}.`);
+            }
+            let icon = 'ℹ️', color = '#5b6b86', verdict = 'البيانات لسه مش كفاية للحكم على التحسن';
+            if (n >= 2) {
+                const last = pts[n - 1], prev = pts[n - 2], d1 = last - prev;
+                lines.push(`آخر شهر (${mName(monthRows[n - 1])}) كان ${last}% مقابل ${prev}% في ${mName(monthRows[n - 2])}، يعني ${d1 > 0 ? 'زاد' : d1 < 0 ? 'نقص' : 'ثابت'}${d1 ? ' بمقدار ' + Math.abs(d1) + ' نقطة' : ''}.`);
+                if (n >= 4) {
+                    const k = Math.min(3, Math.floor(n / 2)), recent = avg(pts.slice(n - k)), before = avg(pts.slice(0, n - k)), d2 = Math.round(recent - before);
+                    lines.push(`متوسط آخر ${k} شهور ${Math.round(recent)}% مقابل ${Math.round(before)}% للشهور اللي قبلها.`);
+                    if (d2 >= 3) { icon = '✅'; color = '#2e9e6b'; verdict = 'في تحسن في آخر الشهور'; }
+                    else if (d2 <= -3) { icon = '⚠️'; color = '#e0463f'; verdict = 'في تراجع في آخر الشهور'; }
+                    else { icon = '➖'; color = '#f59e0b'; verdict = 'الحضور ثابت تقريباً في آخر الشهور'; }
+                } else {
+                    if (d1 >= 3) { icon = '✅'; color = '#2e9e6b'; verdict = 'في تحسن في آخر شهر'; }
+                    else if (d1 <= -3) { icon = '⚠️'; color = '#e0463f'; verdict = 'في تراجع في آخر شهر'; }
+                    else { icon = '➖'; color = '#f59e0b'; verdict = 'الحضور ثابت تقريباً'; }
+                }
+            }
+            html += '<div class="rp-sec">التفاصيل والخلاصة</div>';
+            html += `<div style="border:2px solid ${color};border-radius:12px;padding:14px 16px;background:${color}14"><div style="font-weight:800;font-size:15px;color:${color};margin-bottom:8px">${icon} ${verdict}</div><div style="font-size:13px;line-height:2">${lines.map(l => '• ' + l).join('<br>')}</div></div>`;
             html += '<div class="rp-note">النسب محسوبة على المخدومين المسجلين حالياً، والمخدوم اللي اتضاف في نص السنة نسبته ممكن تكون أقل من الحقيقية.</div>';
-            html += rpTrendBox(monthRows);
             showReport(html, true, 'تقرير_سنوي_' + year);
         }
 
