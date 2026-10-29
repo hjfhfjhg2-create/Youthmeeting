@@ -2682,26 +2682,39 @@ notify pgrst, 'reload schema';</pre>
                 : `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد أحد في هذه الفئة.</p>`);
         }
 
+        // ألوان الإكسل = نفس ألوان تبويب الافتقاد (visStyle) بس كألوان صلبة تنفع في الشيت
+        function visExcelStyle(n) {
+            if (n === 1) return { bg: 'FFD8EDE2', tx: 'FF14213D', badgeBg: 'FF4CAF7A', badgeTx: 'FFFFFFFF' };
+            if (n === 2) return { bg: 'FFFFE0E0', tx: 'FF14213D', badgeBg: 'FFFF9999', badgeTx: 'FF800000' };
+            if (n === 3) return { bg: 'FFFAC1C1', tx: 'FF14213D', badgeBg: 'FFF25C5C', badgeTx: 'FFFFFFFF' };
+            if (n <= 5) return { bg: 'FFDD8C8C', tx: 'FF3B0000', badgeBg: 'FFB30000', badgeTx: 'FFFFFFFF' };
+            return { bg: 'FFA47373', tx: 'FFFFFFFF', badgeBg: 'FF5A0000', badgeTx: 'FFFFFFFF' };
+        }
+
         async function exportVisitationExcel() {
             let { allMeetings, list } = getVisitationData();
             if (list.length === 0) { alert('لا يوجد متغيبون للتصدير.'); return; }
             let today = new Date().toISOString().slice(0, 10);
             let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب'];
-            let mk = (name, title, items) => ({
+            let mk = (name, title, items, tabColor) => ({
                 name, title,
                 subtitle: 'العدد: ' + items.length + '   |   تاريخ التصدير: ' + today,
                 headers,
                 rows: items.map((x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، ')]),
                 widths: [9, 28, 20, 22, 34, 17, 14, 45],
                 align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right'],
-                textCols: [5]
+                textCols: [5],
+                rowStyles: items.map(x => visExcelStyle(x.n)),
+                badgeCols: [1, 6],
+                tabColor
             });
-            let sorted = [...list].sort((a, b) => b.n - a.n);
+            // الأكتر غياب في الأول، ولو نفس العدد بالترتيب الأبجدي
+            let sorted = [...list].sort((a, b) => (b.n - a.n) || String(a.m.name || '').localeCompare(String(b.m.name || ''), 'ar'));
             let sheets = [mk('الكل', 'كل المتغيبين', sorted)];
             let names = { 1: 'غاب اجتماع', 2: 'غاب اجتماعين', 3: 'غاب ٣ اجتماعات', 4: 'غاب ٤ اجتماعات ⚠️', 5: 'غاب ٥ اجتماعات ⚠️', 6: 'غياب طويل ٦+' };
             [1, 2, 3, 4, 5, 6].forEach(g => {
                 let items = sorted.filter(x => visGroupOf(x.n) === g);
-                if (items.length) sheets.push(mk(names[g], names[g], items));
+                if (items.length) sheets.push(mk(names[g], names[g], items, visExcelStyle(g).badgeBg));
             });
             await downloadStyledWorkbook(`افتقاد_${today}.xlsx`, sheets);
         }
@@ -4031,6 +4044,7 @@ notify pgrst, 'reload schema';</pre>
             const wb = new ExcelJS.Workbook();
             wb.creator = 'كنيسة الأنبا تكلا - Youth Meeting';
             wb.created = new Date();
+            wb.views = [{ x: 0, y: 0, width: 10000, height: 20000, firstSheet: 0, activeTab: 0, visibility: 'visible' }];
 
             const usedNames = new Set();
             const cleanName = (n) => {
@@ -4044,7 +4058,7 @@ notify pgrst, 'reload schema';</pre>
             sheets.forEach(sh => {
                 const cols = sh.headers.length;
                 const ws = wb.addWorksheet(cleanName(sh.name), {
-                    properties: { tabColor: { argb: C.pink } },
+                    properties: { tabColor: { argb: sh.tabColor || C.pink } },
                     views: [{ rightToLeft: true, showGridLines: false, state: 'frozen', ySplit: 4 }],
                     pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0,
                                  horizontalCentered: true, margins: { left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 } }
@@ -4100,6 +4114,14 @@ notify pgrst, 'reload schema';</pre>
                         c.alignment = { horizontal: sh.align[ci] || 'center', vertical: 'middle', wrapText: true, readingOrder: 'rtl' };
                         c.border = border;
                         if (ri % 2 === 1) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.zebra } };
+
+                        // تلوين الصف حسب عدد مرات الغياب (الافتقاد): الصف مظلل، والاسم والعدد بلون الشارة
+                        if (sh.rowStyles && sh.rowStyles[ri]) {
+                            const rs = sh.rowStyles[ri];
+                            const isBadge = sh.badgeCols && sh.badgeCols.includes(ci);
+                            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isBadge ? rs.badgeBg : rs.bg } };
+                            c.font = { name: FONT, size: 11, bold: !!isBadge, color: { argb: isBadge ? rs.badgeTx : rs.tx } };
+                        }
 
                         // تلوين خانة الحالة
                         if (sh.statusCol && ci === sh.statusCol - 1) {
