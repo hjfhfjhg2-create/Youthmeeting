@@ -1557,6 +1557,14 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 </div>
             </div>
             
+            <!-- بحث عن مخدوم: حضر كام مرة وبالتواريخ -->
+            <div class="input-group autocomplete-container" style="margin-bottom:14px;">
+                <label>🔎 ابحث عن مخدوم وشوف حضر كام مرة وفي أنهي تواريخ:</label>
+                <input type="text" id="att-person-search" placeholder="اكتب الاسم واختاره من القائمة..." autocomplete="off" oninput="attPersonSearch(this.value)" onfocus="attPersonSearch(this.value)">
+                <div id="att-person-results" class="autocomplete-results" style="display:none"></div>
+            </div>
+            <div id="att-person-card" style="display:none;"></div>
+
             <div id="attendance-controls" style="display:none; margin-bottom: 20px;">
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
                     <button class="btn-qr" onclick="openQRScanner('attendance')" style="flex:1; min-width:200px; padding:16px; font-size:15px;">📷 تسجيل سريع بمسح QR Code</button>
@@ -1739,9 +1747,15 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                         <input type="number" id="trip-fee" placeholder="مثال: 300" oninput="updateAllTripFees()">
                     </div>
                 </div>
-                <div class="input-group" style="margin-top: 16px; margin-bottom: 0;">
-                    <label>اسم الفاعلية (سيظهر في الإكسيل والمستندات)</label>
-                    <input type="text" id="trip-event-name" oninput="autoArchiveTrip()" placeholder="مثال: رحلة دير الأنبا بيشوي - رحلة صيف 2026">
+                <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:16px;">
+                    <div class="input-group" style="flex:2; min-width:200px; margin-bottom:0;">
+                        <label>اسم الفاعلية (سيظهر في الإكسيل والمستندات)</label>
+                        <input type="text" id="trip-event-name" oninput="onTripNameInput()" placeholder="مثال: رحلة دير الأنبا بيشوي - رحلة صيف 2026">
+                    </div>
+                    <div class="input-group" style="flex:1; min-width:160px; margin-bottom:0;">
+                        <label>📅 تاريخ الرحلة</label>
+                        <input type="date" id="trip-event-date" onchange="onTripDateChange()">
+                    </div>
                 </div>
             </div>
 
@@ -1753,6 +1767,8 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                 <button onclick="openTripDiscountsModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:none;">🏷️ الخصومات</button>
                 <button onclick="openTripYearModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📅 رحلات السنة</button>
+                <button onclick="openTripGenderModal('شاب')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#4ba3ea,#1d6fb8); box-shadow:none;">👦 عدد الشباب <span id="trip-cnt-m" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
+                <button onclick="openTripGenderModal('شابة')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#f472a6,#c4306b); box-shadow:none;">👧 عدد الشابات <span id="trip-cnt-f" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
             </div>
 
             <div class="input-group autocomplete-container">
@@ -3401,7 +3417,7 @@ notify pgrst, 'reload schema';</pre>
             if(!currentMeetingDate) return;
             document.getElementById('attendance-controls').style.display = 'block';
             document.getElementById('attendance-sheet').style.display = 'block';
-            currentAttendees = db.members.filter(m => db.attendanceRecords[currentMeetingDate] && db.attendanceRecords[currentMeetingDate][m.id]);
+            currentAttendees = sortAttendeesByTime(db.members.filter(m => db.attendanceRecords[currentMeetingDate] && db.attendanceRecords[currentMeetingDate][m.id]));
             renderAttendanceTable();
         }
 
@@ -3453,10 +3469,12 @@ notify pgrst, 'reload schema';</pre>
             if(!db.tripsData[key]) db.tripsData[key] = { fee: 0, reservations: {} };
             return db.tripsData[key];
         }
-        function changeTripType() { 
+        function changeTripType() {
             let trip = getTripObj();
-            document.getElementById('trip-fee').value = trip.fee || ''; 
-            renderTripTable(); 
+            document.getElementById('trip-fee').value = trip.fee || '';
+            let cur = _archKeys[getActiveTripKey()];
+            if (cur) { document.getElementById('trip-event-name').value = cur.name || ''; document.getElementById('trip-event-date').value = cur.date || localISO(); }
+            renderTripTable();
         }
         // حفظ بيانات المخدوم في الحجز (الخصم والاسترداد متخزنين جوه عمود installments من غير ما نغير الجدول)
         function unpackInst(raw) {
@@ -3624,7 +3642,7 @@ notify pgrst, 'reload schema';</pre>
                 if (disc > 0) { a.discountCount++; a.discountSum += disc; }
                 a.people.push({ n: m.name || '', f: m.family || '', fee: trip.fee || 0, d: disc, due, p: r.paid || 0 });
             });
-            return { type, name, date: new Date().toISOString().slice(0, 10), ...a };
+            return { type, name, date: tripDateValue(), ...a };
         }
 
         // كل الرحلات (المحفوظة + الشيت المفتوح دلوقتي) من غير تكرار
@@ -3634,7 +3652,7 @@ notify pgrst, 'reload schema';</pre>
             let cur = _archKeys[live.type];
             if (live.attendees > 0) {
                 archive = archive.filter(x => !((cur && x.key === cur.key) || (x.type === live.type && x.name === live.name && String(x.date).slice(0, 4) === live.date.slice(0, 4))));
-                if (cur) live.date = cur.date;
+                /* التاريخ بيتاخد من خانة تاريخ الرحلة */
                 live.key = cur ? cur.key : null;
                 archive = archive.concat([live]);
             }
@@ -3659,7 +3677,7 @@ notify pgrst, 'reload schema';</pre>
                         : '<div style="padding:10px; font-size:13px; color:var(--text-muted);">أسماء المخصومين مش محفوظة للرحلة دي (اتحفظت قبل التحديث).</div>';
                     return `<details style="border:1px solid var(--card-border); border-radius:12px; margin-bottom:8px; background:rgba(245,158,11,.08);">
                         <summary style="cursor:pointer; padding:10px 12px; font-weight:800; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-                            <span>🚌 ${esc(x.name || x.type)} <small style="font-weight:600; color:var(--text-muted);">(${esc(x.date)})</small></span>
+                            <span>🚌 ${esc(x.name || x.type)} <small style="font-weight:600; color:var(--text-muted);">(${tripDateLabelOf(x.date)})</small></span>
                             <span style="font-size:13px;">${x.discountCount} مخصوم • ${x.discountSum} ج</span></summary>
                         <div>${inner}</div></details>`;
                 }).join('')}` : '<p style="text-align:center; color:var(--text-muted); padding:24px 0;">مفيش خصومات متسجلة في أي رحلة لحد دلوقتي.</p>';
@@ -3681,17 +3699,18 @@ notify pgrst, 'reload schema';</pre>
                 let year = snap.date.slice(0, 4), type = snap.type, cur = _archKeys[type];
                 let archive = db.tripArchive || [];
                 let oldKey = null;
-                if (cur && cur.name === snap.name) { snap.date = cur.date; }
+                if (cur && cur.name === snap.name) { /* نفس الرحلة: التاريخ من خانة التاريخ */ }
                 else {
-                    if (cur) { oldKey = cur.key; snap.date = cur.date; }            // اتغير اسم الرحلة: نشيل القديم
+                    if (cur) { oldKey = cur.key; }            // اتغير اسم الرحلة: نشيل القديم
                     else {
                         let nm = snap.name, n = 2, ex;
                         while ((ex = archive.find(x => x.type === type && x.name === nm && String(x.date).slice(0, 4) === year)) && _archFresh[type]) nm = snap.name + ' (' + (n++) + ')';
-                        if (ex) snap.date = ex.date;
+                        /* التاريخ من خانة تاريخ الرحلة */
                         snap.name = nm;
                     }
                 }
                 let key = ARCH_PREFIX + snap.date.slice(0, 4) + '|' + type + '|' + snap.name;
+                if (cur && cur.key !== key && !oldKey) oldKey = cur.key;   // اتغير التاريخ لسنة تانية: نشيل القديم
                 if (oldKey && oldKey !== key) await _supabase.from('trips').delete().eq('trip_type', oldKey);
                 await _supabase.from('trips').delete().eq('trip_type', key);
                 if (!snap.attendees) {                                              // الشيت فاضي: نشيله من السجل
@@ -3720,10 +3739,10 @@ notify pgrst, 'reload schema';</pre>
             let list = items.length ? items.map((x, i) => `
                 <div onclick="openTripDetail(${i})" style="cursor:pointer; border:1px solid var(--card-border); border-radius:12px; padding:10px 12px; margin-bottom:8px; background:rgba(99,102,241,.07);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                        <strong>🚌 ${esc(x.name || x.type)}</strong>
+                        <strong>🚌 ${esc(x.name || x.type)} <span style="font-weight:700; font-size:12.5px; color:var(--primary);">📅 ${tripDateLabelOf(x.date)}</span></strong>
                         ${x.key ? `<button onclick="event.stopPropagation(); deleteTripArchive(${i})" style="padding:4px 10px; font-size:12px; background:var(--danger); box-shadow:none;">🗑️</button>` : ''}
                     </div>
-                    <div style="font-size:12.5px; color:var(--text-muted); margin:3px 0 6px;">${esc(x.type)} • ${esc(x.date)}</div>
+                    <div style="font-size:12.5px; color:var(--text-muted); margin:3px 0 6px;">${esc(x.type)} • 📅 ${tripDateLabelOf(x.date)}</div>
                     <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:14px;">
                         <span>👥 عدد المخدومين: <b>${x.attendees || 0}</b></span>
                         <span>💰 ${tripMoneyLine(x)}</span>
@@ -3756,7 +3775,7 @@ notify pgrst, 'reload schema';</pre>
                 ${note}
                 <h4 style="margin:10px 0 6px; color:var(--success);">✅ الشباب اللي دفعوا التمن كامل (${full.length})</h4>${tFull}
                 <h4 style="margin:16px 0 6px; color:#d97706;">🏷️ الشباب اللي كان ليهم خصومات (${disc.length})</h4>${tDisc}`;
-            showTripModal('🚌 ' + (x.name || x.type) + ' (' + x.date + ')', body);
+            showTripModal('🚌 ' + (x.name || x.type) + ' (' + tripDateLabelOf(x.date) + ')', body);
         }
 
         async function deleteTripArchive(i) {
@@ -3829,7 +3848,7 @@ notify pgrst, 'reload schema';</pre>
                 let refundCell = refunded
                     ? `<button onclick="undoRefundTripMember(${m.id})" style="padding:6px 10px; font-size:12px; background:var(--text-muted); box-shadow:none;">↩️ تراجع</button>`
                     : `<button onclick="refundTripMember(${m.id})" style="padding:6px 10px; font-size:12px; background:#f59e0b; box-shadow:none;">💸 استرداد</button>`;
-                let discCell = refunded ? (disc ? `<span style="font-size:12px; color:var(--text-muted);">${disc}</span>` : '-') : `<input type="number" min="0" value="${disc || ''}" placeholder="خصم" title="خصم" style="width:70px; padding:6px; font-size:12px; border:1.5px solid #f59e0b;" onchange="setTripDiscount(${m.id}, this.value)">`;
+                let discCell = refunded ? (disc ? `<span style="font-size:12px; color:var(--text-muted);">${disc}</span>` : '-') : `<input type="number" min="0" value="${disc || ''}" placeholder="خصم" title="خصم" style="width:70px; padding:6px; font-size:12px; border:1.5px solid #f59e0b;" onfocus="showDiscTip(this)" oninput="hideDiscTip()" onblur="hideDiscTip()" onchange="hideDiscTip(); setTripDiscount(${m.id}, this.value)">`;
                 let payControls = refunded ? '' : `
                                 <input type="number" id="inst-input-${m.id}" placeholder="مبلغ" style="width:65px; padding:6px; font-size:12px;">
                                 <button class="btn-success" onclick="addInstallment(${m.id})" style="padding:6px 10px; font-size:12px;">دفع ➕</button>`;
@@ -3853,6 +3872,7 @@ notify pgrst, 'reload schema';</pre>
                     </tr>`;
             });
 
+            if (typeof updateTripGenderCounts === 'function') updateTripGenderCounts();
             // إضافة صف إجمالي الحجز في نهاية الجدول
             if (memberIds.length > 0) {
                 tbody.innerHTML += `
@@ -3869,7 +3889,7 @@ notify pgrst, 'reload schema';</pre>
                 if (tripSnapshot().attendees > 0) await autoArchiveTrip(true);
                 await _supabase.from('trips').delete().eq('trip_type', type);
                 delete _archKeys[type]; _archFresh[type] = true;
-                document.getElementById('trip-event-name').value = '';
+                document.getElementById('trip-event-name').value = ''; document.getElementById('trip-event-date').value = localISO();
                 await loadData();
                 renderTripTable();
             }
@@ -4004,7 +4024,7 @@ notify pgrst, 'reload schema';</pre>
 
             await downloadStyledWorkbook(`شيت_${getActiveTripKey()}_${new Date().toISOString().slice(0,10)}.xlsx`, [{
                 name: String(eventName).slice(0, 28),
-                title: 'كشف: ' + eventName,
+                title: 'كشف: ' + eventName + ' — ' + tripDateLabelOf(tripDateValue()),
                 subtitle: 'إجمالي المطلوب بعد الخصم: ' + totalDue + '   |   إجمالي المحصل: ' + totalCollected + '   |   عدد المشتركين: ' + rows.length,
                 headers: ['مسلسل', 'الاسم', 'الأسرة', 'قيمة الاشتراك', 'الخصم', 'المطلوب بعد الخصم', 'إجمالي المدفوع', 'المتبقي', 'التفاصيل والدفعات', 'الحالة'],
                 rows: rows,
@@ -4831,6 +4851,224 @@ function openMemberDetail(memberId,event){
   if(typeof f==='function'){ window.showTab=async function(...a){ const r=await f.apply(this,a); try{rbSpeak(a[0]);}catch(e){} return r; }; }
   setTimeout(()=>{try{rbSpeak('add-member')}catch(e){}},700);
 })();
+</script>
+<style>
+/* لافتة تنبيه الخصم */
+#disc-tip{position:fixed;z-index:100002;display:none;width:max-content;max-width:230px;background:#f59e0b;color:#2b1a00;padding:8px 12px;border-radius:12px;font-size:12.5px;font-weight:700;line-height:1.7;box-shadow:0 8px 22px rgba(0,0,0,.28);pointer-events:none;text-align:center}
+#disc-tip b{display:block;font-size:13px}
+#disc-tip span{display:block;font-weight:600}
+#disc-tip i{position:absolute;width:12px;height:12px;background:#f59e0b;transform:rotate(45deg);bottom:-6px}
+#disc-tip.below i{bottom:auto;top:-6px}
+</style>
+<script>
+/* ===== تحسينات: ترتيب الحضور + بحث الحضور + تاريخ الرحلة + الشباب/الشابات + لافتة الخصم ===== */
+function localISO(d){ d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+/* ---- ترتيب الحضور بوقت التسجيل (الأول يتكتب أول واحد) ---- */
+function attTimeSecs(str){
+  str = String(str == null ? '' : str);
+  const part = str.indexOf('|') >= 0 ? str.split('|').slice(1).join('|') : str;
+  const t = part.replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632).replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776);
+  const m = t.match(/(\d{1,2})\s*[:٫.]\s*(\d{1,2})(?:\s*[:٫.]\s*(\d{1,2}))?/);
+  if (!m) return null;
+  let h = +m[1];
+  const mi = +m[2], se = +(m[3] || 0);
+  const pm = /م|PM|pm/.test(t), am = /ص|AM|am/.test(t);
+  if (pm && h < 12) h += 12;
+  if (am && h === 12) h = 0;
+  return h * 3600 + mi * 60 + se;
+}
+function sortAttendeesByTime(list){
+  const rowIdx = {};
+  (db.attRows || []).forEach((r, i) => { if (r.meeting_date === currentMeetingDate) rowIdx[r.member_id] = i; });
+  const rec = db.attendanceRecords[currentMeetingDate] || {};
+  const arr = list.map((m, i) => ({ m, t: attTimeSecs(rec[m.id]), i: rowIdx[m.id] != null ? rowIdx[m.id] : 1e9 + i }));
+  arr.sort((a, b) => {
+    if (a.t == null && b.t != null) return 1;
+    if (b.t == null && a.t != null) return -1;
+    return ((a.t || 0) - (b.t || 0)) || (a.i - b.i);
+  });
+  return arr.map(x => x.m);
+}
+
+/* ---- بحث عن مخدوم: حضر كام مرة وبالتواريخ ---- */
+function attPersonSearch(val){
+  const box = document.getElementById('att-person-results'); if (!box) return;
+  const q = norm(val);
+  box.innerHTML = '';
+  if (!q) { box.style.display = 'none'; return; }
+  const res = db.members.map(m => ({ m, s: scoreText(m.name, q) })).filter(x => x.s >= 0)
+    .sort((a, b) => a.s - b.s || String(a.m.name).localeCompare(String(b.m.name), 'ar')).slice(0, 20);
+  if (!res.length) {
+    box.innerHTML = '<div class="autocomplete-item" style="color:var(--text-muted)">مفيش اسم بالشكل ده</div>';
+    box.style.display = 'block'; return;
+  }
+  res.forEach(({ m }) => {
+    const d = document.createElement('div');
+    d.className = 'autocomplete-item';
+    d.innerHTML = '<strong>' + esc(m.name) + '</strong> <small style="color:var(--text-muted)">' + esc(m.family || '') + '</small>';
+    d.onclick = () => {
+      document.getElementById('att-person-search').value = m.name;
+      box.style.display = 'none';
+      showPersonAttendance(m.id);
+    };
+    box.appendChild(d);
+  });
+  box.style.display = 'block';
+}
+function closePersonAttendance(){
+  const c = document.getElementById('att-person-card'); if (c) { c.style.display = 'none'; c.innerHTML = ''; }
+  const i = document.getElementById('att-person-search'); if (i) i.value = '';
+}
+function showPersonAttendance(id){
+  const m = db.members.find(x => x.id == id);
+  const card = document.getElementById('att-person-card'); if (!card) return;
+  if (!m) { card.style.display = 'none'; return; }
+  const days = db.meetings.filter(d => db.attendanceRecords[d] && db.attendanceRecords[d][m.id]).sort().reverse();
+  const total = Math.max(db.meetings.filter(d => absenceCounts(m, d)).length, days.length);
+  const pct = total ? Math.round(days.length / total * 100) : 0;
+  let bonusTotal = 0;
+  const rows = days.map((d, i) => {
+    const rec = db.attendanceRecords[d][m.id];
+    const time = String(rec).indexOf('|') >= 0 ? String(rec).split('|').slice(1).join('|').trim() : '';
+    const b = (db.bonus[d] || {})[m.id];
+    const hasB = b != null && b !== '';
+    if (hasB) bonusTotal += parseFloat(b) || 0;
+    return '<div><span>' + (i + 1) + '. ' + esc(fmtD(d)) + '<br><small>' + esc(d) + (time ? ' • ' + esc(time) : '') + '</small></span>' +
+      (hasB ? '<span class="pm-b">+' + esc(b) + ' بونص</span>' : '') + '</div>';
+  }).join('') || '<div><small>لا يوجد حضور مسجل بعد</small></div>';
+  card.innerHTML =
+    '<div class="settings-card" style="margin-bottom:18px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
+        '<div><h4 style="margin:0 0 6px;border:0;padding:0;">' + esc(m.name) + '</h4>' +
+        '<span class="chip">أسرة: ' + esc(m.family || '-') + '</span><span class="chip">' + esc(m.gender || '-') + '</span></div>' +
+        '<button class="btn-close" onclick="closePersonAttendance()" style="margin:0;width:auto;padding:6px 14px;">✕ إغلاق</button>' +
+      '</div>' +
+      '<div class="pm-stats">' +
+        '<div><b>' + days.length + '</b>مرات الحضور</div>' +
+        '<div><b>' + total + '</b>من اجتماعات</div>' +
+        '<div><b>' + pct + '%</b>نسبة الحضور</div>' +
+        '<div><b>' + bonusTotal + '</b>إجمالي البونص</div>' +
+      '</div>' +
+      '<h5 style="margin:6px 0 8px;font-size:15px;color:var(--primary);">📅 تواريخ الحضور (' + days.length + ')</h5>' +
+      '<div class="pm-days" style="max-height:320px;">' + rows + '</div>' +
+    '</div>';
+  card.style.display = 'block';
+}
+document.addEventListener('click', e => {
+  const box = document.getElementById('att-person-results');
+  if (box && !e.target.closest('#att-person-search') && !e.target.closest('#att-person-results')) box.style.display = 'none';
+});
+
+/* ---- تاريخ الرحلة ---- */
+function tripDateValue(){ const el = document.getElementById('trip-event-date'); return (el && el.value) || localISO(); }
+function tripDateLabelOf(s){
+  const p = String(s || '').split('-');
+  if (p.length < 3 || isNaN(+p[0])) return esc(s || '');
+  return esc(new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }));
+}
+function onTripNameInput(){
+  const nm = (document.getElementById('trip-event-name').value || '').trim();
+  const dEl = document.getElementById('trip-event-date');
+  const type = getActiveTripKey();
+  if (nm && !_archKeys[type] && !_archFresh[type]) {      // رحلة محفوظة قبل كده بنفس الاسم: ناخد تاريخها
+    const year = tripDateValue().slice(0, 4);
+    const ex = (db.tripArchive || []).find(x => x.type === type && x.name === nm && String(x.date).slice(0, 4) === year);
+    if (ex && ex.date) dEl.value = ex.date;
+  }
+  autoArchiveTrip();
+}
+function onTripDateChange(){ autoArchiveTrip(); }
+
+/* ---- عدد الشباب / عدد الشابات ---- */
+function updateTripGenderCounts(){
+  const trip = getTripObj(); let a = 0, b = 0;
+  Object.keys(trip.reservations).forEach(id => {
+    const r = trip.reservations[id]; if (r.refunded) return;
+    const mem = db.members.find(x => x.id == id); if (!mem) return;
+    if (mem.gender === 'شابة') b++; else a++;
+  });
+  const em = document.getElementById('trip-cnt-m'), ef = document.getElementById('trip-cnt-f');
+  if (em) em.textContent = a; if (ef) ef.textContent = b;
+}
+function openTripGenderModal(g){
+  const isG = g === 'شابة', label = isG ? 'الشابات' : 'الشباب', icon = isG ? '👧' : '👦';
+  const trip = getTripObj(), fee = trip.fee || 0;
+  const list = [], refunded = [];
+  Object.keys(trip.reservations).forEach(id => {
+    const m = db.members.find(x => x.id == id); if (!m) return;
+    if ((m.gender === 'شابة') !== isG) return;
+    const r = trip.reservations[id];
+    if (r.refunded) { refunded.push({ m, r }); return; }
+    const disc = r.discount || 0, due = tripDue(trip, r), paid = r.paid || 0;
+    list.push({ m, disc, due, paid, rest: Math.max(due - paid, 0) });
+  });
+  list.sort((a, b) => String(a.m.name).localeCompare(String(b.m.name), 'ar'));
+  const tot = list.reduce((o, x) => { o.paid += x.paid; o.rest += x.rest; o.due += x.due; if (x.disc > 0) { o.dc++; o.ds += x.disc; } return o; }, { paid: 0, rest: 0, due: 0, dc: 0, ds: 0 });
+  const nm = (document.getElementById('trip-event-name').value || '').trim() || getActiveTripKey();
+  const th = 'style="background:var(--primary); color:#fff; padding:7px 4px; font-size:12px; white-space:nowrap;"';
+  const td = 'style="padding:7px 4px; border-bottom:1px solid var(--card-border); text-align:center; font-size:12.5px; white-space:nowrap;"';
+  const tdn = 'style="padding:7px 6px; border-bottom:1px solid var(--card-border); text-align:right; font-size:12.5px; min-width:92px;"';
+  const box = (v, l, c) => '<div style="background:rgba(127,127,160,.10);border:1px solid var(--card-border);border-radius:12px;padding:8px 6px;text-align:center;"><b style="display:block;font-size:19px;color:' + c + ';">' + v + '</b><span style="font-size:12px;color:var(--text-muted);font-weight:700;">' + l + '</span></div>';
+  const status = x => x.rest === 0 && (fee > 0 || x.paid > 0) ? '<span style="color:var(--success);font-weight:800;">خالص ✅</span>' : (x.paid > 0 ? '<span style="color:var(--warning);font-weight:800;">جزئي ⚠️</span>' : '<span style="color:var(--danger);font-weight:800;">لم يدفع ❌</span>');
+  const rowsHtml = list.map((x, i) => '<tr' + (x.disc > 0 ? ' style="background:rgba(245,158,11,.12);"' : '') + '>' +
+    '<td ' + td + '>' + (i + 1) + '</td>' +
+    '<td ' + tdn + '><strong>' + esc(x.m.name) + '</strong><br><small style="color:var(--text-muted);">' + esc(x.m.family || '-') + '</small></td>' +
+    '<td ' + td + '>' + (x.disc > 0 ? '<b style="color:#d97706;">' + x.disc + ' ج</b>' : '—') + '</td>' +
+    '<td ' + td + '>' + x.due + '</td>' +
+    '<td ' + td + '><b style="color:var(--success);">' + x.paid + '</b></td>' +
+    '<td ' + td + '><b style="color:' + (x.rest > 0 ? 'var(--danger)' : 'var(--success)') + ';">' + x.rest + '</b></td>' +
+    '<td ' + td + '>' + status(x) + '</td></tr>').join('');
+  const body =
+    '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">🚌 ' + esc(nm) + ' • 📅 ' + tripDateLabelOf(tripDateValue()) + ' • سعر الاشتراك: <b>' + fee + ' ج</b></div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;">' +
+      box(list.length, 'إجمالي ' + label, 'var(--primary)') +
+      box(tot.paid + ' ج', 'إجمالي المدفوع', 'var(--success)') +
+      box(tot.rest + ' ج', 'إجمالي الباقي', 'var(--danger)') +
+      box(tot.dc + (tot.dc ? ' (' + tot.ds + ' ج)' : ''), 'عدد المخصومين', '#d97706') +
+    '</div>' +
+    (list.length
+      ? '<div class="table-responsive"><table style="width:100%;border-collapse:collapse;"><thead><tr><th ' + th + '>#</th><th ' + th + '>الاسم</th><th ' + th + '>الخصم</th><th ' + th + '>المطلوب</th><th ' + th + '>دفع</th><th ' + th + '>باقي</th><th ' + th + '>الحالة</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>'
+      : '<p style="text-align:center;color:var(--text-muted);padding:22px 0;">مفيش ' + label + ' محجوزين في الرحلة دي لحد دلوقتي.</p>') +
+    (refunded.length ? '<div style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">↩️ مستردين (' + refunded.length + '): ' + refunded.map(x => esc(x.m.name)).join('، ') + '</div>' : '');
+  showTripModal(icon + ' ' + label + ' (' + list.length + ')', body);
+}
+
+/* ---- لافتة الخصم: بتظهر لما تدوس على خانة خصم فاضية وتختفي أول ما تكتب ---- */
+let _tipInp = null;
+function placeDiscTip(){
+  const t = document.getElementById('disc-tip'); if (!t || !_tipInp) return;
+  const r = _tipInp.getBoundingClientRect();
+  const w = t.offsetWidth, h = t.offsetHeight;
+  let left = r.left + r.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  let top = r.top - h - 12, below = false;
+  if (top < 8) { top = r.bottom + 12; below = true; }
+  t.classList.toggle('below', below);
+  t.style.left = left + 'px'; t.style.top = top + 'px';
+  const arrow = t.querySelector('i'); if (arrow) arrow.style.left = Math.max(10, Math.min(r.left + r.width / 2 - left - 6, w - 22)) + 'px';
+}
+function showDiscTip(inp){
+  if (inp.value !== '' && parseFloat(inp.value) > 0) return;     // فيه خصم متسجل: مفيش لافتة
+  let t = document.getElementById('disc-tip');
+  if (!t) {
+    t = document.createElement('div'); t.id = 'disc-tip';
+    t.innerHTML = '<b>اكتب قيمة الخصم فقط</b><span>مثال: خصم ٥٠ جنيه ، خصم ١٠٠ جنيه</span><i></i>';
+    document.body.appendChild(t);
+  }
+  _tipInp = inp;
+  t.style.display = 'block';
+  placeDiscTip();
+}
+function hideDiscTip(){
+  _tipInp = null;
+  const t = document.getElementById('disc-tip'); if (t) t.style.display = 'none';
+}
+addEventListener('scroll', () => { if (_tipInp) placeDiscTip(); }, true);
+addEventListener('resize', () => { if (_tipInp) placeDiscTip(); });
+
+/* تاريخ الرحلة الافتراضي = النهارده */
+(function(){ const el = document.getElementById('trip-event-date'); if (el && !el.value) el.value = localISO(); })();
 </script>
 </body>
 </html>
