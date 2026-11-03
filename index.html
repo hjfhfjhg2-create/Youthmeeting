@@ -16,6 +16,12 @@
     <!-- مكتبة Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- الأوفلاين + PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="offline.js"></script>
+
     <style>
         /* الثيم الافتراضي (الوضع الفاتح - Light Mode) */
         :root {
@@ -1935,7 +1941,7 @@ notify pgrst, 'reload schema';</pre>
         const SUPABASE_URL = 'https://uyoqcwtlxfuzvtpbfvml.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_RxDd9gplG9B2Fn_OxVRbBw_1l2Uy84E';
         document.body.classList.add('restoring');
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storage: window.sessionStorage } });
+        const _supabase = OfflineSync.wrap(supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storage: window.sessionStorage }, global: { fetch: OfflineSync.fetch } }));
         const OTP_SECURITY_CODE = '2027';
 
         let db = { members: [], meetings: [], attendanceRecords: {}, tripsData: {} };
@@ -4645,15 +4651,18 @@ async function logoutUser(){
 /* ===== طبقة التحسينات: بيانات + بونص + بحث + بروفايل ===== */
 var bonusOK=true,bonusChecked=false;
 async function fetchAll(table,orderCols){
-  let all=[],from=0,size=1000;
+  await OfflineSync.ready; await OfflineSync.flush({silent:true});
+  let all=[],from=0,size=1000,anyLocal=false;
   while(true){
     let q=_supabase.from(table).select('*');
     (orderCols||[]).forEach(c=>{q=q.order(c,{ascending:true})});
-    const {data,error}=await q.range(from,from+size-1);
+    const {data,error,local}=await q.range(from,from+size-1);
     if(error)return {data:null,error};
+    if(local)anyLocal=true;
     all=all.concat(data||[]);
     if(!data||data.length<size)break; from+=size;
   }
+  if(!anyLocal)OfflineSync.saveCache(table,all);   // نسخة محلية محدثة من السيرفر
   return {data:all,error:null};
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
