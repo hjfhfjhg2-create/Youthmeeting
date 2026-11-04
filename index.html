@@ -5194,7 +5194,7 @@ function openMemberDetail(memberId,event){
   const $=id=>document.getElementById(id);
   function tick(){
     const d=new Date();
-    const c=$('hm-clock'); if(c) c.textContent=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const c=$('hm-clock'); if(c) c.textContent=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
     const S=d.getSeconds()+d.getMilliseconds()/1000, M=d.getMinutes()+S/60, H=(d.getHours()%12)+M/60;
     const rot=(id,deg)=>{const e=$(id); if(e) e.setAttribute('transform','rotate('+deg+' 60 60)');};
     rot('ac-h',H*30); rot('ac-m',M*6); rot('ac-s',Math.floor(S)*6);
