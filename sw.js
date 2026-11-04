@@ -1,7 +1,7 @@
 /* Service Worker: يخلي التطبيق يفتح من غير نت */
 const VER = 'v2';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
 const CACHE = 'attendance-' + VER;
-const CORE = ['./', './index.html', './offline.js?v=2', './manifest.json', './icon-192.png', './icon-512.png'];
+const CORE = ['./', './index.html', './offline.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN = [
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
   'https://unpkg.com/html5-qrcode',

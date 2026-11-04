@@ -4,10 +4,6 @@
    - كل الكتابات (insert/update/upsert/delete) لو فشلت بسبب النت بتتسجل في طابور
    - أول ما النت يرجع الطابور بيتبعت بالترتيب
    - دخول أوفلاين لو الجهاز سجّل دخول بالنت قبل كده
-   v2:
-   - منع التكرار (حضور: تاريخ+مخدوم | مخدوم: الاسم الكامل+تاريخ الميلاد+التليفون) أوفلاين وأونلاين
-   - طلب تخزين دائم من المتصفح (Chrome/Android + Safari/iPhone) عشان البيانات الأوفلاين ما تتمسحش
-   - العملية ما بتتشالش من الجهاز غير لما السيرفر يقبلها ثم تتأكد في أول تحميل بيانات بعدها
    ============================================================ */
 (function () {
   'use strict';
@@ -30,13 +26,12 @@
     dbp = new Promise(res => {
       if (typeof indexedDB === 'undefined') { res(null); return; }
       try {
-        const r = indexedDB.open('church_offline', 2);
+        const r = indexedDB.open('church_offline', 1);
         r.onupgradeneeded = () => {
           const d = r.result;
-          if (!d.objectStoreNames.contains('cache')) d.createObjectStore('cache', { keyPath: 'table' });
-          if (!d.objectStoreNames.contains('queue')) d.createObjectStore('queue', { keyPath: 'seq', autoIncrement: true });
-          if (!d.objectStoreNames.contains('failed')) d.createObjectStore('failed', { keyPath: 'seq', autoIncrement: true });
-          if (!d.objectStoreNames.contains('unverified')) d.createObjectStore('unverified', { keyPath: 'seq', autoIncrement: true });
+          d.createObjectStore('cache', { keyPath: 'table' });
+          d.createObjectStore('queue', { keyPath: 'seq', autoIncrement: true });
+          d.createObjectStore('failed', { keyPath: 'seq', autoIncrement: true });
         };
         r.onsuccess = () => res(r.result);
         r.onerror = () => res(null);
@@ -79,109 +74,6 @@
     await idb('failed', 'readwrite', s => s.add({ op, err: String(err && err.message || err), at: Date.now() }));
   }
   function persist(table) { idb('cache', 'readwrite', s => s.put({ table, rows: mem[table] || [] })); }
-
-  /* ---------- تخزين دائم (عشان أندرويد/آيفون ما يمسحوش البيانات الأوفلاين) ---------- */
-  let persistState = null;
-  async function requestPersist() {
-    try {
-      if (navigator.storage && navigator.storage.persist) {
-        if (navigator.storage.persisted && (await navigator.storage.persisted())) persistState = true;
-        else persistState = !!(await navigator.storage.persist());
-      }
-    } catch (e) { /* مش مشكلة */ }
-    return persistState;
-  }
-  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isStandalone = () => { try { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
-
-  /* ---------- منع التكرار ---------- */
-  function normName(s) {
-    return String(s == null ? '' : s).normalize('NFKC').toLowerCase()
-      .replace(/[\u064B-\u0652\u0640]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
-      .replace(/\s+/g, ' ').trim();
-  }
-  function phoneKey(s) {
-    let d = String(s == null ? '' : s).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/\D/g, '');
-    if (d.startsWith('0020')) d = '0' + d.slice(4);
-    else if (d.startsWith('20') && d.length >= 12) d = '0' + d.slice(2);
-    return d;
-  }
-  // المخدوم المتكرر = نفس الاسم الكامل + نفس تاريخ الميلاد + نفس التليفون (مش الاسم الأول بس)
-  function memberKey(r) { return normName(r && r.name) + '|' + String((r && r.birthdate) || '').trim() + '|' + phoneKey(r && r.phone); }
-  function dupKey(table, r) {
-    if (!r) return null;
-    if (table === 'attendance') return (r.meeting_date != null && r.member_id != null) ? r.meeting_date + '|' + r.member_id : null;
-    if (table === 'members') return r.name ? memberKey(r) : null;
-    return null;
-  }
-  const DEDUPE = { attendance: true, members: true };
-  function dropDups(q) {
-    const list = Array.isArray(q.payload) ? q.payload : [q.payload];
-    const seen = new Set((mem[q.t] || []).map(r => dupKey(q.t, r)).filter(Boolean));
-    const keep = [], skipped = [];
-    list.forEach(p => {
-      const k = dupKey(q.t, p);
-      if (k && seen.has(k)) skipped.push(p); else { keep.push(p); if (k) seen.add(k); }
-    });
-    q.payload = Array.isArray(q.payload) ? keep : (keep[0] || null);
-    return { kept: keep.length, skipped };
-  }
-  // قبل الإرسال الفعلي: نتأكد إن السيرفر مفيهوش نفس السجل (لو اتسجل من جهاز تاني)
-  async function serverDupFilter(op) {
-    const list = Array.isArray(op.payload) ? op.payload : [op.payload];
-    const keep = [];
-    for (const p of list) {
-      const k = dupKey(op.t, p);
-      if (!k) { keep.push(p); continue; }
-      let q = real.from(op.t).select('*');
-      if (op.t === 'attendance') q = q.eq('meeting_date', p.meeting_date).eq('member_id', p.member_id);
-      else if (p.birthdate) q = q.eq('birthdate', p.birthdate);
-      else q = q.eq('name', p.name);
-      let r;
-      try { r = await q.limit(200); } catch (e) { r = { error: e, status: 0 }; }
-      if (r.error) { if (isNetErr(r.error) || r.status === 0) return 'net'; keep.push(p); continue; }
-      if (!(r.data || []).some(row => dupKey(op.t, row) === k)) keep.push(p);
-    }
-    if (!keep.length) return { skipAll: true };
-    return { op: Object.assign({}, op, { payload: Array.isArray(op.payload) ? keep : keep[0] }) };
-  }
-
-  /* ---------- التأكد إن العملية اترفعت فعلاً وثبتت ---------- */
-  const VERIFY_WINDOW = 10 * 60 * 1000;
-  function stripSeq(o) { const c = Object.assign({}, o); delete c.seq; return c; }
-  async function markSynced(op) {
-    await idb('unverified', 'readwrite', s => s.add({ t: op.t, op: stripSeq(op), syncedAt: Date.now(), miss: 0 }));
-    await qDel(op.seq);
-  }
-  function confirmed(o, rows) {
-    if (o.op !== 'insert' && o.op !== 'upsert') return true;     // التعديل/الحذف مش بنتحقق منهم (ممكن يتغيروا بعدها)
-    const list = Array.isArray(o.payload) ? o.payload : [o.payload];
-    const keys = (o.op === 'upsert' && o.opts && o.opts.onConflict) ? String(o.opts.onConflict).split(',').map(s => s.trim()) : null;
-    return list.every(p => {
-      const dk = dupKey(o.t, p);
-      if (dk) return rows.some(r => dupKey(o.t, r) === dk);
-      if (keys) return rows.some(r => keys.every(k => String(r[k]) === String(p[k])));
-      if (p && p.id != null && o.t !== 'attendance') return rows.some(r => String(r.id) === String(p.id));
-      return true;
-    });
-  }
-  async function verifyTable(table, rows) {
-    const all = (await idb('unverified', 'readonly', s => s.getAll())) || [];
-    let requeued = 0;
-    for (const x of all) {
-      if (x.t !== table) continue;
-      if (Date.now() - x.syncedAt > VERIFY_WINDOW && x.miss < 2) { await idb('unverified', 'readwrite', s => s.delete(x.seq)); continue; }
-      if (confirmed(x.op, rows)) { await idb('unverified', 'readwrite', s => s.delete(x.seq)); continue; }   // ثبتت ✅ دلوقتي بس نقدر نتخلص من النسخة المحلية
-      x.miss++;
-      if (x.miss < 2) { await idb('unverified', 'readwrite', s => s.put(x)); continue; }                   // نستنى تحميل تاني قبل ما نحكم
-      await idb('unverified', 'readwrite', s => s.delete(x.seq));
-      const tries = (x.op.tries || 0) + 1;
-      if (tries > 3) { await failedAdd(x.op, 'السيرفر قبل العملية بس ما ظهرتش في البيانات'); continue; }
-      await qAdd(Object.assign({}, x.op, { tries }));
-      requeued++;
-    }
-    if (requeued) setTimeout(() => flush(), 500);
-  }
 
   const ready = (async function () {
     try {
@@ -323,11 +215,7 @@
           } catch (e) { if (!isNetErr(e)) throw e; }
         }
       }
-      // أوفلاين: نمنع التكرار الأول، بعدين نطبق محلياً ونسجل في الطابور
-      if (this.op === 'insert' && DEDUPE[this.t]) {
-        const d = dropDups(this);
-        if (!d.kept) return { data: this.sel ? [] : null, error: null, status: 200, local: true, duplicate: true, skipped: d.skipped };
-      }
+      // أوفلاين: نطبق محلياً ونسجل في الطابور
       const op = this.serial();
       const out = applyLocal(this);
       await qAdd(op);
@@ -361,13 +249,7 @@
       syncing = true; badge();
       if (!(await ensureAuth())) return 0;
       const ops = await qAll();
-      for (let op of ops) {
-        if (op.op === 'insert' && DEDUPE[op.t]) {
-          const pre = await serverDupFilter(op);
-          if (pre === 'net') break;
-          if (pre.skipAll) { await qDel(op.seq); synced++; continue; }   // موجود بالفعل على السيرفر: ما نكررهوش
-          op = pre.op;
-        }
+      for (const op of ops) {
         let r;
         try { r = await buildReal(op); } catch (e) { r = { error: e, status: 0 }; }
         if (r.error && (isNetErr(r.error) || r.status === 0)) break;                  // النت وقع تاني: نكمل بعدين
@@ -379,7 +261,7 @@
           if (r.error.code === '23505' && op.op === 'insert') { await qDel(op.seq); synced++; continue; } // اتسجلت قبل كده
           await failedAdd(op, r.error); await qDel(op.seq); continue;
         }
-        await markSynced(op); synced++;       // السيرفر قبلها: نحتفظ بسجل التحقق لحد ما تثبت في أول تحميل بيانات
+        await qDel(op.seq); synced++;
       }
       if (synced && !opts.silent) {
         try { window.dispatchEvent(new CustomEvent('offline-synced', { detail: { n: synced } })); } catch (e) { /* */ }
@@ -484,15 +366,7 @@
     isNetErr,
     pending: () => qlen,
     flush,
-    version: 2,
-    memberKey, phoneKey, normName,
-    requestPersist,
-    async status() {
-      let persisted = persistState;
-      try { if (navigator.storage && navigator.storage.persisted) persisted = await navigator.storage.persisted(); } catch (e) { /* */ }
-      return { pending: qlen, failed: failedCount, persisted: !!persisted, ios: isIOS(), standalone: isStandalone(), online: navigator.onLine };
-    },
-    saveCache(table, rows) { mem[table] = rows; persist(table); verifyTable(table, rows).catch(() => {}); },
+    saveCache(table, rows) { mem[table] = rows; persist(table); },
     readCache(table) { return mem[table] || null; },
     async sync(manual) {
       if (!navigator.onLine) { if (manual && window.toast) window.toast('مفيش نت حالياً — العمليات محفوظة على الجهاز وهتتبعت أول ما النت يرجع'); return; }
@@ -531,19 +405,6 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden && qlen && navigator.onLine) flush(); });
     setInterval(() => { if (qlen && navigator.onLine) flush(); }, 15000);
     document.addEventListener('DOMContentLoaded', badge);
-    // طلب التخزين الدائم: مرة وقت التحميل، ومرة عند أول لمسة (بعض المتصفحات بتشترط تفاعل المستخدم)
-    ready.then(() => requestPersist()).then(() => {
-      setTimeout(() => {
-        try {
-          if (persistState !== true && isIOS() && !isStandalone() && !localStorage.getItem('ofl_ios_hint') && window.toast) {
-            localStorage.setItem('ofl_ios_hint', '1');
-            window.toast('📱 على الآيفون: من سفاري اضغط مشاركة ← «إضافة إلى الشاشة الرئيسية» وافتح التطبيق منها، عشان البيانات الأوفلاين تفضل محفوظة ومتتمسحش.', 12000);
-          }
-        } catch (e) { /* */ }
-      }, 4000);
-    });
-    const firstTouch = () => { requestPersist(); ['click', 'touchstart'].forEach(ev => document.removeEventListener(ev, firstTouch, true)); };
-    ['click', 'touchstart'].forEach(ev => document.addEventListener(ev, firstTouch, true));
     window.addEventListener('offline-synced', e => {
       if (window.toast) window.toast('تمت مزامنة ' + e.detail.n + ' عملية مع السيرفر ✅');
       try { if (typeof window.loadData === 'function') window.loadData(); } catch (x) { /* */ }
