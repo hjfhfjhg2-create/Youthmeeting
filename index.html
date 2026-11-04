@@ -1749,7 +1749,8 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <div id="trip-sheet-view" style="display:none;">
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-                <button onclick="showTripList()" style="padding:10px 14px; font-size:13px; background:var(--text-muted); box-shadow:none;">⬅️ رجوع للرحلات</button>
+                <button id="trip-back-btn" onclick="showTripList()" style="display:none; padding:10px 14px; font-size:13px; background:var(--text-muted); box-shadow:none;">⬅️ كل الرحلات الجارية</button>
+                <button onclick="newTripSheet()" style="padding:10px 14px; font-size:13px; box-shadow:none;">➕ رحلة جديدة</button>
                 <button onclick="sendTripToArchive()" style="padding:10px 14px; font-size:13px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📦 ابعتها للأرشيف</button>
             </div>
             
@@ -2233,7 +2234,7 @@ notify pgrst, 'reload schema';</pre>
                 checkBirthdays();
                 renderFamiliesList();
                 updateNotificationIndicators();
-                renderTripCards(); setTimeout(sweepExpiredTrips, 0);
+                renderTripCards(); updateTripNav(); setTimeout(() => sweepExpiredTrips().then(m => { if (m && tripsTabActive()) openTripsHome(true); }), 0);
             } catch(e) {
                 console.error("Error loading data", e);
             }
@@ -2300,7 +2301,26 @@ notify pgrst, 'reload schema';</pre>
         }
 
         // أخضر = زادت، أحمر = قلت، أصفر = متوسطة (فرق نقطتين أو أقل)
-        function trendCls(diff) { return diff > 2 ? 'up' : diff < -2 ? 'down' : 'mid'; }
+        function trendCls(diff) { return diff > 0 ? 'up' : diff < 0 ? 'down' : 'mid'; }
+        // مقارنة دقيقة بين نسبتين من غير تقريب (ضرب تبادلي): +1 الأولى أعلى، -1 أقل، 0 متساويتين فعلاً
+        function cmpTally(a, b) {
+            if (!a || !b || !(a.total > 0) || !(b.total > 0)) return 0;
+            const l = a.att * b.total, r = b.att * a.total;
+            return l > r ? 1 : l < r ? -1 : 0;
+        }
+        // عرض النسبة: خانة عشرية، ولو نسبتين مختلفتين فعلاً بيظهروا زي بعض بعد التقريب نزوّد خانة
+        function pctTxt(t, other) {
+            let v = pctOf(t.att, t.total);
+            if (other && cmpTally(t, other) !== 0 && v === pctOf(other.att, other.total)) {
+                return (Math.round(t.att / t.total * 10000) / 100) + '';
+            }
+            return v + '';
+        }
+        function monthTally(key) {
+            let att = 0, total = 0;
+            db.meetings.filter(d => d.slice(0, 7) === key).forEach(d => { const t = meetingTally(d); att += t.att; total += t.total; });
+            return { att, total };
+        }
 
         function trendHtml(diff, from) {
             const c = trendCls(diff);
@@ -2312,33 +2332,41 @@ notify pgrst, 'reload schema';</pre>
         function renderHeroToday() {
             const box = document.getElementById('dh-today'); if (!box) return;
             const dateLbl = d => { const p = d.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }); };
-            const arr = [...db.meetings].sort().map(d => ({ d, p: meetingRate(d) })).filter(x => x.p !== null);
+            const arr = [...db.meetings].sort().map(d => ({ d, t: meetingTally(d) })).filter(x => x.t.total > 0);
             let body = '';
 
-            // آخر اجتماعين بتواريخهم، ولون كل نسبة حسب مقارنتها بالاجتماع اللي قبلها
+            // آخر اجتماعين: كل نسبة متلوّنة بمقارنتها الدقيقة بالاجتماع اللي قبلها (أخضر زادت / أحمر قلّت / أصفر متساوية فعلاً)
             if (arr.length) {
                 const n = arr.length, shown = arr.slice(-2);
                 body += '<span class="l1">' + shown.map((x, k) => {
                     const prev = arr[n - shown.length + k - 1];
-                    const c = prev ? trendCls(x.p - prev.p) : 'mid';
-                    return dateLbl(x.d) + ': <b class="' + c + '">' + x.p + '%</b>';
+                    const c = prev ? trendCls(cmpTally(x.t, prev.t)) : 'mid';
+                    return dateLbl(x.d) + ': <b class="' + c + '">' + pctTxt(x.t, prev && prev.t) + '%</b> <small>(' + x.t.att + ' من ' + x.t.total + ')</small>';
                 }).join(' &nbsp;·&nbsp; ') + '</span>';
                 if (n > 1) {
-                    const diff = pdiff(arr[n - 1].p, arr[n - 2].p), c = trendCls(diff);
-                    const verb = diff > 0 ? 'زادت' : diff < 0 ? 'قلت' : 'ثابتة';
-                    body += '<span class="l2 ' + c + '">النسبة ' + verb + ' عن الاجتماع اللي فات' + (diff ? ' بمقدار ' + Math.abs(diff) + '%' : '') + '</span>';
+                    const cur = arr[n - 1].t, pr = arr[n - 2].t, sg = cmpTally(cur, pr), c = trendCls(sg);
+                    const verb = sg > 0 ? 'زادت' : sg < 0 ? 'قلّت' : 'ثابتة';
+                    const dv = Math.round(Math.abs(cur.att / cur.total - pr.att / pr.total) * 10000) / 100;
+                    body += '<span class="l2 ' + c + '">النسبة ' + verb + ' عن الاجتماع اللي فات' + (sg ? ' بمقدار ' + dv + '%' : '') + '</span>';
                 }
             }
 
-            // سطر الشهر: الشهر اللي فات مقارنة باللي قبله، ظاهر طول الشهر الحالي
+            // سطر الشهر: الشهر اللي فات مقارنة باللي قبله
             const now = new Date();
             const key = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
             const nm = dt => dt.toLocaleDateString('ar-EG', { month: 'long' });
             const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
             const pp = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-            const a = monthAvg(key(pm)), b = monthAvg(key(pp));
-            if (a !== null) {
-                body += '<span class="l2">🗓️ ' + nm(pm) + ': ' + a + '%' + (b !== null ? ' · ' + trendHtml(pdiff(a, b), 'عن ' + nm(pp) + ' (' + b + '%)') : '') + '</span>';
+            const ta = monthTally(key(pm)), tb = monthTally(key(pp));
+            if (ta.total) {
+                let tail = '';
+                if (tb.total) {
+                    const sg = cmpTally(ta, tb), c = trendCls(sg);
+                    const dv = Math.round(Math.abs(ta.att / ta.total - tb.att / tb.total) * 10000) / 100;
+                    const from = 'عن ' + nm(pp) + ' (' + pctTxt(tb, ta) + '%)';
+                    tail = ' · <span class="' + c + '">' + (sg > 0 ? '▲ زادت ' + dv + '% ' : sg < 0 ? '▼ قلّت ' + dv + '% ' : '● ثابتة ') + from + '</span>';
+                }
+                body += '<span class="l2">🗓️ ' + nm(pm) + ': ' + pctTxt(ta, tb.total ? tb : null) + '%' + tail + '</span>';
             }
 
             box.innerHTML = body ? '<span class="t">📊 نسبة الحضور</span>' + body : '';
@@ -2373,7 +2401,7 @@ notify pgrst, 'reload schema';</pre>
             if(tabId === 'bonus') renderBonusTab();
             if(tabId === 'settings') fillReportSelectors();
             if(tabId === 'visitation') renderVisitationList();
-            if(tabId === 'trips') renderTripTable();
+            if(tabId === 'trips') await openTripsHome();
             if(tabId === 'birthdays') checkBirthdays();
         }
 
@@ -3179,13 +3207,15 @@ notify pgrst, 'reload schema';</pre>
                 body = 'التقرير فيه ' + n + ' شهر بس. محتاجين ٣ شهور على الأقل فيها اجتماعات عشان نقارن ونحكم هل الحضور بيتحسن ولا لأ.';
             } else {
                 const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
-                const h = Math.floor(n / 2), first = avg(pts.slice(0, h)), last = avg(pts.slice(n - h)), diff = Math.round(last - first);
+                const h = Math.floor(n / 2);
+                const wt = rs => pctOr0(rs.reduce((q, r) => q + r.s.totalAtt, 0), rs.reduce((q, r) => q + r.s.totalElig, 0));
+                const first = wt(rows.slice(0, h)), last = wt(rows.slice(n - h)), diff = pdiff(last, first);
                 const xm = (n - 1) / 2, ym = avg(pts); let num = 0, den = 0;
                 pts.forEach((y, i) => { num += (i - xm) * (y - ym); den += (i - xm) * (i - xm); });
                 const slope = den ? num / den : 0;
                 let bi = 0, wi = 0; pts.forEach((p, i) => { if (p > pts[bi]) bi = i; if (p < pts[wi]) wi = i; });
                 const nm = i => AR_MONTHS[Number(rows[i].k.slice(5)) - 1];
-                const detail = ' متوسط نسبة الحضور في النصف الأول من السنة ' + Math.round(first) + '% وفي النصف الأخير ' + Math.round(last) + '%. أعلى شهر: ' + nm(bi) + ' (' + pts[bi] + '%)، وأقل شهر: ' + nm(wi) + ' (' + pts[wi] + '%).';
+                const detail = ' نسبة الحضور في النصف الأول من السنة ' + first + '% وفي النصف الأخير ' + last + '%. أعلى شهر: ' + nm(bi) + ' (' + pts[bi] + '%)، وأقل شهر: ' + nm(wi) + ' (' + pts[wi] + '%).';
                 if (diff >= 5 && slope > 0) {
                     icon = '✅'; color = '#2e9e6b'; title = 'الإحصائية في تحسن ملحوظ خلال السنة';
                     body = 'نسبة الحضور زادت حوالي ' + diff + ' نقطة مئوية بين أول السنة وآخرها.' + detail;
@@ -3872,15 +3902,19 @@ notify pgrst, 'reload schema';</pre>
             document.getElementById('trip-event-date').value = localISO();
             document.getElementById('trip-fee').value = '';
             await loadData();
-            renderTripTable();
-            showTripList();
+            await openTripsHome(true);
             toast('اتبعتت للأرشيف ✅');
         }
 
         // أول ما تاريخ الرحلة يعدّي: تتنقل للأرشيف تلقائي والشيت يتفضى (بيتنفذ مع كل تحميل بيانات)
+        let _sweepP = null;
         async function sweepExpiredTrips() {
-            if (_tripSweeping) return;
+            if (_tripSweeping && _sweepP) return _sweepP;
             _tripSweeping = true;
+            _sweepP = _sweepImpl();
+            return _sweepP;
+        }
+        async function _sweepImpl() {
             let moved = 0;
             try {
                 const today = localISO(), latest = {};
@@ -3900,9 +3934,40 @@ notify pgrst, 'reload schema';</pre>
             if (moved) {
                 toast('اتنقلت ' + moved + ' رحلة للأرشيف لأن تاريخها عدّى ✅');
                 await loadData();
-                renderTripTable();
             }
+            return moved;
         }
+
+        // ===== فتح تبويب الرحلات: الرحلة المفتوحة جاهزة بشيتها وأسمائها، ولو مفيش رحلة مفتوحة تظهر صفحة جديدة للتسجيل =====
+        function tripsTabActive() { const t = document.getElementById('trips'); return !!(t && t.classList.contains('active')); }
+        function updateTripNav() {
+            const act = (db.tripArchive || []).filter(x => !tripIsArchived(x)).length;
+            const b = document.getElementById('trip-back-btn');
+            if (b) b.style.display = act > 1 ? '' : 'none';
+        }
+        async function openTripsHome(skipSweep) {
+            try { if (!skipSweep) await sweepExpiredTrips(); } catch (e) { console.error(e); }
+            const items = (db.tripArchive || []).filter(x => !tripIsArchived(x)).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+            _tripCardItems = items;
+            if (items.length) { openTripFromCard(0); return; }
+            // شيت فيه أسماء لسه متسجل بدون سجل في الأرشيف: افتحه برضه
+            const pend = Object.keys(db.tripsData || {}).find(t => Object.keys((db.tripsData[t] || {}).reservations || {}).length > 0);
+            if (pend) {
+                document.getElementById('trip-type').value = pend;
+                changeTripType(); showTripSheetView(); updateTripNav(); return;
+            }
+            newTripSheet();
+            updateTripNav();
+        }
+        // لو الصفحة فاضلة مفتوحة وعدّى منتصف الليل: اقفل الرحلات اللي تاريخها عدّى
+        let _tripDay = null;
+        setInterval(async () => {
+            const now = localISO();
+            if (_tripDay === null) { _tripDay = now; return; }
+            if (now === _tripDay) return;
+            _tripDay = now;
+            try { const m = await sweepExpiredTrips(); if (m && tripsTabActive()) await openTripsHome(true); } catch (e) { console.error(e); }
+        }, 60000);
 
         // كل الرحلات (المحفوظة + الشيت المفتوح دلوقتي) من غير تكرار
         // includeActive=false: الأرشيف بس (اللي تاريخه عدّى أو اتبعت). true: كل الرحلات (للخصومات)
