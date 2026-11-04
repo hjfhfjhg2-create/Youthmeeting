@@ -20,7 +20,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <script src="offline.js"></script>
+    <script src="offline.js?v=2"></script>
 
     <style>
         /* الثيم الافتراضي (الوضع الفاتح - Light Mode) */
@@ -1364,6 +1364,63 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 .ac-dig{font:800 12px 'Noto Kufi Arabic','Cairo',sans-serif;color:#ffe9a8;letter-spacing:1.5px;margin-top:2px}
 @media(max-width:800px){.art-clock svg{width:92px;height:92px}}
 </style>
+<style id="v3-smart-birthdays">
+/* ===== نافذة الأسئلة الذكية ===== */
+.smart-box{max-width:400px!important;text-align:center}
+.smart-ic{font-size:52px;line-height:1;margin-bottom:6px;animation:smartPop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes smartPop{from{transform:scale(.3) rotate(-20deg);opacity:0}}
+.smart-box h3{margin:6px 0 8px!important}
+#smart-text{white-space:pre-line;font-size:14.5px;line-height:1.9;color:var(--text-muted);margin:0 0 18px;font-weight:600}
+.smart-actions{display:flex;gap:10px}
+.smart-actions button{flex:1;padding:13px 10px;font-size:14.5px}
+.smart-actions .smart-no{background:transparent!important;color:var(--text-muted)!important;border:1.5px solid var(--border)!important;box-shadow:none!important}
+
+/* ===== تبويب أعياد الميلاد ===== */
+.bd-hero{position:relative;overflow:hidden;border-radius:24px;padding:26px 18px 24px;margin:6px 0 16px;text-align:center;color:#fff;background:linear-gradient(135deg,#ff5fa2 0%,#a855f7 55%,#f59e0b 135%);box-shadow:0 22px 40px -24px rgba(168,85,247,.95)}
+.bd-hero .bd-in{position:relative;z-index:2}
+.bd-hero h3{margin:8px 0 4px!important;color:#fff!important;-webkit-text-fill-color:#fff;font-size:26px!important;text-shadow:0 3px 12px rgba(0,0,0,.28)}
+.bd-hero p{margin:0;font-weight:700;font-size:13.5px;opacity:.97;text-shadow:0 2px 8px rgba(0,0,0,.25)}
+.bd-cake{font-size:60px;line-height:1;display:inline-block;animation:bdBounce 2.4s ease-in-out infinite;filter:drop-shadow(0 10px 12px rgba(0,0,0,.28))}
+.bd-balloon{position:absolute;bottom:-44px;font-size:34px;opacity:0;animation:bdFloat 7s ease-in infinite}
+.bd-balloon:nth-of-type(1){left:5%;animation-delay:0s}.bd-balloon:nth-of-type(2){left:22%;animation-delay:2.2s;font-size:28px}
+.bd-balloon:nth-of-type(3){right:22%;animation-delay:4s;font-size:30px}.bd-balloon:nth-of-type(4){right:5%;animation-delay:1.2s}
+.bd-confetti{position:absolute;inset:0;pointer-events:none;z-index:1}
+.bd-confetti i{position:absolute;top:-16px;opacity:.9;animation:bdFall linear infinite}
+@keyframes bdFall{to{transform:translateY(300px) rotate(540deg);opacity:.15}}
+@keyframes bdFloat{0%{transform:translateY(0) rotate(-6deg);opacity:0}15%{opacity:1}100%{transform:translateY(-250px) rotate(8deg);opacity:0}}
+@keyframes bdBounce{50%{transform:translateY(-8px) rotate(-4deg)}}
+.bd-search{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:2px 14px;margin-bottom:12px}
+.bd-search input{border:0!important;background:transparent!important;box-shadow:none!important;flex:1;min-width:0;padding:11px 4px!important;font-family:inherit;color:var(--text)!important;outline:none}
+.bd-months{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
+@media(min-width:640px){.bd-months{grid-template-columns:repeat(6,1fr)}}
+.bd-chip{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:9px 4px;border-radius:14px;background:var(--card);border:1.5px solid var(--border);color:var(--text);text-align:center;transition:transform .15s,box-shadow .15s}
+.bd-chip b{font:800 19px/1.1 'Cairo',sans-serif}
+.bd-chip span{font:700 11px 'Cairo',sans-serif;color:var(--text-muted)}
+.bd-chip i{position:absolute;top:-7px;left:-4px;min-width:19px;height:19px;padding:0 5px;box-sizing:border-box;border-radius:10px;background:#ec4899;color:#fff;font:800 10.5px/19px 'Cairo',sans-serif;font-style:normal;text-align:center}
+.bd-chip:hover{transform:translateY(-2px)}.bd-chip:active{transform:scale(.95)}
+.bd-chip.on{background:linear-gradient(135deg,#ff5fa2,#a855f7);border-color:transparent;color:#fff;box-shadow:0 10px 20px -10px #a855f7}
+.bd-chip.on span{color:#fff}
+.bd-chip.soon{grid-column:1/-1;flex-direction:row;gap:8px;padding:11px}
+.bd-chip.soon b{font-size:17px}.bd-chip.soon span{font-size:13.5px}
+.bd-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 12px;font-weight:800;color:var(--text)}
+.bd-head em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--text-muted)}
+.bd-card{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px;border-radius:18px;background:var(--card);border:1px solid var(--border);border-right:5px solid #3b82f6;cursor:pointer;transition:transform .15s,box-shadow .15s;flex-wrap:wrap}
+.bd-card.f{border-right-color:#ec4899}
+.bd-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px -16px rgba(0,0,0,.45)}
+.bd-date{flex:0 0 58px;height:62px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(160deg,#4ba3ea,#1d6fb8)}
+.bd-card.f .bd-date{background:linear-gradient(160deg,#f472a6,#c4306b)}
+.bd-date b{font:800 22px/1 'Cairo',sans-serif}.bd-date span{font-size:11px;font-weight:700;opacity:.95}
+.bd-info{flex:1;min-width:0}.bd-info strong{display:block;font-size:15px;color:var(--text)}
+.bd-info p{margin:3px 0 0;font-size:12.5px;color:var(--text-muted);font-weight:600}
+.bd-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.bd-when{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(168,85,247,.14);color:#a855f7;white-space:nowrap}
+.bd-when.now{background:linear-gradient(135deg,#f59e0b,#ec4899);color:#fff}
+.bd-wa{font-size:12px;font-weight:800;text-decoration:none;padding:4px 11px;border-radius:20px;background:#25d366;color:#fff!important}
+.bd-card.today{border:2px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,#f59e0b,#ec4899,#a855f7) border-box;box-shadow:0 14px 30px -16px rgba(236,72,153,.85)}
+.bd-wish{flex-basis:100%;font-size:13px;font-weight:700;color:var(--text);background:rgba(245,158,11,.13);border-radius:12px;padding:8px 12px}
+.bd-empty{text-align:center;padding:34px 10px;color:var(--text-muted);font-weight:700;line-height:1.9}.bd-empty b{display:block;font-size:46px}
+@media (prefers-reduced-motion:reduce){.bd-hero *{animation:none!important}}
+</style>
 </head>
 <body>
 <div class="bg-logo"></div>
@@ -1844,7 +1901,17 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <div class="rb-say" onclick="openHelp('birthdays')"><b>كوجي بوت 🤖 · شرح «أعياد الميلاد»</b><span class="rb-line" data-text="مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!">مين عيد ميلاده النهارده أو قريب؟ روح هنّيه!</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
-            <h3>أعياد الميلاد 🎂</h3>
+            <div class="bd-hero">
+                <div class="bd-confetti" id="bd-confetti"></div>
+                <span class="bd-balloon">🎈</span><span class="bd-balloon">🎈</span><span class="bd-balloon">🎈</span><span class="bd-balloon">🎈</span>
+                <div class="bd-in">
+                    <div class="bd-cake">🎂</div>
+                    <h3>أعياد الميلاد</h3>
+                    <p id="bd-hero-sub">اختار شهر من ١ لـ ١٢ وشوف مين عيد ميلاده 🎈</p>
+                </div>
+            </div>
+            <div class="bd-search"><span>🔍</span><input type="text" id="bd-search" placeholder="ابحث بالاسم في كل أعياد الميلاد..." oninput="bdSearch(this.value)" autocomplete="off"></div>
+            <div class="bd-months" id="bd-months"></div>
             <div id="birthdays-container"></div>
         </div>
 
@@ -1886,6 +1953,14 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                         <select id="rp-year-select" style="padding:10px; border-radius:10px; width:100%; font-family:inherit; font-weight:700;"></select>
                     </div>
                     <button class="btn-success" onclick="openYearlyReport()">📊 عرض التقرير السنوي</button>
+                </div>
+            </div>
+
+            <div class="settings-card" id="offline-card">
+                <h4>📴 الشغل بدون نت والمزامنة</h4>
+                <div id="offline-status" style="font-size:13.5px; line-height:2;"></div>
+                <div class="action-row" style="margin-top:12px;">
+                    <button class="btn-success" onclick="OfflineSync.sync(true).then(renderOfflineCard)">🔄 مزامنة الآن</button>
                 </div>
             </div>
 
@@ -1933,6 +2008,19 @@ notify pgrst, 'reload schema';</pre>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn-success" onclick="downloadQRCodeImage()" style="flex:1;">📥 حفظ الرمز كصورة</button>
                 <button onclick="closeQRDisplay()" style="background:var(--text-muted); box-shadow:0 6px 0 #475569; flex:1;">تم 💾</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة الأسئلة الذكية (نعم / لا) -->
+    <div id="smart-modal" class="modal-overlay" style="z-index:1200">
+        <div class="modal-body smart-box">
+            <div class="smart-ic" id="smart-ic">✨</div>
+            <h3 id="smart-title"></h3>
+            <p id="smart-text"></p>
+            <div class="smart-actions">
+                <button class="btn-success" id="smart-yes">نعم ✅</button>
+                <button class="smart-no" id="smart-no">لا</button>
             </div>
         </div>
     </div>
@@ -2161,7 +2249,7 @@ notify pgrst, 'reload schema';</pre>
                 document.getElementById('direct-login-error').style.display = 'none';
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('app-section').style.display = 'block'; document.body.classList.add('in-app'); setTimeout(()=>window.flashLogo&&window.flashLogo(),150);
-                let today = new Date().toISOString().split('T')[0];
+                let today = localISO();
                 document.getElementById('meeting-date').value = today;
                 await loadData();
             }
@@ -2325,7 +2413,7 @@ notify pgrst, 'reload schema';</pre>
             if(tabId === 'attendance') loadAttendanceForDate();
             if(tabId === 'committed') renderCommittedList();
             if(tabId === 'bonus') renderBonusTab();
-            if(tabId === 'settings') fillReportSelectors();
+            if(tabId === 'settings') { fillReportSelectors(); renderOfflineCard(); }
             if(tabId === 'visitation') renderVisitationList();
             if(tabId === 'trips') renderTripTable();
             if(tabId === 'birthdays') checkBirthdays();
@@ -2431,14 +2519,54 @@ notify pgrst, 'reload schema';</pre>
             let member = db.members.find(m => m.id == memberId);
             if(!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
             closeQRScanner();
-            if(activeQRTarget === 'attendance') { await addMemberToMeeting(member.id); alert("✅ تسجيل حضور: " + member.name); }
-            else if(activeQRTarget === 'trip') { await addMemberToTrip(member.id); alert("✅ إضافة: " + member.name + " لقائمة الرحلة"); }
+            if(activeQRTarget === 'attendance') { if (await addMemberToMeeting(member.id)) alert("✅ تسجيل حضور: " + member.name); }
+            else if(activeQRTarget === 'trip') { if (await addMemberToTrip(member.id)) alert("✅ إضافة: " + member.name + " لقائمة الرحلة"); }
             else if(activeQRTarget === 'profile') { openMemberDetail(member.id); }
         }
 
         function clearInputError(el) { el.classList.remove('input-error'); }
 
+        // ============================================================
+        // نافذة سؤال ذكية: بترجع true لو ضغط نعم، false لو لا
+        // ============================================================
+        function smartAsk(o) {
+            return new Promise(res => {
+                const el = document.getElementById('smart-modal');
+                const yes = document.getElementById('smart-yes'), no = document.getElementById('smart-no');
+                document.getElementById('smart-ic').textContent = o.icon || '✨';
+                document.getElementById('smart-title').textContent = o.title || '';
+                document.getElementById('smart-text').textContent = o.text || '';
+                yes.textContent = o.yes || 'نعم ✅'; no.textContent = o.no || 'لا';
+                const done = v => {
+                    el.style.display = 'none';
+                    yes.onclick = no.onclick = null;
+                    document.removeEventListener('keydown', onKey, true);
+                    res(v);
+                };
+                const onKey = e => { if (e.key === 'Enter') { e.preventDefault(); done(true); } else if (e.key === 'Escape') done(false); };
+                yes.onclick = () => done(true); no.onclick = () => done(false);
+                document.addEventListener('keydown', onKey, true);
+                el.style.display = 'flex';
+                setTimeout(() => { try { yes.focus(); } catch (e) {} }, 60);
+            });
+        }
+
+        // ============================================================
+        // منع التكرار: المخدوم المتكرر = نفس الاسم الكامل + تاريخ الميلاد + التليفون
+        // (مش الاسم الأول بس: كذا حد اسمه كيرلس أو مينا عادي يتسجلوا)
+        // ============================================================
+        function findMemberDuplicate(md, ignoreId) {
+            const k = OfflineSync.memberKey(md);
+            return db.members.find(m => String(m.id) !== String(ignoreId || '') && OfflineSync.memberKey(m) === k) || null;
+        }
+        function findSameNameMember(md, ignoreId) {
+            const n = OfflineSync.normName(md.name);
+            return db.members.find(m => String(m.id) !== String(ignoreId || '') && OfflineSync.normName(m.name) === n) || null;
+        }
+
+        let _savingMember = false;
         async function saveMember() {
+            if (_savingMember) return;
             let fields = ['m-name', 'm-gender', 'm-stage', 'm-family', 'm-birthdate', 'm-phone', 'm-address', 'm-father'];
             let hasError = false;
             fields.forEach(id => {
@@ -2464,19 +2592,80 @@ notify pgrst, 'reload schema';</pre>
                 family: familyInput, birthdate: document.getElementById('m-birthdate').value, address: document.getElementById('m-address').value,
                 phone: document.getElementById('m-phone').value, father: document.getElementById('m-father').value, notes: document.getElementById('m-notes').value
             };
-            memberData.family = resolveFamilyName(familyInput, memberData.gender, editId || null);
-            if (editId) {
-                await _supabase.from('members').update(memberData).eq('id', editId);
-                alert('تم تعديل البيانات بنجاح!');
-                await loadData();
-                cancelEdit();
-            } else {
-                memberData.id = Date.now();
-                await _supabase.from('members').insert([memberData]);
-                await loadData();
-                cancelEdit();
-                showMemberQRCode(memberData.id);
+            const btn = document.getElementById('btn-save-member');
+            _savingMember = true; if (btn) btn.disabled = true;
+            try {
+                await loadData();   // أحدث نسخة: من السيرفر لو في نت، أو من الجهاز لو أوفلاين
+
+                // 1) تكرار فعلي (كل البيانات متطابقة): نمنع
+                const dup = findMemberDuplicate(memberData, editId);
+                if (dup) {
+                    ['m-name', 'm-birthdate', 'm-phone'].forEach(id => document.getElementById(id).classList.add('input-error'));
+                    toast('⚠️ «' + dup.name + '» تم اضافته من قبل (نفس الاسم وتاريخ الميلاد ورقم التليفون)', 6500);
+                    return;
+                }
+                // 2) نفس الاسم الكامل بس ببيانات مختلفة: نسأل (مش بنمنع)
+                const same = findSameNameMember(memberData, editId);
+                if (same) {
+                    const ok = await smartAsk({
+                        icon: '🤔', title: 'فيه مخدوم بنفس الاسم',
+                        text: 'فيه «' + same.name + '» متسجل قبل كده (أسرة: ' + (same.family || '-') + ' • تاريخ الميلاد: ' + (same.birthdate || '-') + ').\nبياناته مختلفة عن اللي كتبته. ده شخص تاني؟',
+                        yes: 'أيوه شخص تاني، احفظ ✅', no: 'لا، إلغاء'
+                    });
+                    if (!ok) return;
+                }
+
+                memberData.family = resolveFamilyName(familyInput, memberData.gender, editId || null);
+                if (editId) {
+                    const r = await _supabase.from('members').update(memberData).eq('id', editId);
+                    if (r && r.error) { toast('❌ تعذر تعديل البيانات: ' + r.error.message, 6000); return; }
+                    alert('تم تعديل البيانات بنجاح!');
+                    await loadData();
+                    cancelEdit();
+                } else {
+                    memberData.id = Date.now();
+                    const r = await _supabase.from('members').insert([memberData]);
+                    if (r && r.error) { toast('❌ تعذر حفظ المخدوم: ' + r.error.message, 6000); return; }
+                    if (r && r.duplicate) { toast('⚠️ «' + name + '» تم اضافته من قبل', 6000); return; }
+                    await loadData();
+                    cancelEdit();
+                    toast('✅ تم حفظ ' + name);
+                    // أسئلة ذكية بعد الحفظ
+                    await offerAttendanceToday(memberData.id);
+                    await offerTripBooking(memberData.id);
+                    showMemberQRCode(memberData.id);
+                }
+            } finally {
+                _savingMember = false; if (btn) btn.disabled = false;
             }
+        }
+
+        // بعد تسجيل مخدوم جديد: تحب أضيفه في حضور اليوم؟
+        async function offerAttendanceToday(id) {
+            const m = db.members.find(x => x.id == id); if (!m) return;
+            const today = localISO();
+            const ok = await smartAsk({
+                icon: '📋', title: 'تسجيل حضور اليوم؟',
+                text: 'تم حفظ «' + m.name + '» ✅\nتحب أضيفه في حضور اليوم (' + fmtD(today) + ')؟',
+                yes: 'نعم، سجّل حضوره ✅', no: 'لا، مش دلوقتي'
+            });
+            if (!ok) return;
+            if (await addMemberToMeeting(id, today)) toast('✅ ' + m.name + ' اتسجل حاضر في اجتماع اليوم');
+        }
+
+        // لو فيه حجز رحلة/فعالية شغال: تحب أضيفه فيه كمان؟
+        async function offerTripBooking(id) {
+            const m = db.members.find(x => x.id == id); if (!m) return;
+            const key = getActiveTripKey(), tr = db.tripsData[key];
+            if (!tr || !(tr.fee > 0 || Object.keys(tr.reservations || {}).length)) return;
+            const label = (document.getElementById('trip-event-name').value || '').trim() || key;
+            const ok = await smartAsk({
+                icon: '🚌', title: 'إضافته لحجز الفعالية؟',
+                text: 'فيه حجز شغال لـ «' + label + '».\nتحب أضيف «' + m.name + '» فيه؟',
+                yes: 'نعم، ضيفه ✅', no: 'لا'
+            });
+            if (!ok) return;
+            if (await addMemberToTrip(id)) toast('✅ ' + m.name + ' اتضاف لحجز «' + label + '»');
         }
 
         function editProfile(id, event) {
@@ -2716,21 +2905,37 @@ notify pgrst, 'reload schema';</pre>
         async function exportVisitationExcel() {
             let { allMeetings, list } = getVisitationData();
             if (list.length === 0) { alert('لا يوجد متغيبون للتصدير.'); return; }
-            let today = new Date().toISOString().slice(0, 10);
+            let today = localISO();
             let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب'];
-            let mk = (name, title, items, tabColor) => ({
-                name, title,
-                subtitle: 'العدد: ' + items.length + '   |   تاريخ التصدير: ' + today,
-                headers,
-                rows: items.map((x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، ')]),
-                widths: [9, 28, 20, 22, 34, 17, 14, 45],
-                align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right'],
-                textCols: [5],
-                rowStyles: items.map(x => visExcelStyle(x.n)),
-                badgeCols: [1, 6],
-                tabColor
-            });
-            // الأكتر غياب في الأول، ولو نفس العدد بالترتيب الأبجدي
+            let rowOf = (x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، ')];
+            // كل شيت: الشباب فوق بعض بنفس الألوان، وتحتهم الشابات (الترقيم بيبدأ من ١ في كل قسم)
+            let mk = (name, title, items, tabColor) => {
+                const youth = items.filter(x => x.m.gender === 'شاب');
+                const girls = items.filter(x => x.m.gender === 'شابة');
+                const other = items.filter(x => x.m.gender !== 'شاب' && x.m.gender !== 'شابة');
+                const rows = [], rowStyles = [];
+                const addSection = (label, color, arr) => {
+                    if (!arr.length) return;
+                    if (rows.length) { rows.push({ __gap: true }); rowStyles.push(null); }
+                    rows.push({ __section: label + '   —   العدد: ' + arr.length, color }); rowStyles.push(null);
+                    arr.forEach((x, i) => { rows.push(rowOf(x, i)); rowStyles.push(visExcelStyle(x.n)); });
+                };
+                addSection('👦 الشباب', 'FF1D6FB8', youth);
+                addSection('👧 الشابات', 'FFC4306B', girls);
+                addSection('❔ غير محدد النوع', 'FF5B6B86', other);
+                return {
+                    name, title,
+                    subtitle: 'الشباب: ' + youth.length + '   |   الشابات: ' + girls.length + (other.length ? '   |   غير محدد: ' + other.length : '') + '   |   الإجمالي: ' + items.length + '   |   تاريخ التصدير: ' + today,
+                    headers, rows, rowStyles,
+                    widths: [9, 28, 20, 22, 34, 17, 14, 45],
+                    align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right'],
+                    textCols: [5],
+                    badgeCols: [1, 6],
+                    noFilter: true,
+                    tabColor
+                };
+            };
+            // الأكتر غياب في الأول، ولو نفس العدد بالترتيب الأبجدي (داخل كل قسم)
             let sorted = [...list].sort((a, b) => (b.n - a.n) || String(a.m.name || '').localeCompare(String(b.m.name || ''), 'ar'));
             let sheets = [mk('الكل', 'كل المتغيبين', sorted)];
             let names = { 1: 'غاب اجتماع', 2: 'غاب اجتماعين', 3: 'غاب ٣ اجتماعات', 4: 'غاب ٤ اجتماعات ⚠️', 5: 'غاب ٥ اجتماعات ⚠️', 6: 'غياب طويل ٦+' };
@@ -3444,14 +3649,54 @@ notify pgrst, 'reload schema';</pre>
             });
         }
 
-        async function addMemberToMeeting(id) {
-            let now = new Date();
-            let timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-            let dateTimeFull = `${currentMeetingDate} | ${timeStr}`;
+        // هل المخدوم متسجل حضور في الاجتماع ده؟ (محلي أولاً، وبعدين تأكيد من السيرفر لو في نت)
+        async function attendanceExists(d, id) {
+            if (db.attendanceRecords[d] && db.attendanceRecords[d][id]) return true;
+            try {
+                const r = await _supabase.from('attendance').select('member_id').eq('meeting_date', d).eq('member_id', id).limit(1);
+                return !!(r && !r.error && r.data && r.data.length);
+            } catch (e) { return false; }
+        }
+        // عدد الاجتماعات اللي غابها المخدوم ورا بعض قبل التاريخ ده
+        function absenceStreakBefore(m, d) {
+            let n = 0; const ms = [...db.meetings].filter(x => x < d).sort();
+            for (let i = ms.length - 1; i >= 0; i--) {
+                if (db.attendanceRecords[ms[i]] && db.attendanceRecords[ms[i]][m.id]) break;
+                if (!absenceCounts(m, ms[i])) break;
+                n++;
+            }
+            return n;
+        }
+        const _attBusy = new Set();
+        async function addMemberToMeeting(id, date) {
+            const d = date || currentMeetingDate;
+            if (!d) { toast('اختار تاريخ الاجتماع الأول'); return false; }
+            const bk = d + '|' + id;
+            if (_attBusy.has(bk)) return false;          // ضغطتين/مسح مرتين ورا بعض
+            _attBusy.add(bk);
+            try {
+                const m = db.members.find(x => x.id == id);
+                if (await attendanceExists(d, id)) {
+                    toast('⚠️ ' + (m ? m.name : 'المخدوم') + ' تم اضافته من قبل في حضور ' + fmtD(d), 5500);
+                    return false;
+                }
+                const streak = m ? absenceStreakBefore(m, d) : 0;
+                let now = new Date();
+                let timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                let dateTimeFull = `${d} | ${timeStr}`;
 
-            await _supabase.from('attendance').insert([{ meeting_date: currentMeetingDate, member_id: id, attend_time: dateTimeFull }]);
-            await loadData();
-            loadAttendanceForDate();
+                const r = await _supabase.from('attendance').insert([{ meeting_date: d, member_id: id, attend_time: dateTimeFull }]);
+                if (r && r.error) { toast('❌ تعذر تسجيل الحضور: ' + r.error.message, 6000); return false; }
+                if (r && r.duplicate) { toast('⚠️ ' + (m ? m.name : 'المخدوم') + ' تم اضافته من قبل في حضور ' + fmtD(d), 5500); return false; }
+                await loadData();
+                if (d === currentMeetingDate) loadAttendanceForDate();
+                // ملاحظات ذكية
+                if (m) {
+                    if (streak >= 2) toast('👏 ' + m.name + ' رجع بعد ما غاب ' + streak + ' اجتماعات — رحّب بيه!', 5500);
+                    if (d === localISO() && bdayDaysAhead(m.birthdate) === 0) toast('🎂 النهارده عيد ميلاد ' + m.name + '! كل سنة وهو طيب', 5500);
+                }
+                return true;
+            } finally { _attBusy.delete(bk); }
         }
 
         async function removeMemberFromMeeting(id) {
@@ -3568,19 +3813,37 @@ notify pgrst, 'reload schema';</pre>
                 res.appendChild(div);
             });
         }
+        const _tripBusy = new Set();
         async function addMemberToTrip(id) {
             let key = getActiveTripKey();
-            let fee = getTripObj().fee || 0;
-            await _supabase.from('trips').upsert([{ 
-                trip_type: key, 
-                member_id: id, 
-                fee: fee, 
-                paid: 0, 
-                installments: JSON.stringify([]) 
-            }], { onConflict: 'trip_type,member_id' });
-            await loadData();
-            renderTripTable();
-            autoArchiveTrip();
+            const bk = key + '|' + id;
+            if (_tripBusy.has(bk)) return false;
+            _tripBusy.add(bk);
+            try {
+                const m = db.members.find(x => x.id == id);
+                const label = (document.getElementById('trip-event-name').value || '').trim() || key;
+                let exists = !!getTripObj().reservations[id];
+                if (!exists) {
+                    try {
+                        const r = await _supabase.from('trips').select('member_id').eq('trip_type', key).eq('member_id', id).limit(1);
+                        exists = !!(r && !r.error && r.data && r.data.length);
+                    } catch (e) {}
+                }
+                if (exists) { toast('⚠️ ' + (m ? m.name : 'المخدوم') + ' تم اضافته من قبل في حجز «' + label + '»', 5500); return false; }
+                let fee = getTripObj().fee || 0;
+                const r = await _supabase.from('trips').upsert([{
+                    trip_type: key,
+                    member_id: id,
+                    fee: fee,
+                    paid: 0,
+                    installments: JSON.stringify([])
+                }], { onConflict: 'trip_type,member_id' });
+                if (r && r.error) { toast('❌ تعذر إضافة الحجز: ' + r.error.message, 6000); return false; }
+                await loadData();
+                renderTripTable();
+                autoArchiveTrip();
+                return true;
+            } finally { _tripBusy.delete(bk); }
         }
         async function removeMemberFromTrip(id) {
             await _supabase.from('trips').delete().eq('trip_type', getActiveTripKey()).eq('member_id', id);
@@ -3938,37 +4201,98 @@ notify pgrst, 'reload schema';</pre>
             return Math.round((n - t) / 864e5);
         }
 
-        function checkBirthdays() {
-            let container = document.getElementById('birthdays-container');
-            const t = new Date(); t.setHours(0, 0, 0, 0);
-            const label = d => d === 0 ? 'النهارده' : d === 1 ? 'بكرة' : d === 2 ? 'بعد بكرة' : 'بعد ' + d + ' أيام';
-            let list = db.members.map(m => ({ m, d: bdayDaysAhead(m.birthdate) }))
-                .filter(x => x.d !== null && x.d <= BDAY_WINDOW).sort((a, b) => a.d - b.d);
-            let today = list.filter(x => x.d === 0), soon = list.filter(x => x.d > 0);
-
-            let html = '';
-            today.forEach(({ m }) => {
-                html += `
-                    <div class="birthday-box">
-                        <strong>🎉 كل سنة وأنت طيب يا/ ${esc(m.name)}!</strong>
-                        <p style="margin:6px 0 0 0; font-size:13.5px;">عيد ميلاد سعيد، نسأل الرب أن يبارك حياتك ويحفظك (أسرة: ${esc(m.family || '-')})</p>
-                    </div>`;
-            });
-            if (soon.length) {
-                html += `<h4 style="margin:22px 0 10px; color:var(--primary);">🎈 قريباً — خلال ${BDAY_WINDOW} أيام</h4>`;
-                soon.forEach(({ m, d }) => {
-                    let when = new Date(t.getTime() + d * 864e5);
-                    let dateTxt = when.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-                    let by = +String(m.birthdate).split('-')[0], age = when.getFullYear() - by;
-                    let ageTxt = by >= 1900 && age > 0 && age < 120 ? ' — هيكمل ' + age + ' سنة' : '';
-                    html += `
-                    <div class="birthday-box" style="opacity:.92">
-                        <strong>🎂 ${esc(m.name)}</strong>
-                        <p style="margin:6px 0 0 0; font-size:13.5px;"><b>${label(d)}</b> (${dateTxt})${ageTxt} — أسرة: ${esc(m.family || '-')}</p>
-                    </div>`;
-                });
+        // ============================================================
+        // أعياد الميلاد: شكل احتفالي + بحث بالشهور من ١ لـ ١٢ + بحث بالاسم
+        // ============================================================
+        let bdMonth = 'soon', bdQuery = '';
+        const AR_NUM = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        function bdParts(bd) {
+            const p = String(bd || '').split('-'); if (p.length < 3) return null;
+            const y = +p[0], m = +p[1], d = +p[2];
+            return (m >= 1 && m <= 12 && d >= 1 && d <= 31) ? { y, m, d } : null;
+        }
+        function bdBuildConfetti() {
+            const c = document.getElementById('bd-confetti'); if (!c || c.dataset.ready) return;
+            c.dataset.ready = '1';
+            const cols = ['#fde047', '#ffffff', '#34d399', '#60a5fa', '#fb7185', '#f97316', '#c084fc'];
+            let h = '';
+            for (let i = 0; i < 30; i++) {
+                const sz = 6 + Math.floor(Math.random() * 7);
+                h += '<i style="left:' + (Math.random() * 100).toFixed(1) + '%;width:' + sz + 'px;height:' + Math.round(sz * 1.5) + 'px;background:' + cols[i % cols.length] +
+                     ';border-radius:' + (Math.random() > .5 ? '50%' : '2px') + ';animation-delay:-' + (Math.random() * 6).toFixed(2) + 's;animation-duration:' + (4 + Math.random() * 4).toFixed(2) + 's"></i>';
             }
-            container.innerHTML = html || `<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد أعياد ميلاد اليوم أو خلال الأيام الثلاثة القادمة.</p>`;
+            c.innerHTML = h;
+        }
+        function bdWaLink(m, text) {
+            let d = String(m.phone || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/\D/g, '');
+            if (!d) return '';
+            if (d.startsWith('00')) d = d.slice(2); else if (d.startsWith('0')) d = '2' + d;   // 01x... => 201x...
+            return 'https://wa.me/' + d + '?text=' + encodeURIComponent(text);
+        }
+        // mode = 'month' يعرض عيد الميلاد في السنة الحالية، غير كده يعرض أقرب عيد ميلاد جاي
+        function bdCard(x, mode) {
+            const m = x.m, p = x.p, dA = x.d, isToday = dA === 0;
+            const g = m.gender === 'شابة' ? 'f' : 'm';
+            const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+            let occ = new Date(t0.getFullYear(), p.m - 1, p.d);
+            if (mode !== 'month' && occ < t0) occ = new Date(t0.getFullYear() + 1, p.m - 1, p.d);
+            const age = occ.getFullYear() - p.y;
+            let ageTxt = '';
+            if (p.y >= 1900 && age > 0 && age < 120) ageTxt = isToday ? 'بيكمل ' + AR_NUM(age) + ' سنة النهارده' : (occ < t0 ? 'كمّل ' : 'هيكمل ') + AR_NUM(age) + ' سنة';
+            let when = '';
+            if (isToday) when = 'النهارده 🎉';
+            else if (mode === 'month' && occ < t0) when = 'عدّى ✔️';
+            else if (dA <= 30) when = dA === 1 ? 'بكرة' : dA === 2 ? 'بعد بكرة' : 'بعد ' + AR_NUM(dA) + ' أيام';
+            const wa = bdWaLink(m, 'كل سنة وأنت طيب يا ' + m.name + ' 🎂🎉\nنسأل الرب أن يبارك حياتك ويحفظك ويفرّح قلبك 🙏');
+            return '<div class="bd-card ' + g + (isToday ? ' today' : '') + '" onclick="openMemberDetail(' + m.id + ')">' +
+                '<div class="bd-date"><b>' + AR_NUM(p.d) + '</b><span>' + AR_MONTHS[p.m - 1] + '</span></div>' +
+                '<div class="bd-info"><strong>' + esc(m.name) + '</strong><p>' + (g === 'f' ? '👧' : '👦') + ' أسرة: ' + esc(m.family || '-') + (ageTxt ? ' • 🎂 ' + ageTxt : '') + '</p></div>' +
+                '<div class="bd-side">' + (when ? '<span class="bd-when' + (isToday ? ' now' : '') + '">' + when + '</span>' : '') +
+                (wa ? '<a class="bd-wa" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">📱 هنّيه</a>' : '') + '</div>' +
+                (isToday ? '<div class="bd-wish">🎉 كل سنة وأنت طيب يا ' + esc(m.name) + '! نسأل الرب أن يبارك حياتك ويحفظك</div>' : '') +
+                '</div>';
+        }
+        function bdSetMonth(m) {
+            bdMonth = m; bdQuery = '';
+            const i = document.getElementById('bd-search'); if (i) i.value = '';
+            checkBirthdays();
+        }
+        function bdSearch(v) { bdQuery = v || ''; checkBirthdays(); }
+
+        function checkBirthdays() {
+            const box = document.getElementById('birthdays-container'); if (!box) return;
+            bdBuildConfetti();
+            const all = db.members.map(m => ({ m, p: bdParts(m.birthdate), d: bdayDaysAhead(m.birthdate) })).filter(x => x.p);
+            const cnt = Array(13).fill(0); all.forEach(x => cnt[x.p.m]++);
+            const todayN = all.filter(x => x.d === 0).length;
+
+            // أزرار الشهور ١ – ١٢
+            const chips = document.getElementById('bd-months');
+            if (chips) chips.innerHTML =
+                '<button class="bd-chip soon' + (bdMonth === 'soon' && !bdQuery ? ' on' : '') + '" onclick="bdSetMonth(\'soon\')"><b>🎈</b><span>النهارده وقريباً</span></button>' +
+                AR_MONTHS.map((nm, i) => '<button class="bd-chip' + (bdMonth === i + 1 && !bdQuery ? ' on' : '') + '" onclick="bdSetMonth(' + (i + 1) + ')"><b>' + AR_NUM(i + 1) + '</b><span>' + nm + '</span>' + (cnt[i + 1] ? '<i>' + AR_NUM(cnt[i + 1]) + '</i>' : '') + '</button>').join('');
+
+            const sub = document.getElementById('bd-hero-sub');
+            if (sub) sub.textContent = todayN ? '🎉 النهارده ' + AR_NUM(todayN) + (todayN === 1 ? ' عيد ميلاد' : ' أعياد ميلاد') + ' — روح هنّيهم!' : 'اختار شهر من ١ لـ ١٢ وشوف مين عيد ميلاده 🎈';
+
+            const q = norm(bdQuery);
+            let html = '';
+            if (q) {
+                const list = all.filter(x => norm(x.m.name).includes(q)).sort((a, b) => a.d - b.d);
+                html = '<div class="bd-head"><span>🔍 نتيجة البحث</span><em>' + AR_NUM(list.length) + ' مخدوم</em></div>' +
+                    (list.map(x => bdCard(x, 'soon')).join('') || '<div class="bd-empty"><b>🤷</b>مفيش حد بالاسم ده عنده تاريخ ميلاد مسجل.</div>');
+            } else if (bdMonth === 'soon') {
+                const today = all.filter(x => x.d === 0), soon = all.filter(x => x.d > 0 && x.d <= BDAY_WINDOW).sort((a, b) => a.d - b.d);
+                if (today.length) html += '<div class="bd-head"><span>🎉 النهارده</span><em>' + AR_NUM(today.length) + '</em></div>' + today.map(x => bdCard(x, 'soon')).join('');
+                if (soon.length) html += '<div class="bd-head"><span>🎈 قريباً — خلال ' + AR_NUM(BDAY_WINDOW) + ' أيام</span><em>' + AR_NUM(soon.length) + '</em></div>' + soon.map(x => bdCard(x, 'soon')).join('');
+                if (!html) html = '<div class="bd-empty"><b>🎈</b>مفيش أعياد ميلاد النهارده ولا خلال الأيام الجاية.<br>اختار شهر من فوق وشوف أعياد الميلاد كلها.</div>';
+            } else {
+                const list = all.filter(x => x.p.m === bdMonth).sort((a, b) => (a.p.d - b.p.d) || String(a.m.name).localeCompare(String(b.m.name), 'ar'));
+                const bm = list.filter(x => x.m.gender !== 'شابة').length, gf = list.length - bm;
+                html = '<div class="bd-head"><span>🎂 أعياد ميلاد شهر ' + AR_MONTHS[bdMonth - 1] + '</span><em>' + AR_NUM(list.length) + ' مخدوم • 👦 ' + AR_NUM(bm) + ' • 👧 ' + AR_NUM(gf) + '</em></div>' +
+                    (list.map(x => bdCard(x, 'month')).join('') || '<div class="bd-empty"><b>🗓️</b>مفيش أعياد ميلاد في شهر ' + AR_MONTHS[bdMonth - 1] + '.</div>');
+            }
+            box.innerHTML = html;
         }
 
         function downloadCSVFile(filename, csvContent) {
@@ -4051,7 +4375,7 @@ notify pgrst, 'reload schema';</pre>
                 let csv = '';
                 sheets.forEach(sh => {
                     csv += `${sh.title}\n${sh.headers.join(',')}\n`;
-                    sh.rows.forEach(r => { csv += r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\n'; });
+                    sh.rows.forEach(r => { if (!Array.isArray(r)) { if (r.__section) csv += `"${r.__section}"\n`; return; } csv += r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\n'; });
                     csv += '\n';
                 });
                 downloadCSVFile(filename.replace(/\.xlsx$/, '.csv'), csv);
@@ -4130,6 +4454,19 @@ notify pgrst, 'reload schema';</pre>
                 // البيانات
                 sh.rows.forEach((r, ri) => {
                     const row = ws.getRow(5 + ri);
+                    // صف عنوان قسم (شباب / شابات) أو فاصل
+                    if (r && !Array.isArray(r)) {
+                        if (r.__gap) { row.height = 8; return; }
+                        ws.mergeCells(5 + ri, 1, 5 + ri, cols);
+                        const sc = row.getCell(1);
+                        sc.value = r.__section;
+                        sc.font = { name: FONT, size: 13, bold: true, color: { argb: C.white } };
+                        sc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: r.color || C.navy } };
+                        sc.alignment = { horizontal: 'center', vertical: 'middle', readingOrder: 'rtl' };
+                        for (let ci = 1; ci <= cols; ci++) row.getCell(ci).border = border;
+                        row.height = 28;
+                        return;
+                    }
                     r.forEach((v, ci) => {
                         const c = row.getCell(ci + 1);
                         const isText = sh.textCols && sh.textCols.includes(ci);
@@ -4186,7 +4523,7 @@ notify pgrst, 'reload schema';</pre>
                 }
 
                 // فلتر + تكرار رأس الجدول عند الطباعة
-                if (sh.rows.length) ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: lastData, column: cols } };
+                if (sh.rows.length && !sh.noFilter) ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: lastData, column: cols } };
                 ws.pageSetup.printTitlesRow = '4:4';
             });
 
@@ -4639,7 +4976,7 @@ async function logoutUser(){
       document.body.classList.add('in-app');
       setTimeout(()=>window.flashLogo&&window.flashLogo(),150);
       const md = document.getElementById('meeting-date');
-      if (md && !md.value) md.value = new Date().toISOString().split('T')[0];
+      if (md && !md.value) md.value = localISO();
       await loadData();
     }
   }catch(e){ console.error('restore session failed', e); }
@@ -5078,6 +5415,21 @@ addEventListener('resize', () => { if (_tipInp) placeDiscTip(); });
 
 /* تاريخ الرحلة الافتراضي = النهارده */
 (function(){ const el = document.getElementById('trip-event-date'); if (el && !el.value) el.value = localISO(); })();
+</script>
+<script id="v3-offline-card">
+async function renderOfflineCard() {
+  const el = document.getElementById('offline-status');
+  if (!el || !window.OfflineSync || !OfflineSync.status) return;
+  const s = await OfflineSync.status();
+  let h = '<div>' + (s.online ? '🟢 متصل بالنت' : '🔴 أوفلاين') + '</div>' +
+    '<div>⏳ عمليات محفوظة على الجهاز ومستنية المزامنة: <b>' + s.pending + '</b></div>';
+  if (s.failed) h += '<div>⚠️ عمليات رفضها السيرفر: <b>' + s.failed + '</b></div>';
+  h += s.persisted
+    ? '<div>🔒 التخزين الدائم مفعّل: المتصفح مش هيمسح بياناتك الأوفلاين.</div>'
+    : '<div>⚠️ التخزين الدائم لسه مش مفعّل. ' + (s.ios && !s.standalone ? 'على الآيفون: مشاركة ← «إضافة إلى الشاشة الرئيسية» وافتح التطبيق منها.' : 'ثبّت التطبيق على الشاشة الرئيسية لتأمين أفضل.') + '</div>';
+  h += '<div style="color:var(--text-muted);font-size:12.5px">البيانات بتتشال من الجهاز بس بعد ما السيرفر يقبلها وتثبت في التطبيق.</div>';
+  el.innerHTML = h;
+}
 </script>
 </body>
 </html>
