@@ -5043,6 +5043,7 @@ async function fetchAll(table,orderCols){
     if(!data||data.length<size)break; from+=size;
   }
   if(!anyLocal)OfflineSync.saveCache(table,all);   // نسخة محلية محدثة من السيرفر
+  else if(!all.length && !OfflineSync.hasCache(table) && !window.__noCacheWarned){window.__noCacheWarned=1;setTimeout(()=>toast('⚠️ مفيش نسخة محفوظة على الجهاز. افتح التطبيق مرة بالنت وسجّل دخول وسيبه يحمّل البيانات، وبعدها هيشتغل أوفلاين',8000),500)}
   return {data:all,error:null};
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}

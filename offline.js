@@ -26,12 +26,13 @@
     dbp = new Promise(res => {
       if (typeof indexedDB === 'undefined') { res(null); return; }
       try {
-        const r = indexedDB.open('church_offline', 1);
+        const r = indexedDB.open('church_offline', 2);
         r.onupgradeneeded = () => {
           const d = r.result;
-          d.createObjectStore('cache', { keyPath: 'table' });
-          d.createObjectStore('queue', { keyPath: 'seq', autoIncrement: true });
-          d.createObjectStore('failed', { keyPath: 'seq', autoIncrement: true });
+          const has = n => d.objectStoreNames.contains(n);
+          if (!has('cache')) d.createObjectStore('cache', { keyPath: 'table' });
+          if (!has('queue')) d.createObjectStore('queue', { keyPath: 'seq', autoIncrement: true });
+          if (!has('failed')) d.createObjectStore('failed', { keyPath: 'seq', autoIncrement: true });
         };
         r.onsuccess = () => res(r.result);
         r.onerror = () => res(null);
@@ -105,6 +106,12 @@
       if (k === 'eq') return String(a) === String(v);
       if (k === 'neq') return String(a) !== String(v);
       if (k === 'in') return (v || []).map(String).includes(String(a));
+      if (k === 'is') return v === null ? a == null : a === v;
+      if (k === 'not') { const op = v[0], val = v[1]; return op === 'is' ? !(val === null ? a == null : a === val) : op === 'eq' ? String(a) !== String(val) : true; }
+      if (k === 'gt') return a != null && a > v;
+      if (k === 'gte') return a != null && a >= v;
+      if (k === 'lt') return a != null && a < v;
+      if (k === 'lte') return a != null && a <= v;
       return true;
     });
   }
@@ -159,7 +166,7 @@
     else if (o.op === 'upsert') q = q.upsert(o.payload, o.opts || undefined);
     else if (o.op === 'delete') q = q.delete();
     if (o.sel) q = q.select(o.cols || '*');
-    o.f.forEach(([k, c, v]) => { q = q[k](c, v); });
+    o.f.forEach(([k, c, v]) => { q = k === 'not' ? q.not(c, v[0], v[1]) : q[k](c, v); });
     (o.ord || []).forEach(([c, d]) => { q = q.order(c, { ascending: d > 0 }); });
     if (o.rng) q = q.range(o.rng[0], o.rng[1]);
     if (o.lim != null) q = q.limit(o.lim);
@@ -177,6 +184,12 @@
     eq(c, v) { this.f.push(['eq', c, v]); return this; }
     neq(c, v) { this.f.push(['neq', c, v]); return this; }
     in(c, v) { this.f.push(['in', c, v]); return this; }
+    is(c, v) { this.f.push(['is', c, v]); return this; }
+    not(c, op, v) { this.f.push(['not', c, [op, v]]); return this; }
+    gt(c, v) { this.f.push(['gt', c, v]); return this; }
+    gte(c, v) { this.f.push(['gte', c, v]); return this; }
+    lt(c, v) { this.f.push(['lt', c, v]); return this; }
+    lte(c, v) { this.f.push(['lte', c, v]); return this; }
     order(c, o) { this.ord.push([c, o && o.ascending === false ? -1 : 1]); return this; }
     range(a, b) { this.rng = [a, b]; return this; }
     limit(n) { this.lim = n; return this; }
@@ -193,16 +206,36 @@
       return this.runWrite();
     }
 
+    qkey() {
+      return 'q|' + this.t + '|' + JSON.stringify([this.cols, this.f, this.ord, this.rng, this.lim]);
+    }
+
     async runRead() {
       this.op = 'select';
       if (qlen === 0 && navigator.onLine) {
         try {
           const r = await buildReal(this);
-          if (!r.error || !(isNetErr(r.error) || r.status === 0)) return r;
+          if (!r.error) {
+            // نخزن نتيجة كل قراءة ناجحة تلقائياً
+            try {
+              if (Array.isArray(r.data)) {
+                mem[this.qkey()] = r.data; persist(this.qkey());
+                const full = this.cols === '*' && !this.f.length && this.lim == null &&
+                  (!this.rng || (this.rng[0] === 0 && r.data.length <= this.rng[1] - this.rng[0]));
+                if (full) { mem[this.t] = r.data; persist(this.t); }
+              }
+            } catch (e) { /* */ }
+            return r;
+          }
+          if (!(isNetErr(r.error) || r.status === 0)) return r;
         } catch (e) { if (!isNetErr(e)) throw e; }
       }
       // أوفلاين أو فيه عمليات معلقة: من النسخة المحلية
-      return { data: readLocal(this), error: null, local: true, status: 200 };
+      let data;
+      if (mem[this.t] && mem[this.t].length) data = readLocal(this);
+      else if (mem[this.qkey()]) data = clone(mem[this.qkey()]);
+      else data = readLocal(this);
+      return { data, error: null, local: true, status: 200 };
     }
 
     async runWrite() {
@@ -368,6 +401,7 @@
     flush,
     saveCache(table, rows) { mem[table] = rows; persist(table); },
     readCache(table) { return mem[table] || null; },
+    hasCache(table) { return !!(mem[table] && mem[table].length); },
     async sync(manual) {
       if (!navigator.onLine) { if (manual && window.toast) window.toast('مفيش نت حالياً — العمليات محفوظة على الجهاز وهتتبعت أول ما النت يرجع'); return; }
       if (!qlen) { if (manual && window.toast) window.toast('كل حاجة متزامنة ✅'); return; }
@@ -397,6 +431,8 @@
   };
   if (typeof window !== 'undefined') window.OfflineSync = api;
   if (typeof module !== 'undefined') module.exports = api;
+
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* */ }
 
   /* ---------- أحداث ---------- */
   if (typeof window !== 'undefined') {

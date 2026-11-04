@@ -1,5 +1,5 @@
 /* Service Worker: يخلي التطبيق يفتح من غير نت */
-const VER = 'v7';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
+const VER = 'v8';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
 const CACHE = 'attendance-' + VER;
 const CORE = ['./', './index.html', './offline.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN = [
@@ -64,6 +64,24 @@ self.addEventListener('fetch', e => {
         return r;
       } catch (err) {
         return (await c.match('./index.html', { ignoreSearch: true })) || (await c.match('./')) || Response.error();
+      }
+    })());
+    return;
+  }
+
+  // ملفات التطبيق نفسها: النت الأول (عشان التحديث يوصل فوراً) وإلا الكاش
+  if (url.origin === location.origin && /\.(js|json|html)$/.test(url.pathname)) {
+    e.respondWith((async () => {
+      const c = await caches.open(CACHE);
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 4000);
+        const r = await fetch(req, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (r && r.ok) c.put(req, r.clone());
+        return r;
+      } catch (err) {
+        return (await c.match(req, { ignoreSearch: true })) || Response.error();
       }
     })());
     return;
