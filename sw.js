@@ -1,5 +1,5 @@
 /* Service Worker: يخلي التطبيق يفتح من غير نت */
-const VER = 'v6';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
+const VER = 'v7';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
 const CACHE = 'attendance-' + VER;
 const CORE = ['./', './index.html', './offline.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN = [
@@ -13,9 +13,14 @@ const CDN = [
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
+    // الملفات المحلية: add عادي
+    // مكتبات الـ CDN: لازم fetch ثم put، لأن cache.add بيرفض الردود الـ opaque (no-cors) وماكانتش بتتخزن فعلاً
     await Promise.allSettled([
       ...CORE.map(u => c.add(u)),
-      ...CDN.map(u => c.add(new Request(u, { mode: 'no-cors' })))
+      ...CDN.map(async u => {
+        const r = await fetch(new Request(u, { mode: 'no-cors' }));
+        if (r && (r.ok || r.type === 'opaque')) await c.put(u, r);
+      })
     ]);
     self.skipWaiting();
   })());
@@ -24,7 +29,18 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k.startsWith('attendance-') && k !== CACHE).map(k => caches.delete(k)));
+    const old = keys.filter(k => k.startsWith('attendance-') && k !== CACHE);
+    const cur = await caches.open(CACHE);
+    // ننقل أي ملف متخزن في الكاش القديم (المكتبات والخطوط) للجديد قبل المسح، عشان تحديث الإصدار ما يسيبش التطبيق من غير مكتباته أوفلاين
+    for (const k of old) {
+      try {
+        const oc = await caches.open(k);
+        for (const rq of await oc.keys()) {
+          if (!(await cur.match(rq))) { const rs = await oc.match(rq); if (rs) await cur.put(rq, rs); }
+        }
+      } catch (err) { /* مش مشكلة */ }
+    }
+    await Promise.all(old.map(k => caches.delete(k)));
     await self.clients.claim();
   })());
 });
