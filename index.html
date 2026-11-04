@@ -1708,7 +1708,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                     <select id="fam-att-month" onchange="renderFamilyAttendanceStats()" style="padding:10px 14px; border-radius:10px; border:1px solid var(--card-border); font-family:inherit; font-weight:700;"></select>
                 </div>
                 <h4 style="margin:0 0 6px 0; color:var(--primary);">📈 نسبة حضور الأسر</h4>
-                <p style="color: var(--text-muted); font-size: 13px; margin:0 0 12px 0;">النسبة = (عدد مرات حضور أفراد الأسرة) ÷ (عدد الأفراد × عدد اجتماعات الشهر). الأعمدة الصغيرة بتوضح النسبة في آخر ٦ شهور.</p>
+                <p style="color: var(--text-muted); font-size: 13px; margin:0 0 12px 0;">النسبة = (عدد مرات حضور أفراد الأسرة) ÷ (عدد الأفراد المسجلين قبل كل اجتماع × عدد اجتماعات الشهر). الأعمدة الصغيرة بتوضح النسبة في آخر ٦ شهور.</p>
                 <div id="fam-att-list"></div>
             </div>
 
@@ -1736,6 +1736,22 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             </div>
 
             <h3>نظام حجز الرحلات والفعاليات الذكي</h3>
+
+            <!-- الرحلات الجارية: اضغط على رحلة تفتح شيت الأسماء -->
+            <div id="trip-list-view">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+                    <button onclick="newTripSheet()" style="flex:1; min-width:140px; padding:12px; font-size:14px;">➕ رحلة جديدة</button>
+                    <button onclick="openTripDiscountsModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:none;">🏷️ الخصومات</button>
+                    <button onclick="openTripYearModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📅 أرشيف رحلات السنة</button>
+                </div>
+                <div id="trip-cards"></div>
+            </div>
+
+            <div id="trip-sheet-view" style="display:none;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+                <button onclick="showTripList()" style="padding:10px 14px; font-size:13px; background:var(--text-muted); box-shadow:none;">⬅️ رجوع للرحلات</button>
+                <button onclick="sendTripToArchive()" style="padding:10px 14px; font-size:13px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📦 ابعتها للأرشيف</button>
+            </div>
             
             <div style="padding:22px; border-radius:var(--radius-md); border:1px solid var(--card-border); margin-bottom:26px;">
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
@@ -1808,6 +1824,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                     </table>
                 </div>
             </div>
+            </div><!-- /trip-sheet-view -->
         </div>
 
         <!-- البروفايلات والبحث -->
@@ -2025,7 +2042,7 @@ notify pgrst, 'reload schema';</pre>
                 steps: [
                     'فوق بتلاقي <b>إجمالي الشباب</b> و<b>إجمالي الشابات</b> و<b>الإجمالي الكلي</b>.',
                     'اضغط على أي أسرة علشان تفتح أعضاءها. جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
-                    '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
+                    '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد المسجلين قبل كل اجتماع × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
                     '<b>«📥 تصدير كل بيانات الأسر»</b> بيطلعلك ملف Excel واحد وكل أسرة في شيت لوحدها.',
                     'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.'],
                 tips: []
@@ -2202,7 +2219,7 @@ notify pgrst, 'reload schema';</pre>
 
                 (tripsRes.data || []).forEach(t => {
                     if (String(t.trip_type).startsWith('ARCHIVE|')) {   // سجل الرحلات المحفوظ
-                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.tripArchive.push({ key: t.trip_type, ...o }); } catch (e) {}
+                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) { const it = { key: t.trip_type, ...o }, ix = db.tripArchive.findIndex(x => x.key === t.trip_type); if (ix < 0) db.tripArchive.push(it); else if ((it.attendees || 0) >= (db.tripArchive[ix].attendees || 0)) db.tripArchive[ix] = it; } } catch (e) {}
                         return;
                     }
                     if (!db.tripsData[t.trip_type]) db.tripsData[t.trip_type] = { fee: t.fee || 0, reservations: {} };
@@ -2216,6 +2233,7 @@ notify pgrst, 'reload schema';</pre>
                 checkBirthdays();
                 renderFamiliesList();
                 updateNotificationIndicators();
+                renderTripCards(); setTimeout(sweepExpiredTrips, 0);
             } catch(e) {
                 console.error("Error loading data", e);
             }
@@ -2250,16 +2268,35 @@ notify pgrst, 'reload schema';</pre>
         }
 
         // نسبة الحضور لاجتماع واحد (المخدومين المسجلين قبل الاجتماع بس)
+        // ===== محرك النسب الموحد: كل النسب في التطبيق بتتحسب بنفس القاعدة =====
+        // النسبة = الحاضرين ÷ المخدومين اللي كانوا مسجلين وقت الاجتماع (أو حضروه فعلاً).
+        // الشهر/السنة/الأسرة = مجموع الحضور ÷ مجموع فرص الحضور (مش متوسط نسب مقرّبة). التقريب في آخر خطوة بس.
+        var PCT_DECIMALS = 1;
+        function pctOf(a, b) { if (!(b > 0)) return null; const k = Math.pow(10, PCT_DECIMALS); return Math.round(a / b * 100 * k) / k; }
+        function pctOr0(a, b) { const p = pctOf(a, b); return p === null ? 0 : p; }
+        function pdiff(a, b) { const k = Math.pow(10, PCT_DECIMALS); return Math.round((a - b) * k) / k; }
+        function attAt(d, id) { return !!(db.attendanceRecords[d] && db.attendanceRecords[d][id]); }
+        function inScope(m, d) { return absenceCounts(m, d) || attAt(d, m.id); }
+        function meetingTally(d, members) {
+            const elig = (members || db.members).filter(m => inScope(m, d));
+            return { att: elig.filter(m => attAt(d, m.id)).length, total: elig.length };
+        }
+        function groupTally(members, meetings) {
+            let att = 0, total = 0;
+            meetings.forEach(d => { const t = meetingTally(d, members); att += t.att; total += t.total; });
+            return { att, total, pct: pctOf(att, total) };
+        }
+
+        // نسبة الحضور لاجتماع واحد
         function meetingRate(d) {
-            const rec = db.attendanceRecords[d] || {};
-            const elig = db.members.filter(m => absenceCounts(m, d));
-            if (!elig.length) return null;
-            return Math.round(elig.filter(m => rec[m.id]).length / elig.length * 100);
+            const t = meetingTally(d);
+            return t.total ? pctOf(t.att, t.total) : null;
         }
 
         function monthAvg(key) {
-            const r = db.meetings.filter(d => d.slice(0, 7) === key).map(meetingRate).filter(x => x !== null);
-            return r.length ? Math.round(r.reduce((a, b) => a + b, 0) / r.length) : null;
+            let att = 0, total = 0;
+            db.meetings.filter(d => d.slice(0, 7) === key).forEach(d => { const t = meetingTally(d); att += t.att; total += t.total; });
+            return total ? pctOf(att, total) : null;
         }
 
         // أخضر = زادت، أحمر = قلت، أصفر = متوسطة (فرق نقطتين أو أقل)
@@ -2287,7 +2324,7 @@ notify pgrst, 'reload schema';</pre>
                     return dateLbl(x.d) + ': <b class="' + c + '">' + x.p + '%</b>';
                 }).join(' &nbsp;·&nbsp; ') + '</span>';
                 if (n > 1) {
-                    const diff = arr[n - 1].p - arr[n - 2].p, c = trendCls(diff);
+                    const diff = pdiff(arr[n - 1].p, arr[n - 2].p), c = trendCls(diff);
                     const verb = diff > 0 ? 'زادت' : diff < 0 ? 'قلت' : 'ثابتة';
                     body += '<span class="l2 ' + c + '">النسبة ' + verb + ' عن الاجتماع اللي فات' + (diff ? ' بمقدار ' + Math.abs(diff) + '%' : '') + '</span>';
                 }
@@ -2301,7 +2338,7 @@ notify pgrst, 'reload schema';</pre>
             const pp = new Date(now.getFullYear(), now.getMonth() - 2, 1);
             const a = monthAvg(key(pm)), b = monthAvg(key(pp));
             if (a !== null) {
-                body += '<span class="l2">🗓️ ' + nm(pm) + ': ' + a + '%' + (b !== null ? ' · ' + trendHtml(a - b, 'عن ' + nm(pp) + ' (' + b + '%)') : '') + '</span>';
+                body += '<span class="l2">🗓️ ' + nm(pm) + ': ' + a + '%' + (b !== null ? ' · ' + trendHtml(pdiff(a, b), 'عن ' + nm(pp) + ' (' + b + '%)') : '') + '</span>';
             }
 
             box.innerHTML = body ? '<span class="t">📊 نسبة الحضور</span>' + body : '';
@@ -2785,9 +2822,9 @@ notify pgrst, 'reload schema';</pre>
 
         function famPctFor(members, meetings) {
             if (!members.length || !meetings.length) return null;
-            let att = 0;
-            meetings.forEach(d => members.forEach(m => { if (db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) att++; }));
-            return { att, total: members.length * meetings.length, pct: Math.round(att / (members.length * meetings.length) * 100) };
+            const g = groupTally(members, meetings);
+            if (!g.total) return null;
+            return { att: g.att, total: g.total, pct: g.pct };
         }
 
         function renderFamilyAttendanceStats() {
@@ -2987,12 +3024,14 @@ notify pgrst, 'reload schema';</pre>
         function rpStats(meetings) {
             let members = db.members;
             let per = meetings.map(d => {
-                let present = members.filter(m => rpAtt(d, m.id));
-                return { d, n: present.length, boys: present.filter(m => m.gender !== 'شابة').length, girls: present.filter(m => m.gender === 'شابة').length, pct: members.length ? Math.round(present.length / members.length * 100) : 0 };
+                let elig = members.filter(m => inScope(m, d));
+                let present = elig.filter(m => rpAtt(d, m.id));
+                return { d, n: present.length, total: elig.length, boys: present.filter(m => m.gender !== 'شابة').length, girls: present.filter(m => m.gender === 'شابة').length, pct: pctOr0(present.length, elig.length) };
             });
             let ms = members.map(m => {
-                let c = meetings.filter(d => rpAtt(d, m.id)).length;
-                return { m, c, pct: meetings.length ? Math.round(c / meetings.length * 100) : 0, bonus: meetings.reduce((s, d) => s + rpBonus(d, m.id), 0) };
+                let el = meetings.filter(d => inScope(m, d));
+                let c = el.filter(d => rpAtt(d, m.id)).length;
+                return { m, c, tot: el.length, pct: pctOr0(c, el.length), bonus: meetings.reduce((s, d) => s + rpBonus(d, m.id), 0) };
             });
             let groups = {};
             members.forEach(m => {
@@ -3001,14 +3040,11 @@ notify pgrst, 'reload schema';</pre>
                 groups[k].members.push(m);
             });
             let fams = Object.values(groups).map(o => {
-                let att = 0;
-                meetings.forEach(d => o.members.forEach(m => { if (rpAtt(d, m.id)) att++; }));
-                let total = o.members.length * meetings.length;
-                return { ...o, att, total, pct: total ? Math.round(att / total * 100) : 0 };
+                const t = groupTally(o.members, meetings);
+                return { ...o, att: t.att, total: t.total, pct: pctOr0(t.att, t.total) };
             }).sort((a, b) => b.pct - a.pct);
-            let totalAtt = per.reduce((s, x) => s + x.n, 0);
-            let avgPct = members.length && meetings.length ? Math.round(totalAtt / (members.length * meetings.length) * 100) : 0;
-            return { per, ms, fams, totalAtt, avgPct, avgN: meetings.length ? Math.round(totalAtt / meetings.length) : 0 };
+            let totalAtt = per.reduce((s, x) => s + x.n, 0), totalElig = per.reduce((s, x) => s + x.total, 0);
+            return { per, ms, fams, totalAtt, totalElig, avgPct: pctOr0(totalAtt, totalElig), avgN: meetings.length ? Math.round(totalAtt / meetings.length * 10) / 10 : 0 };
         }
 
         function rpStreaks(upToDate) {
@@ -3070,7 +3106,7 @@ notify pgrst, 'reload schema';</pre>
             let pi = allMonths.indexOf(key) - 1, cmp = '';
             if (pi >= 0) {
                 let ps = rpStats([...db.meetings].sort().filter(d => d.startsWith(allMonths[pi])));
-                let diff = st.avgPct - ps.avgPct;
+                let diff = pdiff(st.avgPct, ps.avgPct);
                 cmp = `${diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : ''}${diff}% عن ${monthLabel(allMonths[pi])}`;
             }
             let best = [...st.per].sort((a, b) => b.n - a.n)[0], worst = [...st.per].sort((a, b) => a.n - b.n)[0];
@@ -3086,13 +3122,13 @@ notify pgrst, 'reload schema';</pre>
             html += rpKpis([[st.totalAtt, 'إجمالي مرات الحضور'], [best ? best.n : 0, 'أعلى حضور (' + (best ? best.d : '-') + ')'], [worst ? worst.n : 0, 'أقل حضور (' + (worst ? worst.d : '-') + ')'], [totalBonus, 'إجمالي البونص']]);
 
             html += '<div class="rp-sec">اجتماعات الشهر</div>';
-            html += rpTable(['#', 'التاريخ', 'الحضور', 'شباب', 'شابات', 'النسبة', ''], st.per.map((x, i) => [i + 1, x.d, x.n, x.boys, x.girls, x.pct + '%', rpBar(x.pct)]));
+            html += rpTable(['#', 'التاريخ', 'الحضور', 'شباب', 'شابات', 'النسبة', ''], st.per.map((x, i) => [i + 1, x.d, x.n + ' / ' + x.total, x.boys, x.girls, x.pct + '%', rpBar(x.pct)]));
 
             html += '<div class="rp-sec">نسبة حضور الأسر</div>' + rpFamTable(st.fams);
-            html += '<div class="rp-note">النسبة محسوبة على الأفراد المسجلين حالياً في كل أسرة.</div>';
+            html += '<div class="rp-note">النسبة = مرات الحضور ÷ (عدد الأفراد المسجلين قبل كل اجتماع × عدد الاجتماعات). اللي اتسجل بعد اجتماع مايتحسبش عليه غياب.</div>';
 
             html += '<div class="rp-sec">🏆 الأكثر حضوراً هذا الشهر</div>';
-            html += rpTable(['#', 'الاسم', 'الأسرة', 'مرات الحضور', 'النسبة', 'البونص'], top.map((x, i) => [i + 1, esc(x.m.name), esc(x.m.family || '-'), x.c + ' / ' + meetings.length, x.pct + '%', x.bonus]), [1, 2]);
+            html += rpTable(['#', 'الاسم', 'الأسرة', 'مرات الحضور', 'النسبة', 'البونص'], top.map((x, i) => [i + 1, esc(x.m.name), esc(x.m.family || '-'), x.c + ' / ' + x.tot, x.pct + '%', x.bonus]), [1, 2]);
 
             html += `<div class="rp-sec">⭐ حضروا كل اجتماعات الشهر (${perfect.length})</div>`;
             html += perfect.length ? `<div style="font-size:12px;line-height:2;">${perfect.map(x => esc(x.m.name)).join(' • ')}</div>` : '<div class="rp-empty">لا يوجد.</div>';
@@ -3113,16 +3149,18 @@ notify pgrst, 'reload schema';</pre>
             if (open) renderMeetingsReport();
         }
         function renderMeetingsReport() {
-            const total = db.members.length, ms = [...db.meetings].sort().reverse();
+            const ms = [...db.meetings].sort().reverse();
             const years = [...new Set(ms.map(d => d.slice(0, 4)))];
             document.getElementById('mr-year').innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
             document.getElementById('mr-sum').textContent = ms.length
-                ? ms.length + ' اجتماع — النسبة محسوبة من إجمالي المسجلين في البرنامج (' + total + '). اضغط على أي اجتماع لفتح سجل الحضور بتاعه.'
+                ? ms.length + ' اجتماع — النسبة = الحاضرين ÷ المسجلين قبل كل اجتماع (اللي اتسجل بعد الاجتماع مايتحسبش عليه غياب). اضغط على أي اجتماع لفتح سجل الحضور بتاعه.'
                 : 'لا توجد اجتماعات مسجلة لسه.';
+            const ids = new Set(db.members.map(m => String(m.id)));
             document.getElementById('mr-tbody').innerHTML = ms.map((d, i) => {
-                const n = Object.keys(db.attendanceRecords[d] || {}).length, p = total ? Math.min(100, Math.round(n / total * 100)) : 0;
+                const t = meetingTally(d), p = pctOr0(t.att, t.total);
+                const orphan = Object.keys(db.attendanceRecords[d] || {}).filter(k => !ids.has(String(k))).length;
                 const day = new Date(d + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                return `<tr class="mr-row" onclick="openMeetingFromReport('${d}')"><td>${ms.length - i}</td><td>${day}</td><td>${n} / ${total}</td><td><span class="mr-pct" style="color:${rpCol(p)}">${p}%</span><div class="mr-track"><i style="width:${p}%;background:${rpCol(p)}"></i></div></td></tr>`;
+                return `<tr class="mr-row" onclick="openMeetingFromReport('${d}')"><td>${ms.length - i}</td><td>${day}</td><td>${t.att} / ${t.total}${orphan ? ` <small style="color:var(--text-muted)">(+${orphan} سجل لمخدوم محذوف)</small>` : ''}</td><td><span class="mr-pct" style="color:${rpCol(p)}">${p}%</span><div class="mr-track"><i style="width:${p}%;background:${rpCol(p)}"></i></div></td></tr>`;
             }).join('');
         }
         function openMeetingFromReport(d) {
@@ -3179,16 +3217,15 @@ notify pgrst, 'reload schema';</pre>
             html += '<div class="rp-sec">نسبة الحضور في كل شهر</div>';
             html += `<div class="rp-chart">${monthRows.map(r => `<div><span>${r.s.avgPct}%</span><i style="height:${Math.max(2, r.s.avgPct * 1.1)}px;background:${r === best ? '#2e9e6b' : rpCol(r.s.avgPct)}"></i></div>`).join('')}</div>`;
             html += `<div class="rp-labels">${monthRows.map(r => `<span>${mName(r)}</span>`).join('')}</div>`;
-            html += rpTable(['الشهر', 'الاجتماعات', 'إجمالي الحضور', 'متوسط الحضور', 'النسبة', ''],
-                monthRows.map(r => [monthLabel(r.k) + (r === best && monthRows.length > 1 ? ' 🏆' : ''), r.ms.length, r.s.totalAtt, r.s.avgN, r.s.avgPct + '%', rpBar(r.s.avgPct)]));
+            html += rpTable(['الشهر', 'الاجتماعات', 'الحضور / فرص الحضور', 'متوسط الحضور', 'النسبة', ''],
+                monthRows.map(r => [monthLabel(r.k) + (r === best && monthRows.length > 1 ? ' 🏆' : ''), r.ms.length, r.s.totalAtt + ' / ' + r.s.totalElig, r.s.avgN, r.s.avgPct + '%', rpBar(r.s.avgPct)]));
             if (best && monthRows.length > 1) html += `<div class="rp-note">🏆 أعلى شهر حضوراً: <b>${mName(best)}</b> (${best.s.avgPct}%)</div>`;
 
             // ---- أكتر الأسر انتظاماً ----
             html += '<div class="rp-sec">أكتر الأسر انتظاماً في الحضور</div>';
             let famRows = st.fams.filter(f => f.total > 0).map(f => {
                 let good = monthRows.filter(r => {
-                    let a = 0; r.ms.forEach(d => f.members.forEach(m => { if (rpAtt(d, m.id)) a++; }));
-                    let t = f.members.length * r.ms.length; return t && Math.round(a / t * 100) >= 50;
+                    const g = groupTally(f.members, r.ms); return g.total > 0 && g.pct >= 50;
                 }).length;
                 return { f, good };
             });
@@ -3199,7 +3236,7 @@ notify pgrst, 'reload schema';</pre>
             const pts = monthRows.map(r => r.s.avgPct), n = pts.length;
             const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
             let lines = [];
-            lines.push(`إجمالي نسبة الحضور خلال سنة ${year}: <b>${st.avgPct}%</b> (${st.totalAtt} حضور في ${meetings.length} اجتماع، بمتوسط ${st.avgN} فرد في الاجتماع من ${db.members.length} مخدوم مسجل).`);
+            lines.push(`إجمالي نسبة الحضور خلال سنة ${year}: <b>${st.avgPct}%</b> (${st.totalAtt} حضور من أصل ${st.totalElig} فرصة حضور في ${meetings.length} اجتماع، بمتوسط ${st.avgN} فرد في الاجتماع).`);
             if (n > 1) {
                 lines.push(`أعلى شهر حضوراً: <b>${mName(best)}</b> (${best.s.avgPct}%)، وأقل شهر: <b>${mName(worst)}</b> (${worst.s.avgPct}%).`);
             }
@@ -3209,11 +3246,11 @@ notify pgrst, 'reload schema';</pre>
             }
             let icon = 'ℹ️', color = '#5b6b86', verdict = 'البيانات لسه مش كفاية للحكم على التحسن';
             if (n >= 2) {
-                const last = pts[n - 1], prev = pts[n - 2], d1 = last - prev;
+                const last = pts[n - 1], prev = pts[n - 2], d1 = pdiff(last, prev);
                 lines.push(`آخر شهر (${mName(monthRows[n - 1])}) كان ${last}% مقابل ${prev}% في ${mName(monthRows[n - 2])}، يعني ${d1 > 0 ? 'زاد' : d1 < 0 ? 'نقص' : 'ثابت'}${d1 ? ' بمقدار ' + Math.abs(d1) + ' نقطة' : ''}.`);
                 if (n >= 4) {
-                    const k = Math.min(3, Math.floor(n / 2)), recent = avg(pts.slice(n - k)), before = avg(pts.slice(0, n - k)), d2 = Math.round(recent - before);
-                    lines.push(`متوسط آخر ${k} شهور ${Math.round(recent)}% مقابل ${Math.round(before)}% للشهور اللي قبلها.`);
+                    const k = Math.min(3, Math.floor(n / 2)), recent = rpStats(monthRows.slice(n - k).flatMap(r => r.ms)).avgPct, before = rpStats(monthRows.slice(0, n - k).flatMap(r => r.ms)).avgPct, d2 = pdiff(recent, before);
+                    lines.push(`متوسط آخر ${k} شهور ${recent}% مقابل ${before}% للشهور اللي قبلها.`);
                     if (d2 >= 3) { icon = '✅'; color = '#2e9e6b'; verdict = 'في تحسن في آخر الشهور'; }
                     else if (d2 <= -3) { icon = '⚠️'; color = '#e0463f'; verdict = 'في تراجع في آخر الشهور'; }
                     else { icon = '➖'; color = '#f59e0b'; verdict = 'الحضور ثابت تقريباً في آخر الشهور'; }
@@ -3225,7 +3262,7 @@ notify pgrst, 'reload schema';</pre>
             }
             html += '<div class="rp-sec">التفاصيل والخلاصة</div>';
             html += `<div style="border:2px solid ${color};border-radius:12px;padding:14px 16px;background:${color}14"><div style="font-weight:800;font-size:15px;color:${color};margin-bottom:8px">${icon} ${verdict}</div><div style="font-size:13px;line-height:2">${lines.map(l => '• ' + l).join('<br>')}</div></div>`;
-            html += '<div class="rp-note">النسب محسوبة على المخدومين المسجلين حالياً، والمخدوم اللي اتضاف في نص السنة نسبته ممكن تكون أقل من الحقيقية.</div>';
+            html += '<div class="rp-note">النسبة = إجمالي الحضور ÷ إجمالي فرص الحضور (كل مخدوم مسجل قبل كل اجتماع)، فالمخدوم اللي اتضاف في نص السنة بيتحسب عليه الاجتماعات اللي بعد تسجيله بس.</div>';
             showReport(html, true, 'تقرير_سنوي_' + year);
         }
 
@@ -3711,9 +3748,9 @@ notify pgrst, 'reload schema';</pre>
         }
         function closeTripModal() { let ov = document.getElementById('trip-modal'); if (ov) ov.style.display = 'none'; }
 
-        function tripSnapshot() {
-            let trip = getTripObj(), type = getActiveTripKey();
-            let name = (document.getElementById('trip-event-name').value || '').trim();
+        function tripSnapshot(typeArg, nameArg, dateArg) {
+            let type = typeArg || getActiveTripKey(), trip = typeArg ? (db.tripsData[typeArg] || { fee: 0, reservations: {} }) : getTripObj();
+            let name = nameArg != null ? nameArg : (document.getElementById('trip-event-name').value || '').trim();
             let a = { attendees: 0, due: 0, collected: 0, discountCount: 0, discountSum: 0, refundedCount: 0, refundedSum: 0, fee: trip.fee || 0, people: [] };
             Object.keys(trip.reservations).forEach(id => {
                 let m = db.members.find(x => x.id == id);
@@ -3725,21 +3762,152 @@ notify pgrst, 'reload schema';</pre>
                 if (disc > 0) { a.discountCount++; a.discountSum += disc; }
                 a.people.push({ n: m.name || '', f: m.family || '', fee: trip.fee || 0, d: disc, due, p: r.paid || 0 });
             });
-            return { type, name, date: tripDateValue(), ...a };
+            return { type, name, date: dateArg || tripDateValue(), ...a };
+        }
+
+        // ===== الرحلات الجارية والنقل للأرشيف =====
+        // الرحلة في الأرشيف لو اتبعتت يدوي (sent) أو تاريخها عدّى. غير كده هي رحلة جارية بتظهر كارت.
+        function tripIsArchived(x) { return x.sent === true || String(x.date || '') < localISO(); }
+        let _tripSweeping = false, _tripCardItems = [];
+
+        function showTripList() {
+            document.getElementById('trip-sheet-view').style.display = 'none';
+            document.getElementById('trip-list-view').style.display = '';
+            renderTripCards();
+        }
+        function showTripSheetView() {
+            document.getElementById('trip-list-view').style.display = 'none';
+            document.getElementById('trip-sheet-view').style.display = '';
+            renderTripTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderTripCards() {
+            const box = document.getElementById('trip-cards'); if (!box) return;
+            const items = (db.tripArchive || []).filter(x => !tripIsArchived(x)).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+            _tripCardItems = items;
+            if (!items.length) { box.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:24px 0;">مفيش رحلات جارية. اضغط «➕ رحلة جديدة» وسجّل الأسماء، والرحلة هتظهر هنا.</p>'; return; }
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            box.innerHTML = items.map((x, i) => {
+                const p = String(x.date).split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]);
+                const n = Math.round((d - today) / 86400000);
+                const left = n <= 0 ? 'النهارده' : n === 1 ? 'بكرة' : 'بعد ' + n + ' يوم';
+                return `<div onclick="openTripFromCard(${i})" style="cursor:pointer; border:1.5px solid var(--primary); border-radius:14px; padding:12px 14px; margin-bottom:10px; background:rgba(99,102,241,.08);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <strong style="font-size:16px;">🚌 ${esc(x.name || x.type)}</strong>
+                        <span style="font-size:12.5px; font-weight:800; color:var(--primary);">📅 ${tripDateLabelOf(x.date)} • ${left}</span>
+                    </div>
+                    <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px; margin-top:6px;">
+                        <span>👥 <b>${x.attendees || 0}</b> مخدوم</span>
+                        <span>💰 المحصّل <b>${x.collected || 0}</b> من <b>${x.due != null ? x.due : 0}</b> ج</span>
+                        <span style="color:var(--text-muted);">${esc(x.type)}</span>
+                    </div>
+                    <div style="font-size:12px; color:var(--primary); margin-top:4px;">اضغط لفتح شيت الأسماء ◂</div>
+                </div>`;
+            }).join('');
+        }
+
+        function openTripFromCard(i) {
+            const x = _tripCardItems[i]; if (!x) return;
+            document.getElementById('trip-type').value = x.type;
+            _archKeys[x.type] = { key: x.key, name: x.name, date: x.date };
+            _archFresh[x.type] = false;
+            changeTripType();
+            showTripSheetView();
+        }
+
+        function newTripSheet() {
+            const sel = document.getElementById('trip-type'), types = [...sel.options].map(o => o.value);
+            const busy = t => (db.tripArchive || []).some(x => x.type === t && !tripIsArchived(x)) || Object.keys((db.tripsData[t] || {}).reservations || {}).length > 0;
+            const free = types.find(t => !busy(t));
+            if (!free) { toast('كل أنواع الحجز فيها رحلات جارية. افتح واحدة منهم أو ابعتها للأرشيف الأول'); return; }
+            sel.value = free;
+            delete _archKeys[free]; _archFresh[free] = true;
+            changeTripType();
+            document.getElementById('trip-event-name').value = '';
+            document.getElementById('trip-event-date').value = localISO();
+            showTripSheetView();
+            const nm = document.getElementById('trip-event-name'); if (nm) nm.focus();
+        }
+
+        // كتابة رحلة منتقلة للأرشيف (بالدور مع باقي كتابات الأرشيف) وتفضية الشيت لو مطلوب
+        function commitSentTrip(key, snap, clearSheet) {
+            return new Promise(resolve => {
+                _archChain = _archChain.then(async () => {
+                    try {
+                        await _supabase.from('trips').delete().eq('trip_type', key);
+                        let row = { trip_type: key, member_id: null, fee: snap.due, paid: snap.collected, installments: JSON.stringify(snap) };
+                        let r = await _supabase.from('trips').insert([row]);
+                        if (r.error) { row.member_id = 0; r = await _supabase.from('trips').insert([row]); }
+                        if (r.error) { console.error(r.error); resolve(false); return; }
+                        db.tripArchive = (db.tripArchive || []).filter(x => x.key !== key).concat([{ key, ...snap }]);
+                        if (clearSheet) {
+                            await _supabase.from('trips').delete().eq('trip_type', snap.type);
+                            delete _archKeys[snap.type]; _archFresh[snap.type] = true;
+                        }
+                        resolve(true);
+                    } catch (e) { console.error(e); resolve(false); }
+                }).catch(() => {});
+            });
+        }
+
+        // زرار «ابعتها للأرشيف»
+        async function sendTripToArchive() {
+            const type = getActiveTripKey(), snap = tripSnapshot();
+            snap.name = snap.name || snap.type;
+            if (!snap.attendees) { toast('الشيت فاضي — مفيش حاجة تتبعت للأرشيف'); return; }
+            const year = snap.date.slice(0, 4), fd = findTripDup(snap.name, year, type);
+            if (fd && !fd.same) { warnTripDup(type, fd.dup, year, snap); return; }
+            if (!confirm('تبعت «' + snap.name + '» للأرشيف؟\nالشيت هيتفضى وتلاقيها في أرشيف رحلات السنة.')) return;
+            clearTimeout(_archTimer);
+            const cur = _archKeys[type] || (fd && fd.same ? fd.dup : null);
+            const key = ARCH_PREFIX + year + '|' + type + '|' + snap.name;
+            snap.sent = true;
+            if (cur && cur.key !== key) {
+                await _supabase.from('trips').delete().eq('trip_type', cur.key);
+                db.tripArchive = (db.tripArchive || []).filter(x => x.key !== cur.key);
+            }
+            if (!(await commitSentTrip(key, snap, true))) { toast('تعذر نقل الرحلة للأرشيف، حاول تاني'); return; }
+            document.getElementById('trip-event-name').value = '';
+            document.getElementById('trip-event-date').value = localISO();
+            document.getElementById('trip-fee').value = '';
+            await loadData();
+            renderTripTable();
+            showTripList();
+            toast('اتبعتت للأرشيف ✅');
+        }
+
+        // أول ما تاريخ الرحلة يعدّي: تتنقل للأرشيف تلقائي والشيت يتفضى (بيتنفذ مع كل تحميل بيانات)
+        async function sweepExpiredTrips() {
+            if (_tripSweeping) return;
+            _tripSweeping = true;
+            let moved = 0;
+            try {
+                const today = localISO(), latest = {};
+                (db.tripArchive || []).forEach(x => { if (x.type && (!latest[x.type] || String(x.date) > String(latest[x.type].date))) latest[x.type] = x; });
+                for (const type of Object.keys(latest)) {
+                    const x = latest[type];
+                    if (x.sent || !(String(x.date) < today)) continue;           // لسه جارية، أو اتنقلت قبل كده
+                    const t = db.tripsData[type];
+                    if (!t || !Object.keys(t.reservations || {}).length) continue; // الشيت فاضي: هي أصلاً في الأرشيف بتاريخها
+                    const snap = tripSnapshot(type, x.name, x.date);
+                    if (!snap.attendees) continue;
+                    snap.sent = true;
+                    if (await commitSentTrip(x.key, snap, true)) moved++;
+                }
+            } catch (e) { console.error(e); }
+            _tripSweeping = false;
+            if (moved) {
+                toast('اتنقلت ' + moved + ' رحلة للأرشيف لأن تاريخها عدّى ✅');
+                await loadData();
+                renderTripTable();
+            }
         }
 
         // كل الرحلات (المحفوظة + الشيت المفتوح دلوقتي) من غير تكرار
-        function getTripArchiveItems() {
-            let archive = db.tripArchive || [];
-            let live = tripSnapshot(); live.name = live.name || live.type;
-            let cur = _archKeys[live.type];
-            if (live.attendees > 0) {
-                archive = archive.filter(x => !((cur && x.key === cur.key) || (x.type === live.type && x.name === live.name && String(x.date).slice(0, 4) === live.date.slice(0, 4))));
-                /* التاريخ بيتاخد من خانة تاريخ الرحلة */
-                live.key = cur ? cur.key : null;
-                archive = archive.concat([live]);
-            }
-            return archive.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+        // includeActive=false: الأرشيف بس (اللي تاريخه عدّى أو اتبعت). true: كل الرحلات (للخصومات)
+        function getTripArchiveItems(includeActive) {
+            return (db.tripArchive || []).filter(x => includeActive || tripIsArchived(x)).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
         }
 
         function tripMoneyLine(x) {
@@ -3748,7 +3916,7 @@ notify pgrst, 'reload schema';</pre>
         }
 
         function openTripDiscountsModal() {
-            let items = getTripArchiveItems().filter(x => (x.discountCount || 0) > 0);
+            let items = getTripArchiveItems(true).filter(x => (x.discountCount || 0) > 0);
             let totDisc = items.reduce((s, x) => s + (x.discountSum || 0), 0), totPeople = items.reduce((s, x) => s + (x.discountCount || 0), 0);
             let body = items.length ? `
                 <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">عدد الرحلات اللي فيها خصومات: <b>${items.length}</b> • إجمالي المخصومين: <b>${totPeople}</b> • إجمالي الخصومات: <b>${totDisc} ج</b></div>
@@ -3768,7 +3936,7 @@ notify pgrst, 'reload schema';</pre>
         }
 
         // الحفظ التلقائي في رحلات السنة (من غير زرار): بيتنفذ بعد أي تغيير في الشيت
-        const _archKeys = {}, _archFresh = {};
+        const _archKeys = {}, _archFresh = {}, _archWarned = {};
         let _archTimer = null;
         function autoArchiveTrip(immediate) {
             let snap = tripSnapshot();
@@ -3777,20 +3945,45 @@ notify pgrst, 'reload schema';</pre>
             if (immediate) return writeTripArchive(snap);
             _archTimer = setTimeout(() => writeTripArchive(snap), 1200);
         }
-        async function writeTripArchive(snap) {
+        // اسم الرحلة للمقارنة: من غير تشكيل، وهمزات/ياء/تاء مربوطة/مسافات موحّدة
+        function normTripName(s) {
+            return String(s || '').replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLowerCase();
+        }
+        // هل الرحلة دي (نفس الاسم + نفس السنة) موجودة في الأرشيف كسجل تاني؟
+        // same=true يعني نفس الشيت بعد إعادة فتح الصفحة (تكملة مش تكرار)
+        function findTripDup(name, year, type) {
+            const n = normTripName(name), cur = _archKeys[type];
+            const dup = (db.tripArchive || []).find(x => x.key && !(cur && x.key === cur.key) && normTripName(x.name || x.type) === n && String(x.date).slice(0, 4) === String(year));
+            if (!dup) return null;
+            if (!cur && dup.type === type && !_archFresh[type]) return { dup, same: true };
+            return { dup, same: false };
+        }
+        function warnTripDup(type, dup, year, snap) {
+            const k = normTripName(snap.name) + '|' + year;
+            if (_archWarned[type] === k) return;
+            _archWarned[type] = k;
+            const msg = 'الرحلة دي موجودة بالفعل في أرشيف رحلات السنة: «' + (dup.name || dup.type) + '» (' + tripDateLabelOf(dup.date) + '). مش هتتسجل تاني. لو دي رحلة مختلفة غيّر اسمها.';
+            if (snap.attendees > 0) alert(msg); else toast(msg);
+        }
+        // كل الكتابات في الأرشيف بتتنفذ ورا بعض، عشان مسح+إضافة كتابتين مايتداخلوش ويطلع صفين لنفس الرحلة
+        let _archChain = Promise.resolve();
+        function writeTripArchive(snap) {
+            _archChain = _archChain.then(() => writeTripArchiveNow(snap)).catch(e => console.error(e));
+            return _archChain;
+        }
+        async function writeTripArchiveNow(snap) {
             try {
                 let year = snap.date.slice(0, 4), type = snap.type, cur = _archKeys[type];
                 let archive = db.tripArchive || [];
                 let oldKey = null;
+                let fd = findTripDup(snap.name, year, type);
+                if (fd && !fd.same) { warnTripDup(type, fd.dup, year, snap); return; }   // الرحلة موجودة بالفعل: ماتتكتبش تاني
+                delete _archWarned[type];
+                if (fd && fd.same && !cur) cur = { key: fd.dup.key, name: fd.dup.name, date: fd.dup.date };
                 if (cur && cur.name === snap.name) { /* نفس الرحلة: التاريخ من خانة التاريخ */ }
                 else {
                     if (cur) { oldKey = cur.key; }            // اتغير اسم الرحلة: نشيل القديم
-                    else {
-                        let nm = snap.name, n = 2, ex;
-                        while ((ex = archive.find(x => x.type === type && x.name === nm && String(x.date).slice(0, 4) === year)) && _archFresh[type]) nm = snap.name + ' (' + (n++) + ')';
-                        /* التاريخ من خانة تاريخ الرحلة */
-                        snap.name = nm;
-                    }
+                    else { /* الاسم المتكرر اتمنع فوق، مفيش ترقيم (2) تاني */ }
                 }
                 let key = ARCH_PREFIX + snap.date.slice(0, 4) + '|' + type + '|' + snap.name;
                 if (cur && cur.key !== key && !oldKey) oldKey = cur.key;   // اتغير التاريخ لسنة تانية: نشيل القديم
@@ -3832,7 +4025,7 @@ notify pgrst, 'reload schema';</pre>
                     </div>
                     ${x.refundedCount ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">مستردين: ${x.refundedCount} (${x.refundedSum} ج)</div>` : ''}
                     <div style="font-size:12px; color:var(--primary); margin-top:4px;">اضغط لعرض جدول اللي دفعوا كامل وجدول المخصومين ◂</div>
-                </div>`).join('') : '<p style="text-align:center; color:var(--text-muted); padding:20px 0;">مفيش رحلات في السنة دي. أي رحلة بتضيف فيها حجوزات بتتسجل هنا تلقائياً.</p>';
+                </div>`).join('') : '<p style="text-align:center; color:var(--text-muted); padding:20px 0;">مفيش رحلات في الأرشيف للسنة دي. الرحلة بتتنقل هنا أول ما تاريخها يعدّي، أو لما تدوس «ابعتها للأرشيف».</p>';
             let body = `
                 <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
                     <select onchange="openTripYearModal(this.value)" style="padding:8px 12px; border-radius:10px; border:1px solid var(--card-border); font-family:inherit; font-weight:800;">${years.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select>
@@ -3971,7 +4164,7 @@ notify pgrst, 'reload schema';</pre>
                 let type = getActiveTripKey();
                 if (tripSnapshot().attendees > 0) await autoArchiveTrip(true);
                 await _supabase.from('trips').delete().eq('trip_type', type);
-                delete _archKeys[type]; _archFresh[type] = true;
+                delete _archKeys[type]; _archFresh[type] = true; delete _archWarned[type];
                 document.getElementById('trip-event-name').value = ''; document.getElementById('trip-event-date').value = localISO();
                 await loadData();
                 renderTripTable();
@@ -4870,7 +5063,7 @@ function openMemberDetail(memberId,event){
   const rows=days.map(d=>{const b=(db.bonus[d]||{})[m.id],t=String(db.attendanceRecords[d][m.id]).split('|')[1]||'';if(b)tb+=parseFloat(b)||0;
     return `<div><span>${fmtD(d)}<br><small>${esc(d)} ${esc(t.trim())}</small></span>${b!=null&&b!==''?`<span class="pm-b">+${esc(b)} بونص</span>`:'<small>—</small>'}</div>`}).join('')||'<div><small>لا يوجد حضور مسجل بعد</small></div>';
   const trips=Object.keys(db.tripsData||{}).filter(k=>db.tripsData[k].reservations[m.id]).map(k=>{const t=db.tripsData[k],r=t.reservations[m.id];return `<div><span>${esc(k)}</span><span>${r.refunded?'تم استرداد المبلغ':(r.paid||0)+' / '+tripDue(t,r)+' ج'}</span></div>`}).join('');
-  const pct=db.meetings.length?Math.round(days.length/db.meetings.length*100):0;
+  const _tot=db.meetings.filter(d=>inScope(m,d)).length;const pct=_tot?pctOf(days.length,_tot):0;
   document.getElementById('pm-body').innerHTML=`
     <div class="pm-head"><div class="avatar ${m.gender==='شابة'?'gf':'gm'}">${esc((m.name||'?').trim()[0])}</div><div><h3>${esc(m.name)}</h3><span class="chip">أسرة: ${esc(m.family||'-')}</span><span class="chip">${esc(m.gender||'-')}</span></div></div>
     <div class="pm-stats"><div><b>${days.length}</b>أيام الحضور</div><div><b>${pct}%</b>نسبة الحضور</div><div><b>${tb}</b>إجمالي البونص</div><div><b>${streak}</b>غياب متتالي</div></div>
@@ -5056,8 +5249,8 @@ function showPersonAttendance(id){
   const card = document.getElementById('att-person-card'); if (!card) return;
   if (!m) { card.style.display = 'none'; return; }
   const days = db.meetings.filter(d => db.attendanceRecords[d] && db.attendanceRecords[d][m.id]).sort().reverse();
-  const total = Math.max(db.meetings.filter(d => absenceCounts(m, d)).length, days.length);
-  const pct = total ? Math.round(days.length / total * 100) : 0;
+  const total = db.meetings.filter(d => inScope(m, d)).length;
+  const pct = total ? pctOf(days.length, total) : 0;
   let bonusTotal = 0;
   const rows = days.map((d, i) => {
     const rec = db.attendanceRecords[d][m.id];
@@ -5109,7 +5302,15 @@ function onTripNameInput(){
   }
   autoArchiveTrip();
 }
-function onTripDateChange(){ autoArchiveTrip(); }
+function onTripDateChange(){
+  const el = document.getElementById('trip-event-date'), type = getActiveTripKey();
+  if (el && el.value && el.value < localISO() && tripSnapshot().attendees > 0) {
+    if (!confirm('التاريخ ده عدّى. الرحلة هتتنقل للأرشيف والشيت هيتفضى تلقائي. تكمل؟')) {
+      el.value = (_archKeys[type] && _archKeys[type].date) || localISO(); return;
+    }
+  }
+  autoArchiveTrip();
+}
 
 /* ---- عدد الشباب / عدد الشابات ---- */
 function updateTripGenderCounts(){

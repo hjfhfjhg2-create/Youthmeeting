@@ -1,5 +1,5 @@
 /* Service Worker: يخلي التطبيق يفتح من غير نت */
-const VER = 'v2';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
+const VER = 'v5';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
 const CACHE = 'attendance-' + VER;
 const CORE = ['./', './index.html', './offline.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN = [
