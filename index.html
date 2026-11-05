@@ -1550,6 +1550,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <button id="mr-toggle" onclick="toggleMeetingsReport()" style="width:100%; margin-bottom:16px;">📑 تقارير الاجتماعات</button>
             <div id="meetings-report" style="display:none; margin-bottom:22px;">
+                <div style="text-align:left;margin-bottom:8px"><button onclick="toggleMeetingsReport()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>
                 <div class="mr-bar">
                     <select id="mr-year"></select>
                     <button class="btn-success" onclick="openYearlyReport(document.getElementById('mr-year').value)">📥 تحميل تقرير سنوي</button>
@@ -1570,13 +1571,13 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                     <button onclick="attFilter('early')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none;">⏰ حضروا بدري</button>
                     <button onclick="attFilter('bday')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#f472a6,#c4306b);">🎂 أعياد ميلاد</button>
                     <button onclick="attFilter('search')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#818cf8,#6366f1);">🔎 بحث بالاسم</button>
-                    <button onclick="attFilter('last3')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#34d399,#059669);">✅ آخر ٣ اجتماعات</button>
-                    <button onclick="attFilter('last4')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#fbbf24,#f59e0b);">✅ آخر ٤ اجتماعات</button>
+                    <button onclick="attFilter('last3')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#34d399,#059669);">✅ آخر ٣ اجتماعات ورا بعض</button>
                 </div>
                 <div id="att-filter-extra"></div>
                 <div id="att-filter-result"></div>
             </div>
             <div class="input-group autocomplete-container" id="att-person-wrap" style="margin-bottom:14px; display:none;">
+                <div style="text-align:left"><button onclick="attFilterClose()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>
                 <label>🔎 ابحث عن أي مخدوم وشوف حضر كام مرة وفي أنهي تواريخ:</label>
                 <input type="text" id="att-person-search" placeholder="اكتب الاسم واختاره من القائمة..." autocomplete="off" oninput="attPersonSearch(this.value)" onfocus="attPersonSearch(this.value)">
                 <div id="att-person-results" class="autocomplete-results" style="display:none"></div>
@@ -2015,8 +2016,9 @@ notify pgrst, 'reload schema';</pre>
                     'اختار <b>«تاريخ الاجتماع»</b>. أول ما تختاره بتظهر أدوات التسجيل وقائمة حضور اليوم ده (ولو اليوم متسجل قبل كده بترجعلك أسماء اللي حضروا).',
                     'سجّل الحضور بطريقتين: <b>«📷 تسجيل سريع بمسح QR Code»</b> بكاميرا الموبايل، أو اكتب أول حروف الاسم في خانة البحث واختاره من القائمة.',
                     'في الجدول هتلاقي الاسم والأسرة ووقت الحضور. اكتب <b>البونص</b> قدام المخدوم لو أخد، ومن عمود <b>«إجراء»</b> تقدر تشيل حضور اتسجل بالغلط.',
-                    'فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
-                    '<b>«📑 تقارير الاجتماعات»</b> فيها كل الاجتماعات ونسب الحضور وتحميل تقرير سنوي، و<b>«📊 تحميل شيت الحضور Excel»</b> بينزّل شيت اليوم.'],
+                    'الجدول مرتب بوقت التسجيل: أول واحد سجّل بياخد <b>رقم ١</b> والباقي تحته ٢ و٣ و٤ بالترتيب، ووقت الحضور بيتسجل بالثانية. فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
+                    '<b>🎛️ فلاتر الحضور</b> بتشتغل على حاضري <b>اليوم المفتوح</b> بس: <b>⏰ حضروا بدري</b> (أول ١٠ ولاد وأول ١٠ بنات بوقت التسجيل)، <b>🎂 أعياد ميلاد</b> (اختار الشهر وتشوف الحاضرين المولودين فيه)، <b>✅ آخر ٣ اجتماعات</b> (الحاضرين اللي حضروا ٣ اجتماعات ورا بعض أو أكتر). أما <b>🔎 بحث بالاسم</b> فبتدوّر في كل الأسماء (حاضر أو لأ) وتشوف حضر كام مرة وبأنهي تواريخ. كل فلتر فيه زرار <b>✕ إغلاق</b>.',
+                    '<b>«📑 تقارير الاجتماعات»</b> فيها كل الاجتماعات ونسب الحضور وتحميل تقرير سنوي (وفيها <b>✕ إغلاق</b>)، و<b>«📊 تحميل شيت الحضور Excel»</b> بينزّل شيت اليوم.'],
                 tips: [
                     'لازم تكون سجّلت المخدومين الأول من تبويب «إضافة مخدوم» علشان يظهروا في البحث ويتمسح كارتهم.']
             },
@@ -2033,9 +2035,9 @@ notify pgrst, 'reload schema';</pre>
             },
             'committed': {
                 title: 'المواظبين', icon: '🏆', color: '#f59e0b',
-                goal: 'بيعرض <b>المواظبين</b> (ولاد وبنات): اللي حضروا ٤ أو ٥ اجتماعات ورا بعض من غير ما يغيبوا ولا مرة.',
+                goal: 'بيعرض <b>المواظبين</b>: أي مخدوم (شاب أو شابة) حضر <b>٤ اجتماعات ورا بعض أو أكتر</b> من غير ما يغيب، وده محسوب من شيت الحضور.',
                 steps: [
-                    'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، مفيش حاجة تكتبها هنا.',
+                    'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، ومقسمة قسمين: <b>👦 الأولاد</b> و<b>👧 البنات</b>.',
                     'استخدمها تشجّع وتكرّم المواظبين، وتعرف مين ثابت على الاجتماعات.',
                     'من رابط <b>«📥 تصدير Excel»</b> فوق تنزّل القائمة في ملف.'],
                 tips: [
@@ -2056,7 +2058,7 @@ notify pgrst, 'reload schema';</pre>
                 goal: 'بتشوف <b>كل الأسر</b> (شباب وشابات) وأعدادهم، وتدير أعضاء كل أسرة.',
                 steps: [
                     'فوق بتلاقي <b>إجمالي الشباب</b> و<b>إجمالي الشابات</b> و<b>الإجمالي الكلي</b>.',
-                    'اضغط على أي أسرة علشان تفتح أعضاءها. جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
+                    'كل أسرة بتظهر في قايمة نوعها: اللي بتسجّله <b>شاب</b> بيروح أسرة الشباب، واللي بتسجّلها <b>شابة</b> بتروح أسرة الشابات، حتى لو الاسم واحد. اضغط على أي أسرة علشان تفتح أعضاءها (ومعاها زرار «⬅️ رجوع»). جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
                     '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد المسجلين قبل كل اجتماع × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
                     '<b>«📥 تصدير كل بيانات الأسر»</b> بيطلعلك ملف Excel واحد وكل أسرة في شيت لوحدها.',
                     'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.'],
@@ -2067,7 +2069,8 @@ notify pgrst, 'reload schema';</pre>
                 goal: 'إدارة <b>حجز الرحلات والمؤتمرات والأيام الروحية</b> ومتابعة الفلوس: مين دفع ومين لسه.',
                 steps: [
                     'اختار <b>نوع الفعالية</b> (رحلة / مؤتمر / يوم روحي / اجتماع خارجي)، واكتب <b>قيمة الاشتراك</b> و<b>اسم الفعالية</b>.',
-                    'ضيف المخدومين بـ <b>«📷 إضافة مخدوم للحجز بـ QR Code»</b> أو بالبحث بالاسم.',
+                    'ضيف المخدومين بـ <b>«📷 إضافة مخدوم للحجز بـ QR Code»</b> أو بالبحث بالاسم. الشيت مرتب بترتيب الحجز: أول واحد اتحجز <b>رقم ١</b> والباقي تحته بالترتيب.',
+                    'أزرار <b>«👦 عدد الشباب»</b> و<b>«👧 عدد الشابات»</b> بتعرض الأسماء ومدفوعاتهم، و<b>«✅ دافعين كامل»</b> بيطلعلك اللي سدّدوا كل المطلوب، و<b>«⚠️ مش مكملين»</b> اللي لسه عليهم باقي (مع المدفوع والباقي). كل قايمة بتفتح فيها زرار <b>✖</b> للإغلاق.',
                     'في الشيت سجّل <b>المدفوع</b> والأقساط، والحالة بتتغير لوحدها: خالص / متبقي / لم يتم الدفع.',
                     '<b>«🏷️ الخصومات»</b> لتطبيق خصم على مخدوم، وعمود <b>«استرداد»</b> لو حد لغى وفلوسه رجعتله.',
                     '<b>«📅 رحلات السنة»</b> بتفتحلك الفعاليات السابقة، و<b>«📊 تحميل شيت الرحلة Excel»</b> بينزّل الشيت.'],
@@ -2232,6 +2235,7 @@ notify pgrst, 'reload schema';</pre>
                 });
                 db.meetings.sort();
 
+                let _tripIdx = 0;
                 (tripsRes.data || []).forEach(t => {
                     if (String(t.trip_type).startsWith('ARCHIVE|')) {   // سجل الرحلات المحفوظ
                         try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) { const it = { key: t.trip_type, ...o }, ix = db.tripArchive.findIndex(x => x.key === t.trip_type); if (ix < 0) db.tripArchive.push(it); else if ((it.attendees || 0) >= (db.tripArchive[ix].attendees || 0)) db.tripArchive[ix] = it; } } catch (e) {}
@@ -2241,7 +2245,8 @@ notify pgrst, 'reload schema';</pre>
                     if (t.fee > 0 || !db.tripsData[t.trip_type].fee) db.tripsData[t.trip_type].fee = t.fee || 0;
                     if (t.member_id) {
                         let u = unpackInst(t.installments);
-                        db.tripsData[t.trip_type].reservations[t.member_id] = { paid: t.paid || 0, installments: u.items, discount: u.discount, refunded: u.refunded, refundAmount: u.refundAmount, refundDate: u.refundDate };
+                        db.tripsData[t.trip_type].reservations[t.member_id] = { paid: t.paid || 0, installments: u.items, discount: u.discount, refunded: u.refunded, refundAmount: u.refundAmount, refundDate: u.refundDate, regAt: u.regAt, seq: (u.regAt > 0 ? u.regAt : (t.created_at && !isNaN(Date.parse(t.created_at)) ? Date.parse(t.created_at) : -1e15 + (typeof t.id === 'number' ? t.id : _tripIdx))) };
+                        _tripIdx++;
                     }
                 });
 
@@ -3630,14 +3635,15 @@ notify pgrst, 'reload schema';</pre>
         function unpackInst(raw) {
             let v = raw;
             try { if (typeof v === 'string') v = JSON.parse(v); } catch (e) { v = []; }
-            if (Array.isArray(v)) return { items: v, discount: 0, refunded: false, refundAmount: 0, refundDate: '' };
-            if (v && typeof v === 'object') return { items: Array.isArray(v.items) ? v.items : [], discount: parseFloat(v.discount) || 0, refunded: !!v.refunded, refundAmount: parseFloat(v.refundAmount) || 0, refundDate: v.refundDate || '' };
-            return { items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '' };
+            if (Array.isArray(v)) return { items: v, discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: 0 };
+            if (v && typeof v === 'object') return { items: Array.isArray(v.items) ? v.items : [], discount: parseFloat(v.discount) || 0, refunded: !!v.refunded, refundAmount: parseFloat(v.refundAmount) || 0, refundDate: v.refundDate || '', regAt: parseFloat(v.regAt) || 0 };
+            return { items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: 0 };
         }
         function packInst(res) {
-            if (!res.discount && !res.refunded) return JSON.stringify(res.installments || []);
-            return JSON.stringify({ items: res.installments || [], discount: res.discount || 0, refunded: !!res.refunded, refundAmount: res.refundAmount || 0, refundDate: res.refundDate || '' });
+            if (!res.discount && !res.refunded && !res.regAt) return JSON.stringify(res.installments || []);
+            return JSON.stringify({ items: res.installments || [], discount: res.discount || 0, refunded: !!res.refunded, refundAmount: res.refundAmount || 0, refundDate: res.refundDate || '', regAt: res.regAt || 0 });
         }
+        function tripIds(trip) { return Object.keys(trip.reservations).sort((a, b) => (trip.reservations[a].seq || 0) - (trip.reservations[b].seq || 0)); }
         function tripDue(t, r) { return Math.max((t.fee || 0) - (r.discount || 0), 0); }
         async function saveTripRes(key, trip, id) {
             let res = trip.reservations[id]; if (!res) return;
@@ -3735,7 +3741,7 @@ notify pgrst, 'reload schema';</pre>
                     member_id: id,
                     fee: fee,
                     paid: 0,
-                    installments: JSON.stringify([])
+                    installments: JSON.stringify({ items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: Date.now() })
                 }], { onConflict: 'trip_type,member_id' });
                 await loadData();
                 renderTripTable();
@@ -4152,7 +4158,7 @@ notify pgrst, 'reload schema';</pre>
             let trip = getTripObj();
             let feeInp = document.getElementById('trip-fee');
             if (!trip.fee && feeInp && feeInp.value) trip.fee = parseFloat(feeInp.value) || 0;
-            let memberIds = Object.keys(trip.reservations);
+            let memberIds = tripIds(trip);
 
             let totalDue = 0, totalCollected = 0, activeCount = 0, refundedCount = 0, refundedSum = 0;
             memberIds.forEach(id => {
@@ -4394,7 +4400,7 @@ notify pgrst, 'reload schema';</pre>
 
         async function exportTripExcel() {
             let trip = getTripObj();
-            let activeIds = Object.keys(trip.reservations).filter(id => !trip.reservations[id].refunded);   // اللي استرد فلوسه مش بيظهر في الإكسيل
+            let activeIds = tripIds(trip).filter(id => !trip.reservations[id].refunded);   // اللي استرد فلوسه مش بيظهر في الإكسيل
             if (activeIds.length === 0) {
                 alert("لا توجد حجوزات مسجلة في هذا الشيت لتصديرها!");
                 return;
@@ -4790,7 +4796,7 @@ notify pgrst, 'reload schema';</pre>
                                 member_id: memberId,
                                 fee: tripObj.fee || 0,
                                 paid: reservation?.paid || 0,
-                                installments: packInst({ installments: reservation?.installments || [], discount: reservation?.discount, refunded: reservation?.refunded, refundAmount: reservation?.refundAmount, refundDate: reservation?.refundDate })
+                                installments: packInst({ regAt: reservation?.regAt, installments: reservation?.installments || [], discount: reservation?.discount, refunded: reservation?.refunded, refundAmount: reservation?.refundAmount, refundDate: reservation?.refundDate })
                             });
                         });
                     });
@@ -5301,6 +5307,12 @@ function sortAttendeesByTime(list){
 /* ---- بحث عن مخدوم: حضر كام مرة وبالتواريخ ---- */
 /* ===== فلاتر تبويب الحضور ===== */
 const AF_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function attFilterClose(){
+  ['att-filter-extra','att-filter-result'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=''});
+  const pw=document.getElementById('att-person-wrap');if(pw)pw.style.display='none';
+  closePersonAttendance();
+}
+const AF_CLOSE='<div style="text-align:left;margin-bottom:6px"><button onclick="attFilterClose()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>';
 function afDay(){return document.getElementById('meeting-date').value||''}
 function afAttendees(){const d=afDay(),rec=db.attendanceRecords[d]||{};return db.members.filter(m=>rec[m.id])}
 function afRow(m,extra){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid var(--card-border);cursor:pointer" onclick="openMemberDetail('+m.id+')"><span><strong>'+esc(m.name)+'</strong> <small style="color:var(--text-muted)">'+esc(m.family||'-')+' • '+esc(m.gender||'-')+'</small></span><span style="font-size:12.5px;font-weight:700;color:var(--primary);text-align:left">'+(extra||'')+'</span></div>'}
@@ -5310,7 +5322,7 @@ function attFilter(type){
   ex.innerHTML='';res.innerHTML='';pw.style.display='none';closePersonAttendance();
   if(type==='search'){pw.style.display='block';const i=document.getElementById('att-person-search');if(i)i.focus();return}
   const d=afDay();
-  if(!d){res.innerHTML=afBox('🎛️ الفلتر',[],'اختار تاريخ الاجتماع الأول.');return}
+  if(!d){res.innerHTML=AF_CLOSE+afBox('🎛️ الفلتر',[],'اختار تاريخ الاجتماع الأول.');return}
   const rec=db.attendanceRecords[d]||{},dayLbl=' — '+esc(fmtD(d));
   if(type==='early'){
     const prev=currentMeetingDate;currentMeetingDate=d;
@@ -5319,22 +5331,22 @@ function attFilter(type){
     const tm=m=>{const r=String(rec[m.id]);return r.indexOf('|')>=0?r.split('|').slice(1).join('|').trim():r};
     const boys=sorted.filter(m=>m.gender!=='شابة').slice(0,10),girls=sorted.filter(m=>m.gender==='شابة').slice(0,10);
     const mk=l=>l.map((m,i)=>afRow(m,(i+1)+'. 🕐 '+esc(tm(m))));
-    res.innerHTML=afBox('👦 أول '+boys.length+' ولاد حضروا بدري'+dayLbl,mk(boys),'مفيش ولاد حاضرين في اليوم ده.')+'<div style="height:12px"></div>'+afBox('👧 أول '+girls.length+' بنات حضروا بدري'+dayLbl,mk(girls),'مفيش بنات حاضرات في اليوم ده.');
+    res.innerHTML=AF_CLOSE+afBox('👦 أول '+boys.length+' ولاد حضروا بدري'+dayLbl,mk(boys),'مفيش ولاد حاضرين في اليوم ده.')+'<div style="height:12px"></div>'+afBox('👧 أول '+girls.length+' بنات حضروا بدري'+dayLbl,mk(girls),'مفيش بنات حاضرات في اليوم ده.');
   }else if(type==='bday'){
-    ex.innerHTML='<select id="af-month" onchange="attBdayRender()" style="width:100%;padding:11px;border-radius:12px;margin-bottom:8px"><option value="">🎂 اختار الشهر...</option>'+AF_MONTHS.map((n,i)=>'<option value="'+(i+1)+'">'+n+'</option>').join('')+'</select>';
+    ex.innerHTML=AF_CLOSE+'<select id="af-month" onchange="attBdayRender()" style="width:100%;padding:11px;border-radius:12px;margin-bottom:8px"><option value="">🎂 اختار الشهر...</option>'+AF_MONTHS.map((n,i)=>'<option value="'+(i+1)+'">'+n+'</option>').join('')+'</select>';
   }else{
     const n=type==='last3'?3:4,all=[...db.meetings].sort().filter(x=>x<=d),rows=[];
     afAttendees().forEach(m=>{let c=0,ds=[];for(let i=all.length-1;i>=0;i--){const x=all[i];if(db.attendanceRecords[x]&&db.attendanceRecords[x][m.id]){c++;ds.push(x)}else break}if(c>=n)rows.push({m,c,ds:ds.slice(0,n).reverse()})});
     rows.sort((a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar'));
     const last=all.slice(-n).join(' ، ');
-    res.innerHTML=afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، ')+(x.c>n?' <small>(متواصل '+x.c+')</small>':''))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض.')+'<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📅 الاجتماعات المحسوبة (من شيت الحضور): '+last+'</div>';
+    res.innerHTML=AF_CLOSE+afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، ')+(x.c>n?' <small>(متواصل '+x.c+')</small>':''))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض.')+'<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📅 الاجتماعات المحسوبة (من شيت الحضور): '+last+'</div>';
   }
 }
 function attBdayRender(){
   const mo=+document.getElementById('af-month').value,res=document.getElementById('att-filter-result');
   if(!mo){res.innerHTML='';return}
   const list=afAttendees().map(m=>{const p=String(m.birthdate||'').split('-');return {m,mo:+p[1],day:+p[2]}}).filter(x=>x.mo===mo).sort((a,b)=>a.day-b.day);
-  res.innerHTML=afBox('🎂 حاضرين مولودين في '+AF_MONTHS[mo-1]+' ('+list.length+') — '+esc(fmtD(afDay())),list.map(x=>afRow(x.m,'🎂 '+x.day+' '+AF_MONTHS[mo-1])),'مفيش حد من حاضري اليوم ده مولود في الشهر ده.');
+  res.innerHTML=AF_CLOSE+afBox('🎂 حاضرين مولودين في '+AF_MONTHS[mo-1]+' ('+list.length+') — '+esc(fmtD(afDay())),list.map(x=>afRow(x.m,'🎂 '+x.day+' '+AF_MONTHS[mo-1])),'مفيش حد من حاضري اليوم ده مولود في الشهر ده.');
 }
 
 /* ===== فلاتر الرحلة: دافعين كامل / مش مكملين ===== */
