@@ -5324,9 +5324,10 @@ function attFilter(type){
     ex.innerHTML='<select id="af-month" onchange="attBdayRender()" style="width:100%;padding:11px;border-radius:12px;margin-bottom:8px"><option value="">🎂 اختار الشهر...</option>'+AF_MONTHS.map((n,i)=>'<option value="'+(i+1)+'">'+n+'</option>').join('')+'</select>';
   }else{
     const n=type==='last3'?3:4,all=[...db.meetings].sort().filter(x=>x<=d),rows=[];
-    afAttendees().forEach(m=>{let c=0,ds=[];for(let i=all.length-1;i>=0;i--){const x=all[i];if(db.attendanceRecords[x]&&db.attendanceRecords[x][m.id]){c++;ds.push(x)}else break}if(c===n)rows.push({m,ds:ds.reverse()})});
+    afAttendees().forEach(m=>{let c=0,ds=[];for(let i=all.length-1;i>=0;i--){const x=all[i];if(db.attendanceRecords[x]&&db.attendanceRecords[x][m.id]){c++;ds.push(x)}else break}if(c>=n)rows.push({m,c,ds:ds.slice(0,n).reverse()})});
     rows.sort((a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar'));
-    res.innerHTML=afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض بالظبط ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، '))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض بالظبط.');
+    const last=all.slice(-n).join(' ، ');
+    res.innerHTML=afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، ')+(x.c>n?' <small>(متواصل '+x.c+')</small>':''))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض.')+'<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📅 الاجتماعات المحسوبة (من شيت الحضور): '+last+'</div>';
   }
 }
 function attBdayRender(){
