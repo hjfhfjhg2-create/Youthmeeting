@@ -2017,7 +2017,7 @@ notify pgrst, 'reload schema';</pre>
                     'سجّل الحضور بطريقتين: <b>«📷 تسجيل سريع بمسح QR Code»</b> بكاميرا الموبايل، أو اكتب أول حروف الاسم في خانة البحث واختاره من القائمة.',
                     'في الجدول هتلاقي الاسم والأسرة ووقت الحضور. اكتب <b>البونص</b> قدام المخدوم لو أخد، ومن عمود <b>«إجراء»</b> تقدر تشيل حضور اتسجل بالغلط.',
                     'الجدول مرتب بوقت التسجيل: أول واحد سجّل بياخد <b>رقم ١</b> والباقي تحته ٢ و٣ و٤ بالترتيب، ووقت الحضور بيتسجل بالثانية. فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
-                    '<b>🎛️ فلاتر الحضور</b> بتشتغل على حاضري <b>اليوم المفتوح</b> بس: <b>⏰ حضروا بدري</b> (أول ١٠ ولاد وأول ١٠ بنات بوقت التسجيل)، <b>🎂 أعياد ميلاد</b> (اختار الشهر وتشوف الحاضرين المولودين فيه)، <b>✅ آخر ٣ اجتماعات</b> (الحاضرين اللي حضروا ٣ اجتماعات ورا بعض أو أكتر). أما <b>🔎 بحث بالاسم</b> فبتدوّر في كل الأسماء (حاضر أو لأ) وتشوف حضر كام مرة وبأنهي تواريخ. كل فلتر فيه زرار <b>✕ إغلاق</b>.',
+                    '<b>🎛️ فلاتر الحضور</b> بتشتغل على حاضري <b>اليوم المفتوح</b> بس: <b>⏰ حضروا بدري</b> (أول ١٠ ولاد وأول ١٠ بنات بوقت التسجيل، ومن الأزرار تختار فترة زي ٧ - ٧:٣٠ أو ٧:٣٠ - ٨ أو ٨ - ٨:٣٠ فيطلعلك كل اللي حضروا فيها، ولاد لوحدهم وبنات لوحدهم)، <b>🎂 أعياد ميلاد</b> (اختار الشهر وتشوف الحاضرين المولودين فيه)، <b>✅ آخر ٣ اجتماعات</b> (الحاضرين اللي حضروا ٣ اجتماعات ورا بعض أو أكتر). أما <b>🔎 بحث بالاسم</b> فبتدوّر في كل الأسماء (حاضر أو لأ) وتشوف حضر كام مرة وبأنهي تواريخ. كل فلتر فيه زرار <b>✕ إغلاق</b>.',
                     '<b>«📑 تقارير الاجتماعات»</b> فيها كل الاجتماعات ونسب الحضور وتحميل تقرير سنوي (وفيها <b>✕ إغلاق</b>)، و<b>«📊 تحميل شيت الحضور Excel»</b> بينزّل شيت اليوم.'],
                 tips: [
                     'لازم تكون سجّلت المخدومين الأول من تبويب «إضافة مخدوم» علشان يظهروا في البحث ويتمسح كارتهم.']
@@ -5325,13 +5325,8 @@ function attFilter(type){
   if(!d){res.innerHTML=AF_CLOSE+afBox('🎛️ الفلتر',[],'اختار تاريخ الاجتماع الأول.');return}
   const rec=db.attendanceRecords[d]||{},dayLbl=' — '+esc(fmtD(d));
   if(type==='early'){
-    const prev=currentMeetingDate;currentMeetingDate=d;
-    const sorted=sortAttendeesByTime(afAttendees());
-    currentMeetingDate=prev||d;
-    const tm=m=>{const r=String(rec[m.id]);return r.indexOf('|')>=0?r.split('|').slice(1).join('|').trim():r};
-    const boys=sorted.filter(m=>m.gender!=='شابة').slice(0,10),girls=sorted.filter(m=>m.gender==='شابة').slice(0,10);
-    const mk=l=>l.map((m,i)=>afRow(m,(i+1)+'. 🕐 '+esc(tm(m))));
-    res.innerHTML=AF_CLOSE+afBox('👦 أول '+boys.length+' ولاد حضروا بدري'+dayLbl,mk(boys),'مفيش ولاد حاضرين في اليوم ده.')+'<div style="height:12px"></div>'+afBox('👧 أول '+girls.length+' بنات حضروا بدري'+dayLbl,mk(girls),'مفيش بنات حاضرات في اليوم ده.');
+    ex.innerHTML=AF_CLOSE+'<div id="af-slots" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>';
+    attEarlyRender(-1);
   }else if(type==='bday'){
     ex.innerHTML=AF_CLOSE+'<select id="af-month" onchange="attBdayRender()" style="width:100%;padding:11px;border-radius:12px;margin-bottom:8px"><option value="">🎂 اختار الشهر...</option>'+AF_MONTHS.map((n,i)=>'<option value="'+(i+1)+'">'+n+'</option>').join('')+'</select>';
   }else{
@@ -5341,6 +5336,27 @@ function attFilter(type){
     const last=all.slice(-n).join(' ، ');
     res.innerHTML=AF_CLOSE+afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، ')+(x.c>n?' <small>(متواصل '+x.c+')</small>':''))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض.')+'<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📅 الاجتماعات المحسوبة (من شيت الحضور): '+last+'</div>';
   }
+}
+
+const AF_SLOTS=[['٧ - ٧:٣٠',19*3600,19.5*3600],['٧:٣٠ - ٨',19.5*3600,20*3600],['٨ - ٨:٣٠',20*3600,20.5*3600]];
+function attEarlyRender(i){
+  const d=afDay(),res=document.getElementById('att-filter-result'),box=document.getElementById('af-slots');
+  if(!d||!res)return;
+  if(box)box.innerHTML='<button onclick="attEarlyRender(-1)" style="padding:8px 14px;font-size:13px;box-shadow:none;'+(i<0?'':'opacity:.55;')+'">أول ١٠ (الكل)</button>'+AF_SLOTS.map((x,k)=>'<button onclick="attEarlyRender('+k+')" style="padding:8px 14px;font-size:13px;box-shadow:none;background:linear-gradient(135deg,#818cf8,#6366f1);'+(i===k?'':'opacity:.55;')+'">🕐 '+x[0]+'</button>').join('');
+  const prev=currentMeetingDate;currentMeetingDate=d;
+  let sorted=sortAttendeesByTime(afAttendees());
+  currentMeetingDate=prev||d;
+  const rec=db.attendanceRecords[d]||{};
+  const tm=m=>{const r=String(rec[m.id]);return r.indexOf('|')>=0?r.split('|').slice(1).join('|').trim():r};
+  const dayLbl=' — '+esc(fmtD(d));
+  let boys=sorted.filter(m=>m.gender!=='شابة'),girls=sorted.filter(m=>m.gender==='شابة'),tag,lim=10;
+  if(i>=0){
+    const sl=AF_SLOTS[i],inSlot=m=>{const t=attTimeSecs(rec[m.id]);return t!=null&&t>=sl[1]&&t<sl[2]};
+    boys=boys.filter(inSlot);girls=girls.filter(inSlot);lim=1e9;tag=' حضروا من '+sl[0];
+  }else tag=' حضروا بدري';
+  boys=boys.slice(0,lim);girls=girls.slice(0,lim);
+  const mk=l=>l.map((m,k)=>afRow(m,(k+1)+'. 🕐 '+esc(tm(m))));
+  res.innerHTML=afBox('👦 '+(i>=0?'':'أول ')+boys.length+' ولاد'+tag+dayLbl,mk(boys),i>=0?'مفيش ولاد حضروا في الفترة دي.':'مفيش ولاد حاضرين في اليوم ده.')+'<div style="height:12px"></div>'+afBox('👧 '+(i>=0?'':'أول ')+girls.length+' بنات'+tag+dayLbl,mk(girls),i>=0?'مفيش بنات حضروا في الفترة دي.':'مفيش بنات حاضرات في اليوم ده.');
 }
 function attBdayRender(){
   const mo=+document.getElementById('af-month').value,res=document.getElementById('att-filter-result');
