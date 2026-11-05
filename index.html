@@ -1469,7 +1469,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <span>أعياد ميلاد 🎂</span>
                 <span id="birthday-notification-dot" style="display:none;" class="notification-dot"></span>
             </button>
-            <button onclick="showTab('committed', this)" data-tab="committed">الملتزمين 🏆</button>
+            <button onclick="showTab('committed', this)" data-tab="committed">المواظبين 🏆</button>
             <button onclick="showTab('bonus', this)" data-tab="bonus">البونص 🎁</button>
             <button onclick="showTab('trips', this)" data-tab="trips">الرحلات 🚌</button>
             <button onclick="showTab('profiles', this)" data-tab="profiles">بحث 🔍</button>
@@ -1563,9 +1563,21 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 </div>
             </div>
             
-            <!-- بحث عن مخدوم: حضر كام مرة وبالتواريخ -->
-            <div class="input-group autocomplete-container" style="margin-bottom:14px;">
-                <label>🔎 ابحث عن مخدوم وشوف حضر كام مرة وفي أنهي تواريخ:</label>
+            <!-- فلاتر الحضور (للمسجلين في الحضور فقط) -->
+            <div class="settings-card" style="margin-bottom:16px;">
+                <div style="font-weight:800; margin-bottom:10px;">🎛️ فلاتر الحضور <small style="color:var(--text-muted); font-weight:600;">(للأسماء المسجلة في الحضور بس)</small></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <button onclick="attFilter('early')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none;">⏰ حضروا بدري</button>
+                    <button onclick="attFilter('bday')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#f472a6,#c4306b);">🎂 أعياد ميلاد</button>
+                    <button onclick="attFilter('search')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#818cf8,#6366f1);">🔎 بحث بالاسم</button>
+                    <button onclick="attFilter('last3')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#34d399,#059669);">✅ آخر ٣ اجتماعات</button>
+                    <button onclick="attFilter('last4')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#fbbf24,#f59e0b);">✅ آخر ٤ اجتماعات</button>
+                </div>
+                <div id="att-filter-extra"></div>
+                <div id="att-filter-result"></div>
+            </div>
+            <div class="input-group autocomplete-container" id="att-person-wrap" style="margin-bottom:14px; display:none;">
+                <label>🔎 ابحث عن حاضر وشوف حضر كام مرة وفي أنهي تواريخ:</label>
                 <input type="text" id="att-person-search" placeholder="اكتب الاسم واختاره من القائمة..." autocomplete="off" oninput="attPersonSearch(this.value)" onfocus="attPersonSearch(this.value)">
                 <div id="att-person-results" class="autocomplete-results" style="display:none"></div>
             </div>
@@ -1628,15 +1640,15 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             <div id="visitation-container" style="margin-top: 20px;"></div>
         </div>
 
-        <!-- تبويب الملتزمين -->
+        <!-- تبويب المواظبين -->
         <div id="committed" class="tab-content">
             <div class="rb-wrap" style="--c:#f59e0b">
-                <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب الملتزمين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
-                <div class="rb-say" onclick="openHelp('committed')"><b>كوجي بوت 🤖 · شرح «الملتزمين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب المواظبين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
+                <div class="rb-say" onclick="openHelp('committed')"><b>كوجي بوت 🤖 · شرح «المواظبين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
-                <h3 style="margin:0;">الملتزمين 🏆</h3>
+                <h3 style="margin:0;">المواظبين 🏆</h3>
                 <a href="#" onclick="exportCommittedExcel(); return false;" style="color:#2e9e6b; font-weight:800; font-size:14px; text-decoration:underline;">📥 تصدير Excel</a>
             </div>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">اللي حضروا ٤ أو ٥ اجتماعات ورا بعض بدون غياب.</p>
@@ -1791,6 +1803,8 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <button onclick="openTripDiscountsModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:none;">🏷️ الخصومات</button>
                 <button onclick="openTripYearModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📅 رحلات السنة</button>
                 <button onclick="openTripGenderModal('شاب')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#4ba3ea,#1d6fb8); box-shadow:none;">👦 عدد الشباب <span id="trip-cnt-m" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
+                <button onclick="openTripPaidModal(true)" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#34d399,#059669); box-shadow:none;">✅ دافعين كامل <span id="trip-cnt-full" style="background:rgba(255,255,255,.28); padding:1px 8px; border-radius:10px; margin-right:4px;">0</span></button>
+                <button onclick="openTripPaidModal(false)" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fb7185,#e11d48); box-shadow:none;">⚠️ مش مكملين <span id="trip-cnt-part" style="background:rgba(255,255,255,.28); padding:1px 8px; border-radius:10px; margin-right:4px;">0</span></button>
                 <button onclick="openTripGenderModal('شابة')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#f472a6,#c4306b); box-shadow:none;">👧 عدد الشابات <span id="trip-cnt-f" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
             </div>
 
@@ -2018,8 +2032,8 @@ notify pgrst, 'reload schema';</pre>
                     'النقطة الحمراء جنب اسم التبويب معناها إن فيه ناس محتاجة افتقاد.']
             },
             'committed': {
-                title: 'الملتزمين', icon: '🏆', color: '#f59e0b',
-                goal: 'بيعرض <b>الملتزمين</b>: اللي حضروا ٤ أو ٥ اجتماعات ورا بعض من غير ما يغيبوا ولا مرة.',
+                title: 'المواظبين', icon: '🏆', color: '#f59e0b',
+                goal: 'بيعرض <b>المواظبين</b> (ولاد وبنات): اللي حضروا ٤ أو ٥ اجتماعات ورا بعض من غير ما يغيبوا ولا مرة.',
                 steps: [
                     'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، مفيش حاجة تكتبها هنا.',
                     'استخدمها تشجّع وتكرّم المواظبين، وتعرف مين ثابت على الاجتماعات.',
@@ -2939,8 +2953,8 @@ notify pgrst, 'reload schema';</pre>
             if (!box) return;
             if (db.meetings.length === 0) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد اجتماعات مسجلة حتى الآن.</p>'; return; }
             let list = getCommittedData();
-            if (!list.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد ملتزمين حالياً.</p>'; return; }
-            box.innerHTML = list.map(({ m, n, dates }, i) => {
+            if (!list.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد مواظبين حالياً.</p>'; return; }
+            const card = ({ m, n, dates }, i) => {
                 let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="font-size:16px; font-weight:900; color:#2e9e6b;">${i + 1}</span>`;
                 let phone = m.phone ? `<a href="tel:${esc(m.phone)}" style="color:var(--success); text-decoration:none; font-weight:800;" onclick="event.stopPropagation()">📞 ${esc(m.phone)}</a>` : 'بدون رقم تليفون';
                 return `
@@ -2949,22 +2963,25 @@ notify pgrst, 'reload schema';</pre>
                         <div class="info">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
                                 <h4 style="margin:0;">${esc(m.name)}</h4>
-                                <span style="background:#2e9e6b; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">حضر آخر ${n} اجتماعات</span>
+                                <span style="background:#2e9e6b; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">واظب ${n} اجتماعات</span>
                             </div>
                             <p><strong>الأسرة:</strong> ${esc(m.family || '-')} | <strong>التليفون:</strong> ${phone}</p>
                             <p><strong>أب الاعتراف:</strong> ${esc(m.father || '-')}</p>
                             <p><strong>تواريخ الحضور:</strong> ${dates.join(' ، ')}</p>
                         </div>
                     </div>`;
-            }).join('');
+            };
+            const girls = list.filter(x => x.m.gender === 'شابة'), boys = list.filter(x => x.m.gender !== 'شابة');
+            const sec = (t, arr) => `<h4 style="margin:18px 0 10px; color:var(--primary);">${t} (${arr.length})</h4>` + (arr.length ? arr.map(card).join('') : '<p style="color:var(--text-muted); text-align:center; padding:14px;">لا يوجد.</p>');
+            box.innerHTML = sec('👦 المواظبين الأولاد', boys) + sec('👧 المواظبات البنات', girls);
         }
 
         async function exportCommittedExcel() {
             let list = getCommittedData();
-            if (!list.length) { alert('لا يوجد ملتزمين للتصدير حالياً.'); return; }
+            if (!list.length) { alert('لا يوجد مواظبين للتصدير حالياً.'); return; }
             let today = new Date().toISOString().slice(0, 10);
-            await downloadStyledWorkbook(`الملتزمين_${today}.xlsx`, [{
-                name: 'الملتزمين', title: 'الملتزمين (٤ - ٥ اجتماعات متتالية)',
+            await downloadStyledWorkbook(`المواظبين_${today}.xlsx`, [{
+                name: 'المواظبين', title: 'المواظبين (٤ - ٥ اجتماعات متتالية)',
                 subtitle: 'العدد: ' + list.length + '   |   تاريخ التصدير: ' + today,
                 headers: ['الترتيب', 'الاسم', 'الأسرة', 'أب الاعتراف', 'رقم التليفون', 'عدد الاجتماعات المتتالية', 'تواريخ الحضور'],
                 rows: list.map((x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.phone || '', x.n, x.dates.join(' ، ')]),
@@ -5282,15 +5299,77 @@ function sortAttendeesByTime(list){
 }
 
 /* ---- بحث عن مخدوم: حضر كام مرة وبالتواريخ ---- */
+/* ===== فلاتر تبويب الحضور ===== */
+const AF_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function afAttendees(){return db.members.filter(m=>attCount(m.id)>0)}
+function afRow(m,extra){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid var(--card-border);cursor:pointer" onclick="openMemberDetail('+m.id+')"><span><strong>'+esc(m.name)+'</strong> <small style="color:var(--text-muted)">'+esc(m.family||'-')+' • '+esc(m.gender||'-')+'</small></span><span style="font-size:12.5px;font-weight:700;color:var(--primary);text-align:left">'+(extra||'')+'</span></div>'}
+function afBox(title,rows,empty){return '<div style="margin-top:6px"><div style="font-weight:800;margin-bottom:6px;color:var(--primary)">'+title+'</div>'+(rows.length?rows.join(''):'<p style="text-align:center;color:var(--text-muted);padding:14px">'+empty+'</p>')+'</div>'}
+function attFilter(type){
+  const ex=document.getElementById('att-filter-extra'),res=document.getElementById('att-filter-result'),pw=document.getElementById('att-person-wrap');
+  ex.innerHTML='';res.innerHTML='';pw.style.display='none';closePersonAttendance();
+  if(type==='early'){
+    const d=document.getElementById('meeting-date').value;
+    if(!d){res.innerHTML=afBox('⏰ أول ٢٠ حضروا بدري',[],'اختار تاريخ الاجتماع الأول.');return}
+    const prev=currentMeetingDate;currentMeetingDate=d;
+    const rec=db.attendanceRecords[d]||{};
+    const list=sortAttendeesByTime(db.members.filter(m=>rec[m.id])).slice(0,20);
+    currentMeetingDate=prev||d;
+    const rows=list.map((m,i)=>{const r=String(rec[m.id]);const t=r.indexOf('|')>=0?r.split('|').slice(1).join('|').trim():r;return afRow(m,(i+1)+'. 🕐 '+esc(t))});
+    res.innerHTML=afBox('⏰ أول '+list.length+' حضروا بدري — '+esc(fmtD(d)),rows,'لا يوجد حضور مسجل في اليوم ده.');
+  }else if(type==='bday'){
+    ex.innerHTML='<select id="af-month" onchange="attBdayRender()" style="width:100%;padding:11px;border-radius:12px;margin-bottom:8px"><option value="">🎂 اختار الشهر...</option>'+AF_MONTHS.map((n,i)=>'<option value="'+(i+1)+'">'+n+'</option>').join('')+'</select>';
+  }else if(type==='search'){
+    pw.style.display='block';const i=document.getElementById('att-person-search');if(i)i.focus();
+  }else{
+    const n=type==='last3'?3:4,all=[...db.meetings].sort(),rows=[];
+    db.members.forEach(m=>{let c=0,ds=[];for(let i=all.length-1;i>=0;i--){const d=all[i];if(db.attendanceRecords[d]&&db.attendanceRecords[d][m.id]){c++;ds.push(d)}else break}if(c===n)rows.push({m,ds:ds.reverse()})});
+    rows.sort((a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar'));
+    res.innerHTML=afBox('✅ حضروا آخر '+n+' اجتماعات ورا بعض بالظبط ('+rows.length+')',rows.map(x=>afRow(x.m,x.ds.join(' ، '))),'مفيش حد حضر '+n+' اجتماعات ورا بعض بالظبط.');
+  }
+}
+function attBdayRender(){
+  const mo=+document.getElementById('af-month').value,res=document.getElementById('att-filter-result');
+  if(!mo){res.innerHTML='';return}
+  const list=afAttendees().map(m=>{const p=String(m.birthdate||'').split('-');return {m,mo:+p[1],day:+p[2]}}).filter(x=>x.mo===mo).sort((a,b)=>a.day-b.day);
+  res.innerHTML=afBox('🎂 مواليد شهر '+AF_MONTHS[mo-1]+' ('+list.length+')',list.map(x=>afRow(x.m,'🎂 '+x.day+' '+AF_MONTHS[mo-1]+' • حضر '+attCount(x.m.id)+' مرة')),'مفيش حد من الحاضرين مولود في الشهر ده.');
+}
+
+/* ===== فلاتر الرحلة: دافعين كامل / مش مكملين ===== */
+function tripPaidLists(){
+  const trip=getTripObj(),fee=trip.fee||0,full=[],part=[];
+  Object.keys(trip.reservations).forEach(id=>{
+    const m=db.members.find(x=>x.id==id);if(!m)return;
+    const r=trip.reservations[id];if(r.refunded)return;
+    const due=tripDue(trip,r),paid=r.paid||0,rest=Math.max(due-paid,0),x={m,due,paid,rest};
+    if(rest===0&&(fee>0||paid>0))full.push(x);else if(rest>0)part.push(x);
+  });
+  const f=(a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar');
+  return {full:full.sort(f),part:part.sort(f)};
+}
+function updateTripPaidCounts(){
+  try{const l=tripPaidLists(),a=document.getElementById('trip-cnt-full'),b=document.getElementById('trip-cnt-part');if(a)a.textContent=l.full.length;if(b)b.textContent=l.part.length}catch(e){}
+}
+function openTripPaidModal(isFull){
+  const l=tripPaidLists(),list=isFull?l.full:l.part;
+  const th='style="background:var(--primary);color:#fff;padding:7px 4px;font-size:12px;white-space:nowrap;"';
+  const td='style="padding:7px 4px;border-bottom:1px solid var(--card-border);text-align:center;font-size:12.5px;white-space:nowrap;"';
+  const tdn='style="padding:7px 6px;border-bottom:1px solid var(--card-border);text-align:right;font-size:12.5px;min-width:92px;"';
+  const tot=list.reduce((o,x)=>{o.paid+=x.paid;o.rest+=x.rest;return o},{paid:0,rest:0});
+  const rows=list.map((x,i)=>'<tr><td '+td+'>'+(i+1)+'</td><td '+tdn+'><strong>'+esc(x.m.name)+'</strong><br><small style="color:var(--text-muted)">'+esc(x.m.family||'-')+'</small></td><td '+td+'>'+x.due+'</td><td '+td+'><b style="color:var(--success)">'+x.paid+'</b></td>'+(isFull?'':'<td '+td+'><b style="color:var(--danger)">'+x.rest+'</b></td>')+'</tr>').join('');
+  const body='<div style="font-weight:800;margin-bottom:10px">العدد: '+list.length+' • إجمالي المدفوع: '+tot.paid+' ج'+(isFull?'':' • إجمالي الباقي: '+tot.rest+' ج')+'</div>'+
+    (list.length?'<div class="table-responsive"><table style="width:100%;border-collapse:collapse;"><thead><tr><th '+th+'>#</th><th '+th+'>الاسم</th><th '+th+'>المطلوب</th><th '+th+'>دفع</th>'+(isFull?'':'<th '+th+'>باقي</th>')+'</tr></thead><tbody>'+rows+'</tbody></table></div>':'<p style="text-align:center;color:var(--text-muted);padding:22px 0">'+(isFull?'مفيش حد دفع كامل لحد دلوقتي.':'الكل مكمّل الفلوس 👏')+'</p>');
+  showTripModal(isFull?'✅ دافعين كامل ('+list.length+')':'⚠️ مش مكملين الفلوس ('+list.length+')',body);
+}
+
 function attPersonSearch(val){
   const box = document.getElementById('att-person-results'); if (!box) return;
   const q = norm(val);
   box.innerHTML = '';
   if (!q) { box.style.display = 'none'; return; }
-  const res = db.members.map(m => ({ m, s: scoreText(m.name, q) })).filter(x => x.s >= 0)
+  const res = db.members.filter(m => attCount(m.id) > 0).map(m => ({ m, s: scoreText(m.name, q) })).filter(x => x.s >= 0)
     .sort((a, b) => a.s - b.s || String(a.m.name).localeCompare(String(b.m.name), 'ar')).slice(0, 20);
   if (!res.length) {
-    box.innerHTML = '<div class="autocomplete-item" style="color:var(--text-muted)">مفيش اسم بالشكل ده</div>';
+    box.innerHTML = '<div class="autocomplete-item" style="color:var(--text-muted)">مفيش حاضر بالاسم ده</div>';
     box.style.display = 'block'; return;
   }
   res.forEach(({ m }) => {
@@ -5388,6 +5467,7 @@ function updateTripGenderCounts(){
   });
   const em = document.getElementById('trip-cnt-m'), ef = document.getElementById('trip-cnt-f');
   if (em) em.textContent = a; if (ef) ef.textContent = b;
+  updateTripPaidCounts();
 }
 function openTripGenderModal(g){
   const isG = g === 'شابة', label = isG ? 'الشابات' : 'الشباب', icon = isG ? '👧' : '👦';
