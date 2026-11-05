@@ -1651,7 +1651,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <h3 style="margin:0;">المواظبين 🏆</h3>
                 <a href="#" onclick="exportCommittedExcel(); return false;" style="color:#2e9e6b; font-weight:800; font-size:14px; text-decoration:underline;">📥 تصدير Excel</a>
             </div>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">اللي حضروا ٤ أو ٥ اجتماعات ورا بعض بدون غياب.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">اللي حضروا ٤ اجتماعات ورا بعض أو أكتر بدون غياب (ولاد وبنات) — من شيت الحضور.</p>
             <div id="committed-container"></div>
         </div>
 
@@ -2942,7 +2942,7 @@ notify pgrst, 'reload schema';</pre>
                     let d = all[i];
                     if (db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) { n++; dates.push(d); } else break;
                 }
-                if (n === 4 || n === 5) list.push({ m, n, dates: dates.reverse() });
+                if (n >= 4) list.push({ m, n, dates: dates.reverse() });
             });
             list.sort((a, b) => b.n - a.n || String(a.m.name).localeCompare(String(b.m.name), 'ar'));
             return list;
@@ -2981,7 +2981,7 @@ notify pgrst, 'reload schema';</pre>
             if (!list.length) { alert('لا يوجد مواظبين للتصدير حالياً.'); return; }
             let today = new Date().toISOString().slice(0, 10);
             await downloadStyledWorkbook(`المواظبين_${today}.xlsx`, [{
-                name: 'المواظبين', title: 'المواظبين (٤ - ٥ اجتماعات متتالية)',
+                name: 'المواظبين', title: 'المواظبين (٤ اجتماعات متتالية أو أكتر)',
                 subtitle: 'العدد: ' + list.length + '   |   تاريخ التصدير: ' + today,
                 headers: ['الترتيب', 'الاسم', 'الأسرة', 'أب الاعتراف', 'رقم التليفون', 'عدد الاجتماعات المتتالية', 'تواريخ الحضور'],
                 rows: list.map((x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.phone || '', x.n, x.dates.join(' ، ')]),
@@ -3460,7 +3460,7 @@ notify pgrst, 'reload schema';</pre>
         function renderFamilyMembersTable() {
             let container = document.getElementById('family-members-container');
             let members = db.members.filter(m => {
-                let matchFam = (m.family || 'أسرة عامة') === currentSelectedFamilyName;
+                let matchFam = (m.family || 'أسرة عامة') === currentSelectedFamilyName && ((m.gender === 'شابة') === (currentSelectedFamilyGender === 'شابة'));
                 if(!currentFamilySearchTerm) return matchFam;
                 return matchFam && m.name.toLowerCase().includes(currentFamilySearchTerm.toLowerCase());
             });
