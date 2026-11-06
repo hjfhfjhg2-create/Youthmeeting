@@ -1364,6 +1364,46 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 .ac-dig{font:800 12px 'Noto Kufi Arabic','Cairo',sans-serif;color:#ffe9a8;letter-spacing:1.5px;margin-top:2px}
 @media(max-width:800px){.art-clock svg{width:92px;height:92px}}
 </style>
+<style id="contests-css">
+.nav-tabs button[data-tab="contests"]{--a:#f59e0b;--a2:#d97706;--ar:245,158,11}
+.nav-tabs button[data-tab="contests"]{border-bottom:3px solid #f59e0b}
+.nav-tabs button[data-tab="contests"].active{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;box-shadow:0 4px 0 #b45309}
+#contests .ct-name{margin:14px 0}
+#contests .ct-name label{display:block;font-weight:800;margin-bottom:6px}
+#contests .ct-name input{width:100%;font-size:16px;font-weight:700}
+#contests .ct-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+#contests .ct-actions button{flex:1;min-width:140px;padding:12px;font-size:14px}
+#contests .ct-card{background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 8px 22px -14px rgba(0,0,0,.35)}
+#contests .ct-card-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+#contests .ct-card-top input{flex:1;min-width:0;font-weight:800;font-size:16px}
+#contests .ct-x{padding:8px 12px!important;font-size:13px!important;flex:none}
+#contests .ct-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#contests .ct-add select{flex:2 1 160px;width:auto!important;min-width:0}
+#contests .ct-add input{flex:1 1 80px;width:auto!important;min-width:70px}
+#contests .ct-add button{flex:1 1 100px;padding:10px;font-size:13px}
+#contests .ct-entry{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+#contests .ct-entry .ct-et{flex:1;font-size:13.5px;font-weight:600}
+#contests .ct-entry input{width:84px!important;flex:none;text-align:center;padding:8px}
+#contests .ct-noentry,#contests .ct-empty,.ct-empty{color:var(--text-muted);font-size:13px;text-align:center;padding:10px}
+#contests .ct-total{margin-top:10px;text-align:center;font-weight:800;background:rgba(245,158,11,.16);border-radius:12px;padding:8px}
+#contests .ct-final{margin-top:22px}
+#contests .ct-final h4,.ct-final-h{margin:0 0 10px;font-size:17px}
+.ct-rank{display:flex;align-items:center;gap:10px;background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.ct-rank.r1{border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.06))}
+.ct-rank.r2{border-color:#94a3b8;background:linear-gradient(135deg,rgba(148,163,184,.25),rgba(148,163,184,.06))}
+.ct-rank.r3{border-color:#c2813b;background:linear-gradient(135deg,rgba(194,129,59,.25),rgba(194,129,59,.06))}
+.ct-medal{font-size:26px}
+.ct-rk-name{flex:1;display:flex;flex-direction:column;min-width:0}
+.ct-rk-name small{color:var(--text-muted)}
+.ct-rk-pts{font-weight:900;font-size:20px;text-align:center}
+.ct-rk-pts small{display:block;font-size:11px;color:var(--text-muted);font-weight:600}
+.ct-arc{border:1px solid var(--border,var(--card-border));border-radius:14px;margin-bottom:10px;padding:8px 12px}
+.ct-arc summary{cursor:pointer;font-weight:700;list-style:none}
+.ct-arc summary small{display:block;color:var(--text-muted);font-weight:500;margin-top:3px}
+.ct-arc-team{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+.ct-arc-team span{color:var(--text-muted)}
+.ct-year{margin:14px 0 8px;font-weight:800}
+</style>
 </head>
 <body>
 <div class="bg-logo"></div>
@@ -1472,6 +1512,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             <button onclick="showTab('committed', this)" data-tab="committed">المواظبين 🏆</button>
             <button onclick="showTab('bonus', this)" data-tab="bonus">البونص 🎁</button>
             <button onclick="showTab('trips', this)" data-tab="trips">الرحلات 🚌</button>
+            <button onclick="showTab('contests', this)" data-tab="contests">المسابقات 🏅</button>
             <button onclick="showTab('profiles', this)" data-tab="profiles">بحث 🔍</button>
             <button onclick="showTab('settings', this)" data-tab="settings">الإعدادات ⚙️</button>
         </div>
@@ -1843,6 +1884,38 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             </div><!-- /trip-sheet-view -->
         </div>
 
+        <!-- المسابقات -->
+        <div id="contests" class="tab-content">
+            <div class="rb-wrap" style="--c:#f59e0b">
+                <button class="rb-btn" onclick="openHelp('contests')" aria-label="شرح تبويب المسابقات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏅</i></span></button>
+                <div class="rb-say" onclick="openHelp('contests')"><b>كوجي بوت 🤖 · شرح «المسابقات»</b><span class="rb-line" data-text="سجّل الفرق ودرجاتها وأنا أحسبلك المجموع وأرتبهم تلقائي.">سجّل الفرق ودرجاتها وأنا أحسبلك المجموع وأرتبهم تلقائي.</span><u>اشرحلي بالتفصيل ◂</u></div>
+            </div>
+
+            <h3>نظام المسابقات والفرق الذكي</h3>
+
+            <div class="ct-name">
+                <label for="ct-name">🏷️ اسم المسابقة</label>
+                <input type="text" id="ct-name" placeholder="مثال: مسابقة صوم ٢٠٢٦" oninput="ctSetName(this.value)">
+            </div>
+
+            <div class="ct-actions">
+                <button onclick="ctAddTeam()">➕ فريق جديد</button>
+                <button onclick="ctOpenArchive()" style="background:linear-gradient(135deg,#818cf8,#6366f1);">🗂️ مسابقات السنة</button>
+                <button onclick="ctSendArchive()" style="background:linear-gradient(135deg,#34d399,#10b981);">📦 إرسال للأرشيف</button>
+            </div>
+
+            <div id="ct-teams"></div>
+
+            <div class="ct-final">
+                <h4>🏆 الترتيب النهائي</h4>
+                <div id="ct-ranking"></div>
+            </div>
+
+            <div class="ct-actions" style="margin-top:20px;">
+                <button class="btn-delete" onclick="ctClearCurrent()">🗑️ تصفير المسابقة الحالية فقط</button>
+            </div>
+        </div>
+
         <!-- البروفايلات والبحث -->
         <div id="profiles" class="tab-content">
             <div class="rb-wrap" style="--c:#3b82f6">
@@ -1933,9 +2006,9 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
                 <h4 style="color:var(--danger);">⚠️ منطقة الخطر والتصفير</h4>
-                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير جميع سجلات حضور الاجتماعات وشيتات الرحلات بالكامل وإرجاعها فارغة دون المساس ببيانات البرفايلات والمخدومين الأساسية.</p>
+                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير كل الشيتات بالكامل: حضور الاجتماعات والرحلات والمسابقات (وأرشيفهم) وإرجاعها فارغة دون المساس ببيانات البرفايلات والمخدومين الأساسية.</p>
                 <div class="action-row">
-                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير شيتات الحضور والرحلات فقط</button>
+                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير كل الشيتات (الحضور والرحلات والمسابقات)</button>
                 </div>
             </div>
         </div>
@@ -2077,6 +2150,20 @@ notify pgrst, 'reload schema';</pre>
                 tips: [
                     'زرار <b>«🗑️ تصفير شيت الحجز فقط»</b> بيمسح حجز الفعالية الحالية — خد بالك قبل ما تضغطه.']
             },
+            'contests': {
+                title: 'المسابقات', icon: '🏅', color: '#f59e0b',
+                goal: 'تسجيل <b>فرق المسابقة</b> وحساب درجاتها تلقائي وترتيبها: المركز الأول والتاني والتالت والرابع.',
+                steps: [
+                    'اكتب <b>اسم المسابقة</b> في الخانة اللي فوق (مثال: مسابقة صوم ٢٠٢٦).',
+                    'اضغط <b>«➕ فريق جديد»</b> واكتب اسم الفريق. كل فريق بيظهر في <b>كارت</b> لوحده، والكروت تحت بعض.',
+                    'جوه كارت الفريق اختار نوع الدرجة من القايمة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
+                    'تقدر تعدّل أي درجة متسجلة أو تمسحها، و<b>مجموع الفريق</b> بيتحسب لوحده.',
+                    'تحت خالص <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
+                    '<b>«📦 إرسال للأرشيف»</b> بينقل المسابقة لـ<b>«🗂️ مسابقات السنة»</b> ويفضي الشيت لمسابقة جديدة، و«مسابقات السنة» بتفتحلك كل المسابقات اللي اتأرشفت.'],
+                tips: [
+                    'المسابقة مفتوحة دايماً زي الرحلات، وكل حاجة بتتسجل بتتحفظ لوحدها.',
+                    'زرار <b>«🗑️ تصفير المسابقة الحالية فقط»</b> بيمسح المسابقة المفتوحة كلها — خد بالك قبل ما تضغطه.']
+            },
             'profiles': {
                 title: 'البحث', icon: '🔍', color: '#3b82f6',
                 goal: '<b>محرك البحث</b>: تلاقي أي مخدوم بسرعة وتفتح ملفه الكامل.',
@@ -2105,12 +2192,12 @@ notify pgrst, 'reload schema';</pre>
                     '<b>«⬇️ تحميل نسخة احتياطية»</b> بينزّل ملف JSON فيه كل البيانات — اعمله بشكل دوري.',
                     'للاسترجاع: اختار ملف الـ JSON واضغط <b>«⬆️ استرجاع البيانات»</b>.',
                     '<b>التقارير PDF:</b> اختار الشهر أو السنة واضغط «عرض التقرير»، وبعدها «حفظ كـ PDF» واختار Save as PDF من نافذة الطباعة.',
-                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات وشيتات الرحلات فقط</b>، وبيانات المخدومين بتفضل زي ما هي.'],
+                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات والرحلات والمسابقات (وأرشيفهم) فقط</b>، وبيانات المخدومين بتفضل زي ما هي.'],
                 tips: [
                     'اعمل <b>نسخة احتياطية</b> قبل أي تصفير.']
             }
         };
-        const helpOrder = ['add-member', 'attendance', 'visitation', 'committed', 'bonus', 'families', 'trips', 'profiles', 'birthdays', 'settings'];
+        const helpOrder = ['add-member', 'attendance', 'visitation', 'committed', 'bonus', 'families', 'trips', 'contests', 'profiles', 'birthdays', 'settings'];
         let helpCurrent = 'add-member';
 
         function openHelp(tabKey) {
@@ -2226,7 +2313,7 @@ notify pgrst, 'reload schema';</pre>
                 db.members = membersRes.data || [];
                 db.meetings = [];
                 db.attendanceRecords = {};
-                db.tripsData = {}; db.tripArchive = []; db.bonus = {}; db.attRows = attendanceRes.data || [];
+                db.tripsData = {}; db.tripArchive = []; db.contests = []; db.bonus = {}; db.attRows = attendanceRes.data || [];
 
                 (attendanceRes.data || []).forEach(record => {
                     if (!db.meetings.includes(record.meeting_date)) db.meetings.push(record.meeting_date);
@@ -2237,6 +2324,10 @@ notify pgrst, 'reload schema';</pre>
 
                 let _tripIdx = 0;
                 (tripsRes.data || []).forEach(t => {
+                    if (String(t.trip_type).startsWith('CONTEST|')) {   // المسابقات
+                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.contests.push({ key: t.trip_type, ...o }); } catch (e) {}
+                        return;
+                    }
                     if (String(t.trip_type).startsWith('ARCHIVE|')) {   // سجل الرحلات المحفوظ
                         try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) { const it = { key: t.trip_type, ...o }, ix = db.tripArchive.findIndex(x => x.key === t.trip_type); if (ix < 0) db.tripArchive.push(it); else if ((it.attendees || 0) >= (db.tripArchive[ix].attendees || 0)) db.tripArchive[ix] = it; } } catch (e) {}
                         return;
@@ -2253,6 +2344,7 @@ notify pgrst, 'reload schema';</pre>
                 checkBirthdays();
                 renderFamiliesList();
                 updateNotificationIndicators();
+                try { contestsAfterLoad(); } catch (e) { console.error(e); }
                 renderTripCards(); updateTripNav(); setTimeout(() => sweepExpiredTrips().then(m => { if (m && tripsTabActive()) openTripsHome(true); }), 0);
             } catch(e) {
                 console.error("Error loading data", e);
@@ -2421,6 +2513,7 @@ notify pgrst, 'reload schema';</pre>
             if(tabId === 'settings') fillReportSelectors();
             if(tabId === 'visitation') renderVisitationList();
             if(tabId === 'trips') await openTripsHome();
+            if(tabId === 'contests') openContestsHome();
             if(tabId === 'birthdays') checkBirthdays();
         }
 
@@ -4668,7 +4761,7 @@ notify pgrst, 'reload schema';</pre>
 
                 // بناء tripsData
                 (tripsRes.data || []).forEach(t => {
-                    if (String(t.trip_type).startsWith('ARCHIVE|')) return;
+                    if (String(t.trip_type).startsWith('ARCHIVE|') || String(t.trip_type).startsWith('CONTEST|')) return;
                     if (!backup.dbSnapshot.tripsData[t.trip_type]) {
                         backup.dbSnapshot.tripsData[t.trip_type] = {
                             fee: t.fee || 0,
@@ -4929,10 +5022,11 @@ notify pgrst, 'reload schema';</pre>
         }
 
         async function clearAllSheetsData() {
-            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كافة شيتات الحضور والرحلات؟")) {
+            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كل الشيتات (الحضور والرحلات وأرشيفها والمسابقات وأرشيفها)؟ بيانات المخدومين هتفضل زي ما هي.")) {
+                clearTimeout(CT.timer); CT.pending = false; CT.cur = null;
                 await Promise.all([
                     _supabase.from('attendance').delete().neq('id', 0),
-                    _supabase.from('trips').delete().neq('member_id', '0')
+                    _supabase.from('trips').delete().neq('trip_type', '')
                 ]);
                 alert("تم تصفير جميع الشيتات بنجاح.");
                 await loadData();
@@ -5717,5 +5811,221 @@ function askAddToTodayAttendance(m,done){
 }
 if(typeof checkBirthdays==='function'){ try{ checkBirthdays(); }catch(e){} }
 </script>
+<script id="contests-js">
+/* ===== تبويب المسابقات ===== */
+const CT_TYPES = ['حضور بدري','تقييم افتتاحية وفقرات','تقييم عمل فني','حضور قداس','تسميع مزمور','تقييم بوستر أو برومو','تقييم توب شيف'];
+const CT_ORD = ['الأول','التاني','التالت','الرابع','الخامس','السادس','السابع','التامن','التاسع','العاشر'];
+const CT_MEDAL = ['🥇','🥈','🥉','🏅'];
+const CT = { cur: null, timer: null, pending: false, seq: 0, chain: Promise.resolve() };
+
+function ctUid(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function ctNewContest() { return { id: ctUid('c'), name: '', archived: false, createdAt: Date.now(), teams: [] }; }
+function ctClone(o) { return JSON.parse(JSON.stringify(o)); }
+function ctParse(v) {
+    const t = String(v == null ? '' : v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace('٫', '.').trim();
+    if (t === '') return null;
+    const n = parseFloat(t);
+    return isFinite(n) ? n : null;
+}
+function ctFmt(n) { return String(Math.round((n || 0) * 100) / 100); }
+function ctTotal(t) { return Math.round((t.entries || []).reduce((a, e) => a + (+e.p || 0), 0) * 100) / 100; }
+function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
+
+/* بعد كل تحميل بيانات: المسابقة المفتوحة هي آخر مسابقة مش مؤرشفة */
+function contestsAfterLoad() {
+    const open = (db.contests || []).filter(c => !c.archived).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];
+    if (CT.pending) return;                       // فيه تعديل لسه بيتحفظ: ماتغيرش المسابقة الحالية
+    if (open) { const c = ctClone(open); delete c.key; c._saved = true; CT.cur = c; }
+    else if (!CT.cur || CT.cur.archived || CT.cur._saved) CT.cur = ctNewContest();
+}
+function ctTabActive() { const t = document.getElementById('contests'); return !!(t && t.classList.contains('active')); }
+function openContestsHome() { if (!CT.cur) contestsAfterLoad(); ctRender(); }
+
+/* ===== الحفظ (صف واحد لكل مسابقة في جدول trips بالاسم CONTEST|id) ===== */
+function ctSaveSoon() { CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
+function ctSaveNow(c) {
+    c = c || CT.cur;
+    if (!c) return Promise.resolve(false);
+    clearTimeout(CT.timer);
+    const seq = ++CT.seq; CT.pending = true;
+    const p = CT.chain.then(async () => {
+        try {
+            const o = ctClone(c); delete o._saved; delete o.key;
+            const key = 'CONTEST|' + o.id;
+            await _supabase.from('trips').delete().eq('trip_type', key);
+            let row = { trip_type: key, member_id: null, fee: 0, paid: 0, installments: JSON.stringify(o) };
+            let r = await _supabase.from('trips').insert([row]);
+            if (r.error) { row.member_id = 0; r = await _supabase.from('trips').insert([row]); }
+            if (r.error) { console.error(r.error); toast('تعذر حفظ المسابقة: ' + r.error.message); return false; }
+            c._saved = true;
+            return true;
+        } catch (e) { console.error(e); return false; }
+    }).catch(() => false);
+    CT.chain = p.then(() => {});
+    return p.then(ok => { if (CT.seq === seq) CT.pending = false; return ok; });
+}
+
+/* ===== الترتيب ===== */
+function ctRanking(c) {
+    const arr = (c.teams || []).map(t => ({ t, total: ctTotal(t) }));
+    arr.sort((a, b) => b.total - a.total);
+    arr.forEach(x => {
+        x.rank = 1 + arr.filter(y => y.total > x.total).length;
+        x.tie = arr.filter(y => y.total === x.total).length > 1;
+    });
+    return arr;
+}
+function ctRankLabel(x) { return 'المركز ' + (CT_ORD[x.rank - 1] || ('رقم ' + x.rank)) + (x.tie ? ' مكرر' : ''); }
+function ctRankingHTML(c) {
+    const arr = ctRanking(c);
+    if (!arr.length) return '<div class="ct-empty">ضيف الفرق وسجّل درجاتها وهيظهر الترتيب هنا</div>';
+    if (!arr.some(x => (x.t.entries || []).length)) return '<div class="ct-empty">لسه ماتسجلتش درجات لأي فريق</div>';
+    return arr.map(x => {
+        const r = Math.min(x.rank, 4);
+        return '<div class="ct-rank r' + r + '"><span class="ct-medal">' + (x.rank <= 4 ? CT_MEDAL[r - 1] : '🎖️') + '</span>' +
+            '<div class="ct-rk-name"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b><small>' + ctRankLabel(x) + '</small></div>' +
+            '<span class="ct-rk-pts">' + ctFmt(x.total) + '<small>درجة</small></span></div>';
+    }).join('');
+}
+function ctRefreshRanking() {
+    const el = document.getElementById('ct-ranking');
+    if (el && CT.cur) el.innerHTML = ctRankingHTML(CT.cur);
+}
+
+/* ===== الرسم ===== */
+function ctCardHTML(t) {
+    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+    const rows = (t.entries || []).map(e =>
+        '<div class="ct-entry"><span class="ct-et">' + esc(e.t) + '</span>' +
+        '<input type="number" step="any" inputmode="decimal" value="' + esc(e.p) + '" oninput="ctSetPts(\'' + t.id + '\',\'' + e.id + '\',this.value)">' +
+        '<button class="btn-delete ct-x" onclick="ctDelEntry(\'' + t.id + '\',\'' + e.id + '\')">✖</button></div>'
+    ).join('') || '<div class="ct-noentry">مفيش درجات متسجلة للفريق ده لسه</div>';
+    return '<div class="ct-card" id="ct-card-' + t.id + '">' +
+        '<div class="ct-card-top"><input type="text" value="' + esc(t.name) + '" placeholder="اسم الفريق" oninput="ctSetTeamName(\'' + t.id + '\',this.value)">' +
+        '<button class="btn-delete ct-x" onclick="ctDelTeam(\'' + t.id + '\')">🗑️</button></div>' +
+        '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
+        '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
+        '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button></div>' +
+        '<div class="ct-entries">' + rows + '</div>' +
+        '<div class="ct-total">المجموع: <b id="ct-tot-' + t.id + '">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
+}
+function ctRender() {
+    const root = document.getElementById('ct-teams');
+    if (!root || !CT.cur) return;
+    const nm = document.getElementById('ct-name');
+    if (nm && document.activeElement !== nm) nm.value = CT.cur.name || '';
+    root.innerHTML = (CT.cur.teams || []).map(ctCardHTML).join('') || '<div class="ct-empty">اضغط «➕ فريق جديد» وابدأ سجّل الفرق</div>';
+    ctRefreshRanking();
+}
+function ctRerenderCard(tid) {
+    const t = ctTeam(tid), el = document.getElementById('ct-card-' + tid);
+    if (!t || !el) return;
+    const sel = document.getElementById('ct-sel-' + tid), keep = sel ? sel.value : '';
+    const tmp = document.createElement('div'); tmp.innerHTML = ctCardHTML(t);
+    el.replaceWith(tmp.firstElementChild);
+    const ns = document.getElementById('ct-sel-' + tid); if (ns && keep) ns.value = keep;
+    ctRefreshRanking();
+}
+
+/* ===== الإجراءات ===== */
+function ctSetName(v) { if (!CT.cur) return; CT.cur.name = v; ctSaveSoon(); }
+function ctAddTeam() {
+    if (!CT.cur) CT.cur = ctNewContest();
+    const t = { id: ctUid('t'), name: '', entries: [] };
+    CT.cur.teams.push(t);
+    ctRender(); ctSaveSoon();
+    const el = document.getElementById('ct-card-' + t.id);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); const i = el.querySelector('.ct-card-top input'); if (i) i.focus(); }
+}
+function ctSetTeamName(tid, v) { const t = ctTeam(tid); if (!t) return; t.name = v; ctRefreshRanking(); ctSaveSoon(); }
+function ctDelTeam(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    if (!confirm('تمسح فريق «' + (t.name || 'بدون اسم') + '» ودرجاته؟')) return;
+    CT.cur.teams = CT.cur.teams.filter(x => x.id !== tid);
+    ctRender(); ctSaveSoon();
+}
+function ctAddEntry(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const sel = document.getElementById('ct-sel-' + tid), inp = document.getElementById('ct-pts-' + tid);
+    const p = ctParse(inp && inp.value);
+    if (p === null) { toast('اكتب الدرجة الأول'); if (inp) inp.focus(); return; }
+    t.entries.push({ id: ctUid('e'), t: sel.value, p });
+    ctRerenderCard(tid); ctSaveSoon();
+    const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
+}
+function ctSetPts(tid, eid, v) {
+    const t = ctTeam(tid); if (!t) return;
+    const e = t.entries.find(x => x.id === eid); if (!e) return;
+    e.p = ctParse(v) || 0;
+    const tot = document.getElementById('ct-tot-' + tid); if (tot) tot.textContent = ctFmt(ctTotal(t));
+    ctRefreshRanking(); ctSaveSoon();
+}
+function ctDelEntry(tid, eid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.entries = t.entries.filter(x => x.id !== eid);
+    ctRerenderCard(tid); ctSaveSoon();
+}
+async function ctSendArchive() {
+    const c = CT.cur;
+    if (!c || !(c.teams || []).length || !c.teams.some(t => (t.entries || []).length)) { toast('المسابقة فاضية — ضيف فرق ودرجات الأول'); return; }
+    if (!String(c.name || '').trim()) { toast('اكتب اسم المسابقة الأول'); const n = document.getElementById('ct-name'); if (n) n.focus(); return; }
+    if (!confirm('تبعت «' + c.name.trim() + '» للأرشيف؟\nالشيت هيتفضى وتلاقيها في «مسابقات السنة».')) return;
+    c.name = c.name.trim(); c.archived = true; c.archivedAt = localISO();
+    const ok = await ctSaveNow(c);
+    if (!ok) { c.archived = false; delete c.archivedAt; toast('تعذر نقل المسابقة للأرشيف، حاول تاني'); return; }
+    db.contests = (db.contests || []).filter(x => x.id !== c.id).concat([Object.assign({ key: 'CONTEST|' + c.id }, ctClone(c))]);
+    CT.cur = ctNewContest();
+    const n = document.getElementById('ct-name'); if (n) n.value = '';
+    ctRender();
+    toast('اتبعتت للأرشيف ✅');
+}
+function ctClearCurrent() {
+    const c = CT.cur; if (!c) return;
+    if (!confirm('تصفّر المسابقة الحالية بالكامل (الاسم والفرق والدرجات)؟')) return;
+    clearTimeout(CT.timer); CT.seq++; CT.pending = true;
+    const id = c.id;
+    CT.chain = CT.chain.then(() => _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + id)).catch(() => {}).then(() => { CT.pending = false; });
+    db.contests = (db.contests || []).filter(x => x.id !== id);
+    CT.cur = ctNewContest();
+    const n = document.getElementById('ct-name'); if (n) n.value = '';
+    ctRender();
+    toast('اتصفّرت المسابقة');
+}
+
+/* ===== مسابقات السنة (الأرشيف) ===== */
+function ctArcItemHTML(c) {
+    const arr = ctRanking(c);
+    const winners = arr.filter(x => x.rank === 1 && (x.t.entries || []).length).map(x => esc(x.t.name || 'فريق بدون اسم')).join(' + ');
+    const teams = arr.map(x =>
+        '<div class="ct-arc-team"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b> — ' + ctFmt(x.total) + ' درجة · ' + ctRankLabel(x) +
+        ((x.t.entries || []).length ? '<br><span>' + (x.t.entries || []).map(e => esc(e.t) + ': ' + ctFmt(e.p)).join(' • ') + '</span>' : '') + '</div>'
+    ).join('');
+    return '<details class="ct-arc"><summary>🏅 ' + esc(c.name || 'مسابقة بدون اسم') +
+        '<small>📅 ' + esc(c.archivedAt || '') + ' · 👥 ' + arr.length + ' فرق' + (winners ? ' · 🥇 ' + winners : '') + '</small></summary>' +
+        '<div style="margin-top:10px;">' + ctRankingHTML(c) + '</div>' +
+        '<div style="margin-top:6px;">' + teams + '</div>' +
+        '<div style="margin-top:10px;"><button class="btn-delete" style="padding:8px 12px;font-size:13px;" onclick="ctDelArchived(\'' + c.id + '\')">🗑️ مسح من الأرشيف</button></div></details>';
+}
+function ctOpenArchive() {
+    const list = (db.contests || []).filter(c => c.archived).sort((a, b) => String(b.archivedAt || '').localeCompare(String(a.archivedAt || '')));
+    let body;
+    if (!list.length) body = '<div class="ct-empty">مفيش مسابقات في الأرشيف لسه</div>';
+    else {
+        const years = {};
+        list.forEach(c => { const y = String(c.archivedAt || '').slice(0, 4) || '—'; (years[y] = years[y] || []).push(c); });
+        body = Object.keys(years).sort().reverse().map(y => '<div class="ct-year">📅 ' + y + '</div>' + years[y].map(ctArcItemHTML).join('')).join('');
+    }
+    showTripModal('🗂️ مسابقات السنة', body);
+}
+async function ctDelArchived(id) {
+    const c = (db.contests || []).find(x => x.id === id); if (!c) return;
+    if (!confirm('تمسح «' + (c.name || 'مسابقة') + '» من الأرشيف نهائي؟')) return;
+    try { await _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + id); } catch (e) { console.error(e); }
+    db.contests = db.contests.filter(x => x.id !== id);
+    ctOpenArchive();
+    toast('اتمسحت من الأرشيف');
+}
+</script>
+
 </body>
 </html>
