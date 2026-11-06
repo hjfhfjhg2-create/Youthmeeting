@@ -1,5 +1,5 @@
 /* Service Worker: يخلي التطبيق يفتح من غير نت */
-const VER = 'v10';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
+const VER = 'v11';                       // غيّر الرقم ده كل ما تعدّل ملفات التطبيق عشان الكاش يتحدّث
 const CACHE = 'attendance-' + VER;
 const CORE = ['./', './index.html', './offline.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN = [
@@ -7,7 +7,8 @@ const CDN = [
   'https://unpkg.com/html5-qrcode',
   'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap'
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap',
+  'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@600;800&display=swap'
 ];
 
 self.addEventListener('install', e => {

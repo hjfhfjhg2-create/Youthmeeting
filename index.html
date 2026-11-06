@@ -1382,7 +1382,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 #contests .ct-add input{flex:1 1 80px;width:auto!important;min-width:70px}
 #contests .ct-add button{flex:1 1 100px;padding:10px;font-size:13px}
 #contests .ct-entry{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
-#contests .ct-entry .ct-et{flex:1;font-size:13.5px;font-weight:600}
+#contests .ct-entry .ct-et{flex:1;font-size:13.5px;font-weight:600;min-width:0;width:auto!important}
 #contests .ct-entry input{width:84px!important;flex:none;text-align:center;padding:8px}
 #contests .ct-noentry,#contests .ct-empty,.ct-empty{color:var(--text-muted);font-size:13px;text-align:center;padding:10px}
 #contests .ct-total{margin-top:10px;text-align:center;font-weight:800;background:rgba(245,158,11,.16);border-radius:12px;padding:8px}
@@ -1794,6 +1794,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                     <div id="family-detail-header-text" style="text-align: right; flex-grow: 1;"></div>
                     <button class="btn-success" id="btn-add-to-fam" onclick="">➕ إضافة مخدوم للأسرة</button>
                     <button class="btn-edit" id="btn-rename-fam" onclick="renameCurrentFamily()">✏️ تعديل اسم الأسرة</button>
+                    <button class="btn-delete" id="btn-delete-fam" onclick="deleteCurrentFamily()">🗑️ إزالة الأسرة</button>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -2028,9 +2029,9 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
                 <h4 style="color:var(--danger);">⚠️ منطقة الخطر والتصفير</h4>
-                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير كل الشيتات بالكامل: حضور الاجتماعات والرحلات والمسابقات (وأرشيفهم) وإرجاعها فارغة دون المساس ببيانات البرفايلات والمخدومين الأساسية.</p>
+                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير <b>كل الشيتات من أول السنة</b>: حضور الاجتماعات (وبالتالي البونص والملتزمين والافتقاد)، الرحلات وأرشيفها، المسابقات وأرشيفها — وإرجاعها كلها فاضية. <b>بيانات المخدومين المسجلين هي الوحيدة اللي مش بتتلمس.</b></p>
                 <div class="action-row">
-                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير كل الشيتات (الحضور والرحلات والمسابقات)</button>
+                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير كل الشيتات (الحضور والرحلات والمسابقات وأرشيفهم)</button>
                 </div>
             </div>
         </div>
@@ -2156,8 +2157,9 @@ notify pgrst, 'reload schema';</pre>
                     'كل أسرة بتظهر في قايمة نوعها: اللي بتسجّله <b>شاب</b> بيروح أسرة الشباب، واللي بتسجّلها <b>شابة</b> بتروح أسرة الشابات، حتى لو الاسم واحد. اضغط على أي أسرة علشان تفتح أعضاءها (ومعاها زرار «⬅️ رجوع»). جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
                     '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد المسجلين قبل كل اجتماع × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
                     '<b>«📥 تصدير كل بيانات الأسر»</b> بيطلعلك ملف Excel واحد وكل أسرة في شيت لوحدها.',
-                    'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.'],
-                tips: []
+                    'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.',
+                    'جوه أي أسرة زرار <b>«🗑️ إزالة الأسرة»</b> بيمسح الأسرة دي بكل مخدوميها (أسماءهم الأساسية وحضورهم وحجوزاتهم) — ومخدومين الأسر التانية ما بيتأثروش. بيطلعلك تحذير وتأكيدين قبل المسح.'],
+                tips: ['مسح الأسرة نهائي وما بيترجعش، فخد نسخة احتياطية من الإعدادات قبل ما تمسح.']
             },
             'trips': {
                 title: 'الرحلات', icon: '🚌', color: '#f97316',
@@ -2181,7 +2183,7 @@ notify pgrst, 'reload schema';</pre>
                     'في مربع <b>«👥 الأعضاء»</b> اكتب أول حروف الاسم واختاره من المخدومين المسجلين في السيستم. اضغط على اسم العضو علشان يبقى <b>قائد الفريق 👑</b> (واضغط عليه تاني لو عايز تشيل العلامة).',
                     'دوس <b>«▸ رجوع لكل الفرق»</b> وهتلاقي كل فريق في <b>كارت</b> لوحده والكروت تحت بعض، مكتوب عليه عدد الأعضاء والقائد والمجموع.',
                     'اضغط على أي كارت علشان <b>تدخل على الفريق</b> وتسجّل الدرجات في أي وقت: اختار نوع الدرجة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
-                    'تقدر تعدّل أي درجة متسجلة أو تمسحها، و<b>مجموع الفريق</b> بيتحسب لوحده.',
+                    '<b>كل حاجة في الفريق تتعدّل في أي وقت:</b> اسم الفريق، إضافة أعضاء أو شيلهم، القائد 👑، نوع أي درجة (من القايمة أو «أخرى» تكتبه بنفسك)، وقيمة أي درجة أو مسحها. <b>مجموع الفريق</b> والترتيب بيتحسبوا لوحدهم.',
                     'تحت الكروت <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع (🥇 🥈 🥉). بيظهر أول ما تسجّل درجات لفريق واحد على الأقل. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
                     '<b>«📦 إرسال للأرشيف»</b> بينقل المسابقة لـ<b>«🗂️ مسابقات السنة»</b> ويفضي الشيت لمسابقة جديدة، و«مسابقات السنة» بتفتحلك كل المسابقات اللي اتأرشفت.'],
                 tips: [
@@ -2217,7 +2219,7 @@ notify pgrst, 'reload schema';</pre>
                     '<b>«⬇️ تحميل نسخة احتياطية»</b> بينزّل ملف JSON فيه كل البيانات — اعمله بشكل دوري.',
                     'للاسترجاع: اختار ملف الـ JSON واضغط <b>«⬆️ استرجاع البيانات»</b>.',
                     '<b>التقارير PDF:</b> اختار الشهر أو السنة واضغط «عرض التقرير»، وبعدها «حفظ كـ PDF» واختار Save as PDF من نافذة الطباعة.',
-                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات والرحلات والمسابقات (وأرشيفهم) فقط</b>، وبيانات المخدومين بتفضل زي ما هي.'],
+                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات من أول السنة والرحلات والمسابقات (وأرشيفهم)</b> كلها، وبيانات المخدومين هي الوحيدة اللي بتفضل زي ما هي. وفي أرشيف الرحلات وأرشيف المسابقات فيه زرار <b>«🧹 تنظيف الأرشيف»</b> بيمسح الأرشيف ده لوحده ويبدأ من جديد.'],
                 tips: [
                     'اعمل <b>نسخة احتياطية</b> قبل أي تصفير.']
             }
@@ -4236,7 +4238,8 @@ notify pgrst, 'reload schema';</pre>
                 <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
                     <select onchange="openTripYearModal(this.value)" style="padding:8px 12px; border-radius:10px; border:1px solid var(--card-border); font-family:inherit; font-weight:800;">${years.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select>
                     <span style="font-size:13px; color:var(--text-muted);">عدد الرحلات: <b>${items.length}</b> • إجمالي المخدومين: <b>${totAtt}</b> • إجمالي المبالغ: <b>${totMoney} ج</b></span>
-                </div>${list}`;
+                </div>${list}
+                ${archive.length ? `<div style="margin-top:14px;"><button class="btn-delete" onclick="cleanTripArchive()" style="padding:10px 14px; font-size:13px;">🧹 تنظيف الأرشيف (مسح كل رحلات السنين)</button></div>` : ''}`;
             showTripModal('📅 رحلات سنة ' + year, body);
         }
 
@@ -5046,16 +5049,49 @@ notify pgrst, 'reload schema';</pre>
             }
         }
 
+        function resetArchCaches() {
+            try { [_archKeys, _archFresh, _archWarned].forEach(o => Object.keys(o).forEach(k => delete o[k])); } catch (e) {}
+        }
         async function clearAllSheetsData() {
-            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كل الشيتات (الحضور والرحلات وأرشيفها والمسابقات وأرشيفها)؟ بيانات المخدومين هتفضل زي ما هي.")) {
-                clearTimeout(CT.timer); CT.pending = false; CT.cur = null;
-                await Promise.all([
+            if (!confirm("⚠️ تحذير: هتتمسح كل الشيتات نهائي من أول السنة:\n• حضور كل الاجتماعات (والبونص)\n• كل الرحلات وأرشيفها\n• كل المسابقات وأرشيفها\n\nبيانات المخدومين المسجلين هتفضل زي ما هي. تكمل؟")) return;
+            if (!confirm("تأكيد أخير: التصفير ما ينفعش يترجع إلا من نسخة احتياطية. تمسح كل الشيتات دلوقتي؟")) return;
+            clearTimeout(CT.timer); CT.seq++; CT.cur = null; CT.open = null;
+            try { await CT.chain; } catch (e) {}
+            CT.pending = false;
+            let results = [];
+            try {
+                results = await Promise.all([
                     _supabase.from('attendance').delete().neq('id', 0),
-                    _supabase.from('trips').delete().neq('trip_type', '')
+                    _supabase.from('trips').delete().neq('trip_type', ''),
+                    _supabase.from('trips').delete().is('trip_type', null)
                 ]);
+            } catch (e) { results = [{ error: e }]; }
+            const bad = results.find(r => r && r.error);
+            resetArchCaches();
+            if (bad) {
+                alert("تعذر تصفير بعض الشيتات: " + (bad.error.message || bad.error) + "\nراجع صلاحيات قاعدة البيانات وحاول تاني.");
+            } else {
                 alert("تم تصفير جميع الشيتات بنجاح.");
-                await loadData();
             }
+            await loadData();
+        }
+
+        // تنظيف أرشيف رحلات السنة (كل السنين) — بيمسح الأرشيف بس
+        async function cleanTripArchive() {
+            const n = (db.tripArchive || []).filter(x => x.key).length;
+            if (!n) { toast('أرشيف الرحلات فاضي'); return; }
+            if (!confirm('تنظّف أرشيف الرحلات؟\nهتتمسح كل الرحلات المحفوظة (' + n + ') لكل السنين نهائي، وتبدأ من جديد.')) return;
+            const keys = [...new Set((db.tripArchive || []).map(x => x.key).filter(Boolean))];
+            let err = null;
+            for (let i = 0; i < keys.length && !err; i += 100) {
+                const r = await _supabase.from('trips').delete().in('trip_type', keys.slice(i, i + 100));
+                err = r.error || null;
+            }
+            if (err) { alert('تعذر تنظيف الأرشيف: ' + (err.message || err)); return; }
+            resetArchCaches();
+            await loadData();
+            openTripYearModal();
+            toast('اتنضّف أرشيف الرحلات ✅');
         }
     
 /* استرجاع الجلسة بعد الريفريش من غير ما يطلب دخول تاني */
@@ -5144,6 +5180,30 @@ async function renameCurrentFamily(){
   if(typeof toast==='function') toast('تم تعديل اسم الأسرة ✅');
   await loadData();
   openFamilyDetail(newName, currentSelectedFamilyGender);
+}
+async function deleteCurrentFamily(){
+  const famName = currentSelectedFamilyName;
+  const isG = currentSelectedFamilyGender === 'شابة';
+  const norm = x => String(x||'').trim().replace(/\s+/g,' ');
+  const inFam = db.members.filter(m => (m.gender==='شابة')===isG && (norm(m.family)||'أسرة عامة')===norm(famName));
+  if(!inFam.length){ alert('الأسرة مفيهاش مخدومين.'); return; }
+  if(!confirm(`⚠️ تحذير شديد\n\nإنت كده هتمسح الأسماء الأساسية للمخدومين نفسهم، مش بس الأسرة!\n\nهتتمسح أسرة «${famName}» بكل مخدوميها (${inFam.length} مخدوم) نهائي، مع كل بيانات حضورهم وحجوزاتهم في الرحلات.\n\nمخدومين الأسر التانية مش هيتأثروا.\n\nتكمل؟`)) return;
+  if(!confirm(`تأكيد أخير: مسح ${inFam.length} مخدوم من أسرة «${famName}» ما ينفعش يترجع. تمسح فعلاً؟`)) return;
+  const ids = inFam.map(m=>m.id);
+  let err = null;
+  for(let i=0;i<ids.length && !err;i+=100){
+    const chunk = ids.slice(i,i+100);
+    const rs = await Promise.all([
+      _supabase.from('attendance').delete().in('member_id', chunk),
+      _supabase.from('trips').delete().in('member_id', chunk)
+    ]);
+    err = (rs.find(r=>r&&r.error)||{}).error || null;
+    if(!err){ const r = await _supabase.from('members').delete().in('id', chunk); err = r.error || null; }
+  }
+  if(err){ alert('تعذر مسح الأسرة بالكامل: '+(err.message||err)); }
+  else if(typeof toast==='function') toast('اتمسحت الأسرة ومخدوميها ✅');
+  await loadData();
+  backToFamiliesList();
 }
 /* الجلسة بتتخزن في التبويب بس: ريفريش = يفضل داخل، فتح اللينك من جديد = تسجيل دخول */
 try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
@@ -5919,9 +5979,12 @@ function ctRefreshRanking() {
 
 /* ===== الرسم ===== */
 function ctCardHTML(t) {
-    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('') + '<option value="__other">✍️ أخرى (اكتب بنفسك)</option>';
     const rows = (t.entries || []).map(e =>
-        '<div class="ct-entry"><span class="ct-et">' + esc(e.t) + '</span>' +
+        '<div class="ct-entry"><select class="ct-et" onchange="ctSetType(\'' + t.id + '\',\'' + e.id + '\',this)">' +
+        (CT_TYPES.indexOf(e.t) < 0 ? '<option value="' + esc(e.t) + '" selected>' + esc(e.t) + '</option>' : '') +
+        CT_TYPES.map(x => '<option value="' + esc(x) + '"' + (x === e.t ? ' selected' : '') + '>' + esc(x) + '</option>').join('') +
+        '<option value="__other">✍️ أخرى (اكتب بنفسك)</option></select>' +
         '<input type="number" step="any" inputmode="decimal" value="' + esc(e.p) + '" oninput="ctSetPts(\'' + t.id + '\',\'' + e.id + '\',this.value)">' +
         '<button class="btn-delete ct-x" onclick="ctDelEntry(\'' + t.id + '\',\'' + e.id + '\')">✖</button></div>'
     ).join('') || '<div class="ct-noentry">مفيش درجات متسجلة للفريق ده لسه</div>';
@@ -6060,9 +6123,25 @@ function ctAddEntry(tid) {
     const sel = document.getElementById('ct-sel-' + tid), inp = document.getElementById('ct-pts-' + tid);
     const p = ctParse(inp && inp.value);
     if (p === null) { toast('اكتب الدرجة الأول'); if (inp) inp.focus(); return; }
-    t.entries.push({ id: ctUid('e'), t: sel.value, p });
+    let type = sel.value;
+    if (type === '__other') {
+        type = (prompt('اكتب اسم نوع الدرجة:') || '').trim();
+        if (!type) { toast('لازم تكتب اسم النوع'); return; }
+    }
+    t.entries.push({ id: ctUid('e'), t: type, p });
     ctRerenderCard(tid); ctSaveSoon();
     const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
+}
+function ctSetType(tid, eid, sel) {
+    const t = ctTeam(tid); if (!t) return;
+    const e = t.entries.find(x => x.id === eid); if (!e) return;
+    let v = sel.value;
+    if (v === '__other') {
+        v = (prompt('اكتب اسم نوع الدرجة:', e.t) || '').trim();
+        if (!v) { ctRerenderCard(tid); return; }
+    }
+    e.t = v;
+    ctRerenderCard(tid); ctSaveSoon();
 }
 function ctSetPts(tid, eid, v) {
     const t = ctTeam(tid); if (!t) return;
@@ -6127,7 +6206,20 @@ function ctOpenArchive() {
         list.forEach(c => { const y = String(c.archivedAt || '').slice(0, 4) || '—'; (years[y] = years[y] || []).push(c); });
         body = Object.keys(years).sort().reverse().map(y => '<div class="ct-year">📅 ' + y + '</div>' + years[y].map(ctArcItemHTML).join('')).join('');
     }
+    if (list.length) body += '<div style="margin-top:14px;"><button class="btn-delete" style="padding:10px 14px;font-size:13px;" onclick="ctCleanArchive()">🧹 تنظيف الأرشيف (مسح كل المسابقات)</button></div>';
     showTripModal('🗂️ مسابقات السنة', body);
+}
+async function ctCleanArchive() {
+    const list = (db.contests || []).filter(c => c.archived);
+    if (!list.length) { toast('أرشيف المسابقات فاضي'); return; }
+    if (!confirm('تنظّف أرشيف المسابقات؟\nهتتمسح كل المسابقات المؤرشفة (' + list.length + ') نهائي، وتبدأ من جديد.')) return;
+    let rs = [];
+    try { rs = await Promise.all(list.map(c => _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + c.id))); } catch (e) { rs = [{ error: e }]; }
+    const bad = rs.find(r => r && r.error);
+    if (bad) { alert('تعذر تنظيف الأرشيف: ' + (bad.error.message || bad.error)); return; }
+    db.contests = (db.contests || []).filter(c => !c.archived);
+    ctOpenArchive();
+    toast('اتنضّف أرشيف المسابقات ✅');
 }
 async function ctDelArchived(id) {
     const c = (db.contests || []).find(x => x.id === id); if (!c) return;
