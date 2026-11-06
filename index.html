@@ -1424,6 +1424,8 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 #contests .ct-tl-pts{text-align:center;font-weight:900;font-size:20px;color:#d97706}
 #contests .ct-tl-pts small{display:block;font-size:11px;color:var(--text-muted);font-weight:600}
 #contests .ct-tl-go{color:var(--text-muted);font-size:18px}
+body .att-ct{display:block;margin-top:3px;font-size:11.5px;font-weight:700;color:#dc2626;line-height:1.4}
+body.dark-mode .att-ct{color:#f87171}
 #contests .ct-back{width:100%;margin:6px 0 12px;padding:12px;font-size:14px;background:linear-gradient(135deg,#818cf8,#6366f1)}
 </style>
 </head>
@@ -2183,6 +2185,7 @@ notify pgrst, 'reload schema';</pre>
                     'في مربع <b>«👥 الأعضاء»</b> اكتب أول حروف الاسم واختاره من المخدومين المسجلين في السيستم. اضغط على اسم العضو علشان يبقى <b>قائد الفريق 👑</b> (واضغط عليه تاني لو عايز تشيل العلامة).',
                     'دوس <b>«▸ رجوع لكل الفرق»</b> وهتلاقي كل فريق في <b>كارت</b> لوحده والكروت تحت بعض، مكتوب عليه عدد الأعضاء والقائد والمجموع.',
                     'اضغط على أي كارت علشان <b>تدخل على الفريق</b> وتسجّل الدرجات في أي وقت: اختار نوع الدرجة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
+                    '<b>ربط المسابقة بالحضور:</b> طول ما المسابقة مفتوحة، أي عضو في فريق وبتسجله في شيت الحضور بيظهر تحت اسمه بالأحمر «🏆 مشارك في مسابقة ... — فريق ...» جنب وقت حضوره، فتعرف هو في فريق مين وانت بتدّيله درجة الحضور. أول ما تبعت المسابقة للأرشيف أو تمسحها التنبيه ده بيختفي من الحضور خالص.',
                     '<b>كل حاجة في الفريق تتعدّل في أي وقت:</b> اسم الفريق، إضافة أعضاء أو شيلهم، القائد 👑، نوع أي درجة (من القايمة أو «أخرى» تكتبه بنفسك)، وقيمة أي درجة أو مسحها. <b>مجموع الفريق</b> والترتيب بيتحسبوا لوحدهم.',
                     'تحت الكروت <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع (🥇 🥈 🥉). بيظهر أول ما تسجّل درجات لفريق واحد على الأقل. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
                     '<b>«📦 إرسال للأرشيف»</b> بينقل المسابقة لـ<b>«🗂️ مسابقات السنة»</b> ويفضي الشيت لمسابقة جديدة، و«مسابقات السنة» بتفتحلك كل المسابقات اللي اتأرشفت.'],
@@ -5286,7 +5289,7 @@ function renderAttendanceTable(){
   const b=db.bonus[currentMeetingDate]||{};
   currentAttendees.forEach((m,i)=>{
     const bv=b[m.id];
-    tb.insertAdjacentHTML('beforeend',`<tr style="cursor:pointer" onclick="openMemberDetail(${m.id})"><td>${i+1}</td><td><strong>${esc(m.name)}</strong></td><td>${esc(m.family||'-')}</td><td>${esc(db.attendanceRecords[currentMeetingDate][m.id])}</td>
+    tb.insertAdjacentHTML('beforeend',`<tr style="cursor:pointer" onclick="openMemberDetail(${m.id})"><td>${i+1}</td><td><strong>${esc(m.name)}</strong>${typeof ctMemberTagHTML==='function'?ctMemberTagHTML(m.id):''}</td><td>${esc(m.family||'-')}</td><td>${esc(db.attendanceRecords[currentMeetingDate][m.id])}</td>
     <td><input class="bonus-input" type="number" step="any" inputmode="decimal" placeholder="بونص" value="${bv==null?'':esc(bv)}" onclick="event.stopPropagation()" onchange="saveBonus(${m.id},this)"></td>
     <td><button class="btn-delete" onclick="removeMemberFromMeeting(${m.id});event.stopPropagation()">إلغاء ✖️</button></td></tr>`);
   });
@@ -5914,6 +5917,16 @@ function ctParse(v) {
 }
 function ctFmt(n) { return String(Math.round((n || 0) * 100) / 100); }
 function ctTotal(t) { return Math.round((t.entries || []).reduce((a, e) => a + (+e.p || 0), 0) * 100) / 100; }
+function ctMemberTagHTML(mid) {
+    const c = CT && CT.cur;
+    if (!c || c.archived) return '';
+    const t = (c.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(mid)));
+    if (!t) return '';
+    return '<div class="att-ct">🏆 مشارك في ' + (c.name ? 'مسابقة «' + esc(c.name) + '»' : 'المسابقة') + ' — فريق ' + esc(t.name || 'بدون اسم') + '</div>';
+}
+function ctRefreshAttendanceHints() {
+    try { if (typeof renderAttendanceTable === 'function' && document.getElementById('attendance-tbody')) renderAttendanceTable(); } catch (e) {}
+}
 function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
 
 /* بعد كل تحميل بيانات: المسابقة المفتوحة هي آخر مسابقة مش مؤرشفة */
@@ -5922,12 +5935,13 @@ function contestsAfterLoad() {
     if (CT.pending) return;                       // فيه تعديل لسه بيتحفظ: ماتغيرش المسابقة الحالية
     if (open) { const c = ctClone(open); delete c.key; c._saved = true; CT.cur = c; }
     else if (!CT.cur || CT.cur.archived || CT.cur._saved) CT.cur = ctNewContest();
+    ctRefreshAttendanceHints();
 }
 function ctTabActive() { const t = document.getElementById('contests'); return !!(t && t.classList.contains('active')); }
 function openContestsHome() { if (!CT.cur) contestsAfterLoad(); ctRender(); }
 
 /* ===== الحفظ (صف واحد لكل مسابقة في جدول trips بالاسم CONTEST|id) ===== */
-function ctSaveSoon() { CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
+function ctSaveSoon() { ctRefreshAttendanceHints(); CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
 function ctSaveNow(c) {
     c = c || CT.cur;
     if (!c) return Promise.resolve(false);
@@ -6071,6 +6085,7 @@ function ctTeamListHTML(t) {
         '<span class="ct-tl-go">◂</span></div>';
 }
 function ctRender() {
+    ctRefreshAttendanceHints();
     const root = document.getElementById('ct-teams');
     if (!root || !CT.cur) return;
     const box = document.getElementById('contests');
