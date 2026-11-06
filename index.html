@@ -1403,6 +1403,17 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 .ct-arc-team{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
 .ct-arc-team span{color:var(--text-muted)}
 .ct-year{margin:14px 0 8px;font-weight:800}
+#contests .ct-mem{background:rgba(99,102,241,.07);border:1px dashed var(--border,var(--card-border));border-radius:14px;padding:10px;margin-bottom:10px}
+#contests .ct-mem-h{font-weight:800;font-size:14px;margin-bottom:6px}
+#contests .ct-mem-hint{color:var(--text-muted);font-size:11.5px;margin:2px 0 6px}
+#contests .ct-m{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+#contests .ct-mn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--primary,#6366f1);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+#contests .ct-mname{flex:1;font-size:14px;font-weight:600;cursor:pointer;min-width:0}
+#contests .ct-mname small{color:var(--text-muted);font-weight:500;margin-inline-start:4px}
+#contests .ct-lead{display:inline-block;margin-inline-start:6px;background:rgba(245,158,11,.22);color:#b45309;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:800}
+#contests .ct-mem input[type=text]{width:100%;margin-top:8px}
+#contests .ct-mem .autocomplete-results{max-height:220px;overflow:auto}
+.ct-mline{display:block;color:var(--text-muted);font-weight:500;margin-top:2px}
 </style>
 </head>
 <body>
@@ -2152,10 +2163,11 @@ notify pgrst, 'reload schema';</pre>
             },
             'contests': {
                 title: 'المسابقات', icon: '🏅', color: '#f59e0b',
-                goal: 'تسجيل <b>فرق المسابقة</b> وحساب درجاتها تلقائي وترتيبها: المركز الأول والتاني والتالت والرابع.',
+                goal: 'تسجيل <b>فرق المسابقة</b> وأعضاء كل فريق وقائده، وحساب الدرجات تلقائي وترتيب الفرق: المركز الأول والتاني والتالت والرابع.',
                 steps: [
                     'اكتب <b>اسم المسابقة</b> في الخانة اللي فوق (مثال: مسابقة صوم ٢٠٢٦).',
                     'اضغط <b>«➕ فريق جديد»</b> واكتب اسم الفريق. كل فريق بيظهر في <b>كارت</b> لوحده، والكروت تحت بعض.',
+                    'تحت اسم الفريق في مربع <b>«👥 الأعضاء»</b> اكتب أول حروف الاسم واختاره من المخدومين المسجلين في السيستم، وبيتسجلوا بالترتيب ١ و٢ و٣... اضغط على اسم عضو علشان يبقى <b>قائد الفريق 👑</b> وتظهر جنبه علامة القائد (واضغط عليه تاني لو عايز تشيلها).',
                     'جوه كارت الفريق اختار نوع الدرجة من القايمة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
                     'تقدر تعدّل أي درجة متسجلة أو تمسحها، و<b>مجموع الفريق</b> بيتحسب لوحده.',
                     'تحت خالص <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
@@ -5903,12 +5915,75 @@ function ctCardHTML(t) {
     return '<div class="ct-card" id="ct-card-' + t.id + '">' +
         '<div class="ct-card-top"><input type="text" value="' + esc(t.name) + '" placeholder="اسم الفريق" oninput="ctSetTeamName(\'' + t.id + '\',this.value)">' +
         '<button class="btn-delete ct-x" onclick="ctDelTeam(\'' + t.id + '\')">🗑️</button></div>' +
+        ctMembersHTML(t) +
         '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
         '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
         '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button></div>' +
         '<div class="ct-entries">' + rows + '</div>' +
         '<div class="ct-total">المجموع: <b id="ct-tot-' + t.id + '">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
 }
+/* ===== أعضاء الفريق والقائد ===== */
+function ctMemRowsHTML(t) {
+    const ms = t.members || [];
+    if (!ms.length) return '<div class="ct-noentry">مفيش أعضاء لسه — دوّر على الاسم تحت وضيفه</div>';
+    return '<div class="ct-mem-hint">اضغط على اسم العضو علشان تخليه <b>قائد الفريق 👑</b></div>' + ms.map((m, i) =>
+        '<div class="ct-m"><span class="ct-mn">' + (i + 1) + '</span>' +
+        '<span class="ct-mname" onclick="ctToggleLeader(\'' + t.id + '\',\'' + esc(m.id) + '\')">' + esc(m.n) +
+        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
+        '<button class="btn-delete ct-x" onclick="ctDelMember(\'' + t.id + '\',\'' + esc(m.id) + '\')">✖</button></div>'
+    ).join('');
+}
+function ctMembersHTML(t) {
+    return '<div class="ct-mem"><div class="ct-mem-h">👥 الأعضاء (<span id="ct-mc-' + t.id + '">' + (t.members || []).length + '</span>)</div>' +
+        '<div id="ct-ml-' + t.id + '">' + ctMemRowsHTML(t) + '</div>' +
+        '<div style="position:relative"><input type="text" id="ct-ms-' + t.id + '" placeholder="اكتب اسم العضو لإضافته..." autocomplete="off" oninput="ctMemSearch(\'' + t.id + '\',this.value)">' +
+        '<div id="ct-mr-' + t.id + '" class="autocomplete-results"></div></div></div>';
+}
+function ctRefreshMembers(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const l = document.getElementById('ct-ml-' + tid); if (l) l.innerHTML = ctMemRowsHTML(t);
+    const c = document.getElementById('ct-mc-' + tid); if (c) c.textContent = (t.members || []).length;
+}
+function ctMemberTeam(mid) {
+    return (CT.cur.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(mid)));
+}
+function ctMemSearch(tid, val) {
+    const res = document.getElementById('ct-mr-' + tid); if (!res) return;
+    res.innerHTML = '';
+    if (!String(val).trim()) return;
+    db.members.map(m => ({ m, s: nmatch(m, val) })).filter(x => x.s >= 0)
+        .sort((a, b) => a.s - b.s || String(a.m.name).localeCompare(String(b.m.name), 'ar')).slice(0, 40).forEach(({ m }) => {
+            const inTeam = ctMemberTeam(m.id);
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.innerHTML = '<strong>' + esc(m.name) + '</strong> <small style="color:var(--text-muted)">' + esc([m.family, m.stage].filter(Boolean).join(' · ')) + '</small>' +
+                (inTeam ? ' <span class="dup-badge">✅ ' + (inTeam.id === tid ? 'مضاف من قبل' : 'في فريق ' + esc(inTeam.name || 'بدون اسم')) + '</span>' : '');
+            div.onclick = () => ctAddMember(tid, m.id);
+            res.appendChild(div);
+        });
+}
+function ctAddMember(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    const m = db.members.find(x => String(x.id) === String(mid)); if (!m) return;
+    const inTeam = ctMemberTeam(m.id);
+    if (inTeam) { toast(inTeam.id === tid ? 'العضو ده مضاف في الفريق بالفعل' : 'العضو ده في فريق «' + (inTeam.name || 'بدون اسم') + '» بالفعل'); return; }
+    (t.members = t.members || []).push({ id: m.id, n: m.name || '', f: m.family || '' });
+    const inp = document.getElementById('ct-ms-' + tid), res = document.getElementById('ct-mr-' + tid);
+    if (inp) { inp.value = ''; inp.focus(); } if (res) res.innerHTML = '';
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+function ctDelMember(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.members = (t.members || []).filter(m => String(m.id) !== String(mid));
+    if (String(t.leader) === String(mid)) t.leader = null;
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+function ctToggleLeader(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.leader = String(t.leader) === String(mid) ? null : mid;
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+
 function ctRender() {
     const root = document.getElementById('ct-teams');
     if (!root || !CT.cur) return;
@@ -5998,6 +6073,7 @@ function ctArcItemHTML(c) {
     const winners = arr.filter(x => x.rank === 1 && (x.t.entries || []).length).map(x => esc(x.t.name || 'فريق بدون اسم')).join(' + ');
     const teams = arr.map(x =>
         '<div class="ct-arc-team"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b> — ' + ctFmt(x.total) + ' درجة · ' + ctRankLabel(x) +
+        ((x.t.members || []).length ? '<span class="ct-mline">👥 ' + (x.t.members || []).map((m, i) => (i + 1) + '. ' + esc(m.n) + (String(x.t.leader) === String(m.id) ? ' 👑' : '')).join(' • ') + '</span>' : '') +
         ((x.t.entries || []).length ? '<br><span>' + (x.t.entries || []).map(e => esc(e.t) + ': ' + ctFmt(e.p)).join(' • ') + '</span>' : '') + '</div>'
     ).join('');
     return '<details class="ct-arc"><summary>🏅 ' + esc(c.name || 'مسابقة بدون اسم') +
