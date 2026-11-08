@@ -1686,7 +1686,7 @@ body.dark-mode .att-ct{color:#f87171}
             </div>
 
             <h3>متابعة الغياب والافتقاد التلقائي 📞</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">يتم هنا رصد المتغيبين أوتوماتيكياً (الغياب المتتالي حتى آخر اجتماع). اختر عدد مرات الغياب لعرض اللي غابوها فقط.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">يتم هنا رصد المتغيبين أوتوماتيكياً: أي مخدوم حضر قبل كده وبعدها غاب اجتماع أو أكتر ورا بعض لحد آخر اجتماع، بيظهر اسمه ومعاه عدد مرات الغياب وتاريخ آخر مرة حضر فيها. اختر عدد مرات الغياب لعرض اللي غابوها فقط.</p>
 
             <div style="display: flex; gap: 15px; flex-wrap: wrap; background: rgba(0,0,0,0.03); border: 1px solid var(--card-border); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 16px; align-items: center; font-size: 13px;">
                 <span style="font-weight: 800; color: var(--text-main);">دليل الألوان:</span>
@@ -2388,20 +2388,8 @@ notify pgrst, 'reload schema';</pre>
             let bdayDot = document.getElementById('birthday-notification-dot');
             if (bdayDot) bdayDot.style.display = hasBirthdayToday ? 'inline-block' : 'none';
 
-            let recentMeetings = [...db.meetings].reverse().slice(0, 1);
             let currentAbsentIds = [];
-            if (recentMeetings.length > 0 && db.members.length > 0) {
-                db.members.forEach(m => {
-                    let missingAll = absenceCounts(m, recentMeetings[0]);
-                    for(let date of recentMeetings) {
-                        if(db.attendanceRecords[date] && db.attendanceRecords[date][m.id]) {
-                            missingAll = false;
-                            break;
-                        }
-                    }
-                    if(missingAll) currentAbsentIds.push(m.id);
-                });
-            }
+            try { currentAbsentIds = getVisitationData().list; } catch (e) {}
 
             let visDot = document.getElementById('visitation-notification-dot');
             if (visDot) visDot.style.display = currentAbsentIds.length > 0 ? 'inline-block' : 'none';
@@ -2843,17 +2831,28 @@ notify pgrst, 'reload schema';</pre>
             let allMeetings = [...db.meetings].sort();
             let list = [];
             db.members.forEach(m => {
-                let n = 0, dates = [];
-                for (let i = allMeetings.length - 1; i >= 0; i--) {
-                    let d = allMeetings[i];
-                    let attended = db.attendanceRecords[d] && db.attendanceRecords[d][m.id];
-                    if (attended) break;
-                    if (!absenceCounts(m, d)) break; // اجتماع قبل تسجيله: ماينفعش يتحسب غياب
-                    n++; dates.push(d);
-                }
-                if (n > 0) list.push({ m, n, dates: dates.reverse() });
+                // الاجتماعات اللي تحسب على المخدوم (من بعد تسجيله، أو اللي حضرها فعلاً)
+                let scope = allMeetings.filter(d => inScope(m, d));
+                let attendedDates = scope.filter(d => attAt(d, m.id));
+                let lastAttended = attendedDates.length ? attendedDates[attendedDates.length - 1] : null;
+                // الغياب المتتالي = كل اجتماع بعد آخر حضور (بعد يوم تسجيله) لحد آخر اجتماع
+                let dates = scope.filter(d => !attAt(d, m.id) && (!lastAttended || d > lastAttended));
+                let n = dates.length;
+                if (n > 0) list.push({
+                    m, n, dates,
+                    lastAttended,
+                    totalAbsent: scope.length - attendedDates.length,
+                    totalAttended: attendedDates.length
+                });
             });
             return { allMeetings, list };
+        }
+
+        function visFmtDate(d) {
+            if (!d) return '';
+            let p = String(d).split('-');
+            if (p.length < 3) return d;
+            return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' (' + d + ')';
         }
 
         function visStyle(n) {
@@ -2901,7 +2900,7 @@ notify pgrst, 'reload schema';</pre>
             shown.sort((a, b) => b.n - a.n);
 
             let html = '';
-            shown.forEach(({ m, n, dates }) => {
+            shown.forEach(({ m, n, dates, lastAttended, totalAbsent, totalAttended }) => {
                 let st = visStyle(n);
                 let absenceText = n === 1 ? 'غاب آخر اجتماع' : n === 2 ? 'غاب آخر اجتماعين' : `غاب آخر ${n} اجتماعات`;
                 if (n === 4 || n === 5) absenceText = '⚠️ ' + absenceText;
@@ -2916,6 +2915,8 @@ notify pgrst, 'reload schema';</pre>
                             </div>
                             <p><strong>الأسرة:</strong> ${m.family || '-'} | <strong>التليفون:</strong> ${phoneLink}</p>
                             <p><strong>أب الاعتراف:</strong> ${m.father || '-'} | <strong>العنوان:</strong> ${m.address || '-'}</p>
+                            <p style="font-weight:800; color:var(--text-main);">🗓️ آخر مرة حضر فيها: ${lastAttended ? visFmtDate(lastAttended) : '<span style="color:#b30000;">لم يحضر أي اجتماع من وقت تسجيله</span>'}</p>
+                            <p><strong>غاب:</strong> ${n} ${n === 1 ? 'اجتماع' : 'اجتماعات'} ورا بعض ${totalAttended > 0 ? '| <strong>حضر:</strong> ' + totalAttended + ' | <strong>إجمالي الغياب:</strong> ' + totalAbsent : ''}</p>
                             <p><strong>تواريخ الغياب:</strong> ${dates.join(' ، ')}</p>
                             <p><strong>ملاحظات:</strong> ${m.notes || 'لا توجد'}</p>
                         </div>
@@ -2944,7 +2945,7 @@ notify pgrst, 'reload schema';</pre>
             let { allMeetings, list } = getVisitationData();
             if (list.length === 0) { alert('لا يوجد متغيبون للتصدير.'); return; }
             let today = new Date().toISOString().slice(0, 10);
-            let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب'];
+            let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب', 'آخر حضور', 'إجمالي الغياب'];
             const isF = x => x.m.gender === 'شابة';
             // الأكتر غياب في الأول، ولو نفس العدد بالترتيب الأبجدي
             const byAbs = (a, b) => (b.n - a.n) || String(a.m.name || '').localeCompare(String(b.m.name || ''), 'ar');
@@ -2955,7 +2956,7 @@ notify pgrst, 'reload schema';</pre>
                     if (!arr.length) return;
                     rows.push({ section: label + '  (' + arr.length + ')', kind }); rowStyles.push(null);
                     arr.forEach((x, i) => {
-                        rows.push([i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، ')]);
+                        rows.push([i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، '), x.lastAttended || 'لم يحضر', x.totalAbsent]);
                         rowStyles.push(visExcelStyle(x.n));
                     });
                 };
@@ -2965,8 +2966,8 @@ notify pgrst, 'reload schema';</pre>
                     name, title,
                     subtitle: 'العدد: ' + items.length + '  (شباب ' + boys.length + ' • شابات ' + girls.length + ')   |   تاريخ التصدير: ' + today,
                     headers, rows,
-                    widths: [9, 28, 20, 22, 34, 17, 14, 45],
-                    align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right'],
+                    widths: [9, 28, 20, 22, 34, 17, 14, 45, 16, 14],
+                    align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right', 'center', 'center'],
                     textCols: [5],
                     rowStyles,
                     badgeCols: [1, 6],
