@@ -6249,52 +6249,224 @@ async function ctDelArchived(id) {
     toast('اتمسحت من الأرشيف');
 }
 </script>
-<style id="btn-3d">
+<style id="flat-motion">
+/* =====================================================================
+   واجهة مسطّحة (Flat) + حركات سلسة
+   - الأزرار والأيقونات بقت عادية من غير عمق 3D
+   - حركات دخول / تحويم / ضغط / تبديل تبويبات
+   ===================================================================== */
+:root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.34,1.56,.64,1)}
+html{scroll-behavior:smooth}
 .btn-edit,.btn-delete{color:#fff!important}
 .btn-edit{border:0!important}
-/* ===== أزرار 3D: نفس ألوان كل زرار، بعمق وظل وضغطة حقيقية ===== */
+
+/* ---------- الأزرار: مسطّحة بظل ناعم ---------- */
 button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]),
 .sd-b{
   position:relative;
   border-radius:14px!important;
   border:0;
-  text-shadow:0 1px 1px rgba(0,0,0,.22);
-  box-shadow:
-    0 6px 0 rgba(0,0,0,.30),
-    0 14px 18px -8px rgba(0,0,0,.40),
-    inset 0 2px 0 rgba(255,255,255,.45),
-    inset 0 -3px 0 rgba(0,0,0,.12)!important;
-  transform:translateY(0);
-  transition:transform .12s ease,box-shadow .12s ease,filter .15s;
+  text-shadow:none;
+  box-shadow:0 4px 12px -4px rgba(0,0,0,.28)!important;
+  transform:translateY(0) scale(1);
+  transition:transform .28s var(--ease-spring),box-shadow .28s var(--ease-out),filter .2s,background-position .4s;
+  will-change:transform;
 }
 button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]):hover,
 .sd-b:hover{
-  transform:translateY(-2px);
-  filter:brightness(1.06);
-  box-shadow:
-    0 8px 0 rgba(0,0,0,.30),
-    0 18px 22px -8px rgba(0,0,0,.42),
-    inset 0 2px 0 rgba(255,255,255,.5),
-    inset 0 -3px 0 rgba(0,0,0,.12)!important;
+  transform:translateY(-3px) scale(1.02);
+  filter:brightness(1.07) saturate(1.05);
+  box-shadow:0 12px 22px -8px rgba(0,0,0,.35)!important;
 }
 button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]):active,
 .sd-b:active{
-  transform:translateY(5px);
+  transform:translateY(0) scale(.95);
   filter:brightness(.97);
-  box-shadow:
-    0 1px 0 rgba(0,0,0,.30),
-    0 3px 6px -2px rgba(0,0,0,.35),
-    inset 0 2px 4px rgba(0,0,0,.18)!important;
+  box-shadow:0 2px 6px -2px rgba(0,0,0,.3)!important;
+  transition-duration:.1s;
 }
-/* الأزرار الصغيرة جوه الجداول والكروت: عمق أخف */
-td button,.visitation-card button,.profile-card button,.family-card-btn{
-}
+/* أزرار صغيرة داخل الجداول والكروت */
 td button:not([data-tab]),.visitation-card button,.profile-card button{
-  box-shadow:0 4px 0 rgba(0,0,0,.28),0 8px 12px -6px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.4),inset 0 -2px 0 rgba(0,0,0,.1)!important;
+  box-shadow:0 2px 8px -3px rgba(0,0,0,.3)!important;
 }
-td button:not([data-tab]):active,.visitation-card button:active,.profile-card button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.28),inset 0 2px 3px rgba(0,0,0,.18)!important}
-@media(prefers-reduced-motion:reduce){button{transition:none!important}}
+td button:not([data-tab]):hover,.visitation-card button:hover,.profile-card button:hover{transform:translateY(-2px) scale(1.05)}
+td button:not([data-tab]):active,.visitation-card button:active,.profile-card button:active{transform:scale(.92)}
+.hm-actions .hm-ok{box-shadow:0 6px 14px -6px rgba(0,0,0,.35)!important}
+button:focus-visible{outline:3px solid rgba(99,102,241,.45);outline-offset:2px}
+button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+
+/* موجة الضغط (Ripple) */
+button.rp-host{overflow:hidden!important}
+.rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);pointer-events:none;animation:rpAnim .65s var(--ease-out) forwards}
+@keyframes rpAnim{to{transform:scale(1);opacity:0}}
+
+/* ---------- أيقونات التبويبات: مسطّحة ---------- */
+.nav-tabs .ic{
+  width:44px!important;height:44px!important;border-radius:14px!important;
+  background:rgba(var(--ar,99,102,241),.14)!important;
+  box-shadow:none!important;text-shadow:none!important;filter:none!important;
+  transform:none!important;animation:none!important;
+  transition:transform .35s var(--ease-spring),background .3s,box-shadow .3s!important;
+}
+.nav-tabs button:hover .ic{transform:translateY(-3px) rotate(-6deg) scale(1.1)!important;background:rgba(var(--ar,99,102,241),.24)!important;box-shadow:none!important}
+.nav-tabs button:active .ic{transform:scale(.9)!important}
+.nav-tabs button.active .ic,
+.nav-tabs button[data-tab].active .ic{
+  background:linear-gradient(135deg,var(--a,#6366f1),var(--a2,#8b5cf6))!important;
+  box-shadow:0 8px 16px -8px rgba(var(--ar,99,102,241),.9)!important;
+  transform:scale(1.08)!important;
+  animation:icPop .55s var(--ease-spring)!important;
+}
+@keyframes icPop{0%{transform:scale(.6) rotate(-14deg)}60%{transform:scale(1.22) rotate(6deg)}100%{transform:scale(1.08) rotate(0)}}
+/* التبويب النشط: مسطّح بدل الظل التقيل */
+.nav-tabs button[data-tab].active,
+body .nav-tabs button[data-tab].active,
+body.dark-mode .nav-tabs button[data-tab].active{
+  box-shadow:0 10px 20px -14px rgba(var(--ar,99,102,241),.9)!important;
+  transform:translateY(-2px)!important;
+}
+.nav-tabs button,.nav-tabs button[data-tab]{transition:background .3s,color .3s,box-shadow .3s,transform .35s var(--ease-spring)!important}
+.nav-tabs button[data-tab]:hover{background:rgba(var(--ar,99,102,241),.08)!important}
+.nav-tabs button[data-tab]:active{transform:scale(.94)!important}
+/* مؤشر سفلي بيتحرك مع التبويب النشط */
+.nav-tabs button[data-tab]::after{content:'';position:absolute;bottom:2px;left:50%;width:0;height:3px;border-radius:3px;background:var(--a,#6366f1);transform:translateX(-50%);transition:width .35s var(--ease-spring)}
+.nav-tabs button[data-tab].active::after{width:22px}
+.nav-tabs{animation:navIn .7s var(--ease-out) both}
+@keyframes navIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+/* ظهور الأيقونات واحدة ورا التانية */
+.nav-tabs button .ic{animation:icIn .6s var(--ease-spring) both}
+.nav-tabs button:nth-child(1) .ic{animation-delay:.05s}.nav-tabs button:nth-child(2) .ic{animation-delay:.1s}
+.nav-tabs button:nth-child(3) .ic{animation-delay:.15s}.nav-tabs button:nth-child(4) .ic{animation-delay:.2s}
+.nav-tabs button:nth-child(5) .ic{animation-delay:.25s}.nav-tabs button:nth-child(6) .ic{animation-delay:.3s}
+.nav-tabs button:nth-child(7) .ic{animation-delay:.35s}.nav-tabs button:nth-child(8) .ic{animation-delay:.4s}
+.nav-tabs button:nth-child(9) .ic{animation-delay:.45s}.nav-tabs button:nth-child(10) .ic{animation-delay:.5s}
+.nav-tabs button:nth-child(11) .ic{animation-delay:.55s}
+@keyframes icIn{from{opacity:0;transform:translateY(14px) scale(.5)}to{opacity:1}}
+/* الأيقونة النشطة بتطفو بهدوء */
+.nav-tabs button.active .ic{animation:icPop .55s var(--ease-spring),icFloat 3.2s ease-in-out .6s infinite!important}
+@keyframes icFloat{0%,100%{transform:scale(1.08) translateY(0)}50%{transform:scale(1.08) translateY(-3px)}}
+
+/* ---------- باقي العناصر المسطّحة ---------- */
+.avatar{box-shadow:0 4px 10px -4px rgba(0,0,0,.3)!important;transition:transform .3s var(--ease-spring)}
+.profile-card:hover .avatar,.visitation-card:hover .avatar{transform:scale(1.1) rotate(-4deg)}
+.hm-tile i{transition:transform .35s var(--ease-spring)}
+.hm-tile:hover i{transform:scale(1.15) rotate(-6deg)}
+.hm-tile{transition:transform .3s var(--ease-spring),border-color .25s,box-shadow .3s!important}
+.hm-tile{animation:cardIn .55s var(--ease-out) both}
+.hm-tile:nth-child(1){animation-delay:.05s}.hm-tile:nth-child(2){animation-delay:.1s}.hm-tile:nth-child(3){animation-delay:.15s}.hm-tile:nth-child(4){animation-delay:.2s}
+.hm-tile:nth-child(5){animation-delay:.25s}.hm-tile:nth-child(6){animation-delay:.3s}.hm-tile:nth-child(7){animation-delay:.35s}.hm-tile:nth-child(8){animation-delay:.4s}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.94)}to{opacity:1;transform:none}}
+
+/* ---------- حركات الدخول ---------- */
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes tin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tab-content.active{animation:rise .55s var(--ease-out) both}
+.tab-content.active>*{animation:cardIn .55s var(--ease-out) both}
+.tab-content.active>*:nth-child(1){animation-delay:.04s}.tab-content.active>*:nth-child(2){animation-delay:.09s}
+.tab-content.active>*:nth-child(3){animation-delay:.14s}.tab-content.active>*:nth-child(4){animation-delay:.19s}
+.tab-content.active>*:nth-child(5){animation-delay:.24s}.tab-content.active>*:nth-child(6){animation-delay:.29s}
+.tab-content.active>*:nth-child(n+7){animation-delay:.32s}
+
+/* الكروت: ظهور متدرّج + رفع عند التحويم */
+.profile-card,.visitation-card,.family-card-btn,.settings-card,.stat-card,.birthday-box{
+  animation:cardIn .5s var(--ease-out) both;
+  transition:transform .3s var(--ease-spring),box-shadow .3s var(--ease-out),border-color .25s!important;
+}
+.profile-card:nth-child(1),.visitation-card:nth-child(1),.family-card-btn:nth-child(1),.settings-card:nth-child(1),.stat-card:nth-child(1){animation-delay:.02s}
+.profile-card:nth-child(2),.visitation-card:nth-child(2),.family-card-btn:nth-child(2),.settings-card:nth-child(2),.stat-card:nth-child(2){animation-delay:.07s}
+.profile-card:nth-child(3),.visitation-card:nth-child(3),.family-card-btn:nth-child(3),.settings-card:nth-child(3),.stat-card:nth-child(3){animation-delay:.12s}
+.profile-card:nth-child(4),.visitation-card:nth-child(4),.family-card-btn:nth-child(4),.settings-card:nth-child(4),.stat-card:nth-child(4){animation-delay:.17s}
+.profile-card:nth-child(5),.visitation-card:nth-child(5),.family-card-btn:nth-child(5),.settings-card:nth-child(5),.stat-card:nth-child(5){animation-delay:.22s}
+.profile-card:nth-child(6),.visitation-card:nth-child(6),.family-card-btn:nth-child(6),.settings-card:nth-child(6),.stat-card:nth-child(6){animation-delay:.27s}
+.profile-card:nth-child(n+7),.visitation-card:nth-child(n+7),.family-card-btn:nth-child(n+7),.settings-card:nth-child(n+7){animation-delay:.3s}
+.profile-card:hover,.visitation-card:hover,.family-card-btn:hover,.settings-card:hover{
+  transform:translateY(-4px)!important;box-shadow:0 16px 30px -16px rgba(20,40,90,.4)!important;
+}
+.profile-card:active,.visitation-card:active,.family-card-btn:active{transform:scale(.98)!important}
+.stat-card:hover{transform:translateY(-3px) scale(1.03)!important}
+
+/* الجداول */
+.custom-table tbody tr{transition:background .2s,transform .2s var(--ease-out)}
+.custom-table tbody tr:hover{background:rgba(99,102,241,.07)!important}
+
+/* الخانات */
+input,select,textarea{transition:border-color .25s,box-shadow .3s var(--ease-out),transform .25s var(--ease-spring)!important}
+input:focus,select:focus,textarea:focus{transform:translateY(-1px)}
+.search-row{transition:box-shadow .3s var(--ease-out),transform .25s var(--ease-spring)}
+.search-row:focus-within{transform:translateY(-2px)}
+
+/* النوافذ المنبثقة */
+.modal-overlay{animation:ovIn .3s ease both}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal-body,.dlg{animation:modalPop .45s var(--ease-spring) both!important}
+@keyframes modalPop{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
+
+/* التنبيهات */
+.toast{animation:toastIn .5s var(--ease-spring) both}
+@keyframes toastIn{from{opacity:0;transform:translateY(-24px) scale(.9)}to{opacity:1;transform:none}}
+
+/* اللوجو والبانر والدخول */
+.logo3d{animation:logoFloat 4.5s ease-in-out infinite}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.logo3d::before{animation:haloSpin 8s linear infinite}
+body.in-app .logo3d::before{animation:haloSpin 14s linear infinite!important}
+#login-section{animation:loginIn .8s var(--ease-out) both!important}
+@keyframes loginIn{from{opacity:0;transform:translateY(36px) scale(.96)}to{opacity:1;transform:none}}
+#login-section .input-group{animation:cardIn .6s var(--ease-out) both}
+#login-section .input-group:nth-of-type(1){animation-delay:.25s}
+#login-section .input-group:nth-of-type(2){animation-delay:.35s}
+#login-section>button[onclick="loginDirect()"]{animation:cardIn .6s var(--ease-out) .45s both,btnGlow 3s ease-in-out 1.2s infinite;background-size:200% 100%}
+#login-section>button[onclick="loginDirect()"]:hover{background-position:100% 0}
+@keyframes btnGlow{0%,100%{box-shadow:0 12px 24px -14px rgba(224,64,127,.7)}50%{box-shadow:0 16px 32px -10px rgba(106,91,214,.8)}}
+body:not(.in-app) header h1,body:not(.in-app) header h2{animation:cardIn .8s var(--ease-out) .1s both}
+.banner-frame{animation:bnIn .9s var(--ease-out) both}
+
+/* زرار الروبوت + الإشعارات */
+.robot-btn{transition:transform .3s var(--ease-spring)}
+.robot-btn:hover{transform:scale(1.1) rotate(-4deg)}
+.notification-dot{animation:pulse 1.6s infinite}
+
+/* خلفية حيّة بسيطة */
+body::after{content:'';position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 20% 25%,rgba(99,102,241,.10),transparent 40%),radial-gradient(circle at 80% 70%,rgba(224,64,127,.09),transparent 42%);
+  animation:bgShift 18s ease-in-out infinite alternate}
+@keyframes bgShift{from{transform:translate(0,0) scale(1)}to{transform:translate(4%,3%) scale(1.12)}}
+
+/* عدّاد الأرقام: نبضة خفيفة لما الرقم يتغيّر */
+.num-bump{animation:numBump .5s var(--ease-spring)}
+@keyframes numBump{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 </style>
+<script>
+/* حركات تفاعلية: موجة الضغط + نبضة الأرقام */
+(function(){
+  // Ripple
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target.closest&&e.target.closest('button');
+    if(!b||b.hasAttribute('data-tab')||b.disabled||b.classList.contains('pw-eye')||b.classList.contains('x')||b.classList.contains('rb-btn'))return;
+    var r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*2;
+    var s=document.createElement('span');s.className='rp';
+    s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';
+    if(getComputedStyle(b).position==='static')b.style.position='relative';
+    b.classList.add('rp-host');b.appendChild(s);
+    setTimeout(function(){s.remove();if(!b.querySelector('.rp'))b.classList.remove('rp-host')},700);
+  },{passive:true});
+  // نبضة لما رقم في الإحصائيات يتغيّر
+  try{
+    var sel='.stat-num,.hm-tile b,.stat b';
+    var obs=new MutationObserver(function(ms){ms.forEach(function(m){
+      var t=m.target.nodeType===3?m.target.parentElement:m.target;
+      if(t&&t.matches&&t.matches(sel)){t.classList.remove('num-bump');void t.offsetWidth;t.classList.add('num-bump')}
+    })});
+    obs.observe(document.body,{childList:true,characterData:true,subtree:true});
+  }catch(e){}
+})();
+</script>
+
 
 </body>
 </html>
