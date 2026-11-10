@@ -108,6 +108,10 @@
       if (k === 'in') return (v || []).map(String).includes(String(a));
       if (k === 'is') return v === null ? a == null : a === v;
       if (k === 'not') { const op = v[0], val = v[1]; return op === 'is' ? !(val === null ? a == null : a === val) : op === 'eq' ? String(a) !== String(val) : true; }
+      if (k === 'like' || k === 'ilike') {
+        const re = new RegExp('^' + String(v).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', k === 'ilike' ? 'i' : '');
+        return a != null && re.test(String(a));
+      }
       if (k === 'gt') return a != null && a > v;
       if (k === 'gte') return a != null && a >= v;
       if (k === 'lt') return a != null && a < v;
@@ -186,6 +190,8 @@
     in(c, v) { this.f.push(['in', c, v]); return this; }
     is(c, v) { this.f.push(['is', c, v]); return this; }
     not(c, op, v) { this.f.push(['not', c, [op, v]]); return this; }
+    like(c, v) { this.f.push(['like', c, v]); return this; }
+    ilike(c, v) { this.f.push(['ilike', c, v]); return this; }
     gt(c, v) { this.f.push(['gt', c, v]); return this; }
     gte(c, v) { this.f.push(['gte', c, v]); return this; }
     lt(c, v) { this.f.push(['lt', c, v]); return this; }
@@ -285,6 +291,15 @@
       for (const op of ops) {
         let r;
         try { r = await buildReal(op); } catch (e) { r = { error: e, status: 0 }; }
+        // صفوف المسابقات/أسباب البونص بتتسجل بـ member_id فاضي: لو السيرفر رفض، نعيد المحاولة بصفر (زي ما بيحصل أونلاين)
+        if (r && r.error && op.op === 'insert' && (r.error.code === '23502' || r.error.code === '23503')) {
+          const pl = Array.isArray(op.payload) ? op.payload : [op.payload];
+          if (pl.some(p => p && p.member_id == null)) {
+            const fixed = pl.map(p => (p && p.member_id == null) ? Object.assign({}, p, { member_id: 0 }) : p);
+            const op2 = Object.assign({}, op, { payload: Array.isArray(op.payload) ? fixed : fixed[0] });
+            try { r = await buildReal(op2); } catch (e) { r = { error: e, status: 0 }; }
+          }
+        }
         if (r.error && (isNetErr(r.error) || r.status === 0)) break;                  // النت وقع تاني: نكمل بعدين
         if (r.error && isAuthErr(r)) {
           if (!(await hasRealSession())) break;                                        // مفيش جلسة: ننتظر تسجيل الدخول

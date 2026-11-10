@@ -559,6 +559,7 @@ button:active{transform:translateY(2px)!important;box-shadow:0 3px 8px rgba(0,0,
 .custom-table tbody tr:nth-child(even){background:rgba(127,127,160,.06)}
 .modal-overlay{background:rgba(6,8,16,.62)}
 .modal-body{animation:pop .3s cubic-bezier(.2,1.2,.4,1)}@keyframes pop{from{opacity:0;transform:scale(.9) rotateX(10deg)}}
+.bonus-reason{width:170px!important;min-width:120px;padding:8px 10px!important;border-radius:10px!important}
 .bonus-input{width:90px!important;padding:8px 10px!important;text-align:center;font-weight:800;border-radius:10px!important;border:1px dashed var(--secondary)!important}
 .search-pro{margin-bottom:22px}
 .search-row{display:flex;align-items:center;gap:10px;padding:6px 16px;border-radius:18px;background:var(--card-glass);border:1px solid var(--card-border);box-shadow:var(--shadow-3d-card);color:var(--primary)}
@@ -738,6 +739,8 @@ body.in-app header{padding:44px 20px 12px}
 .nav-tabs button:nth-child(3){--c1:#fb923c;--c2:#ea580c;--c3:#9a3412}.nav-tabs button:nth-child(4){--c1:#fbbf24;--c2:#d97706;--c3:#92400e}
 .nav-tabs button:nth-child(5){--c1:#a78bfa;--c2:#7c3aed;--c3:#5b21b6}.nav-tabs button:nth-child(6){--c1:#f472b6;--c2:#db2777;--c3:#9d174d}
 .nav-tabs button:nth-child(7){--c1:#facc15;--c2:#ca8a04;--c3:#854d0e}.nav-tabs button:nth-child(8){--c1:#94a3b8;--c2:#64748b;--c3:#334155}
+/* ألوان التبويبات ثابتة لكل تبويب (مش بترتيبه) */
+.nav-tabs button[data-tab="add-member"]{--c1:#34d399;--c2:#059669;--c3:#047857}.nav-tabs button[data-tab="attendance"]{--c1:#60a5fa;--c2:#2563eb;--c3:#1d4ed8}.nav-tabs button[data-tab="visitation"]{--c1:#fb923c;--c2:#ea580c;--c3:#9a3412}.nav-tabs button[data-tab="families"]{--c1:#fbbf24;--c2:#d97706;--c3:#92400e}.nav-tabs button[data-tab="birthdays"]{--c1:#a78bfa;--c2:#7c3aed;--c3:#5b21b6}.nav-tabs button[data-tab="committed"]{--c1:#f472b6;--c2:#db2777;--c3:#9d174d}.nav-tabs button[data-tab="bonus"]{--c1:#facc15;--c2:#ca8a04;--c3:#854d0e}.nav-tabs button[data-tab="trips"]{--c1:#94a3b8;--c2:#64748b;--c3:#334155}
 .notification-dot{position:absolute;top:2px;right:calc(50% - 30px);width:14px;height:14px;margin:0;background:#ef4444;border:2px solid var(--card);animation:pulse 1.4s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 /* الكروت */
@@ -1364,6 +1367,74 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 .ac-dig{font:800 12px 'Noto Kufi Arabic','Cairo',sans-serif;color:#ffe9a8;letter-spacing:1.5px;margin-top:2px}
 @media(max-width:800px){.art-clock svg{width:92px;height:92px}}
 </style>
+<style id="contests-css">
+.nav-tabs button[data-tab="contests"]{--a:#f59e0b;--a2:#d97706;--ar:245,158,11}
+.nav-tabs button[data-tab="contests"]{border-bottom:3px solid #f59e0b}
+.nav-tabs button[data-tab="contests"].active{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;box-shadow:0 4px 0 #b45309}
+#contests .ct-name{margin:14px 0}
+#contests .ct-name label{display:block;font-weight:800;margin-bottom:6px}
+#contests .ct-name input{width:100%;font-size:16px;font-weight:700}
+#contests .ct-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+#contests .ct-actions button{flex:1;min-width:140px;padding:12px;font-size:14px}
+#contests .ct-card{background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 8px 22px -14px rgba(0,0,0,.35)}
+#contests .ct-card-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+#contests .ct-card-top input{flex:1;min-width:0;font-weight:800;font-size:16px}
+#contests .ct-x{padding:8px 12px!important;font-size:13px!important;flex:none}
+#contests .ct-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#contests .ct-add select{flex:2 1 160px;width:auto!important;min-width:0}
+#contests .ct-add input{flex:1 1 80px;width:auto!important;min-width:70px}
+#contests .ct-add button{flex:1 1 100px;padding:10px;font-size:13px}
+#contests .ct-entry{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+#contests .ct-entry .ct-et{flex:1;font-size:13.5px;font-weight:600;min-width:0;width:auto!important}
+#contests .ct-entry input{width:84px!important;flex:none;text-align:center;padding:8px}
+#contests .ct-noentry,#contests .ct-empty,.ct-empty{color:var(--text-muted);font-size:13px;text-align:center;padding:10px}
+#contests .ct-total{margin-top:10px;text-align:center;font-weight:800;background:rgba(245,158,11,.16);border-radius:12px;padding:8px}
+#contests .ct-final{margin-top:22px}
+#contests .ct-bn{display:inline-block;margin-inline-start:6px;background:rgba(168,85,247,.16);color:#7e22ce;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:800}
+body.dark-mode #contests .ct-bn{color:#d8b4fe}
+#contests .ct-bonusbox{margin-top:12px;display:flex;flex-direction:column;gap:8px;background:rgba(168,85,247,.10);border:1px dashed #a855f7;border-radius:14px;padding:10px;text-align:center;font-weight:700}
+#contests .ct-bonusbox button{padding:11px;font-size:14px;background:linear-gradient(135deg,#c084fc,#a855f7)}
+#contests .ct-final h4,.ct-final-h{margin:0 0 10px;font-size:17px}
+.ct-rank{display:flex;align-items:center;gap:10px;background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.ct-rank.r1{border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.06))}
+.ct-rank.r2{border-color:#94a3b8;background:linear-gradient(135deg,rgba(148,163,184,.25),rgba(148,163,184,.06))}
+.ct-rank.r3{border-color:#c2813b;background:linear-gradient(135deg,rgba(194,129,59,.25),rgba(194,129,59,.06))}
+.ct-medal{font-size:26px}
+.ct-rk-name{flex:1;display:flex;flex-direction:column;min-width:0}
+.ct-rk-name small{color:var(--text-muted)}
+.ct-rk-pts{font-weight:900;font-size:20px;text-align:center}
+.ct-rk-pts small{display:block;font-size:11px;color:var(--text-muted);font-weight:600}
+.ct-arc{border:1px solid var(--border,var(--card-border));border-radius:14px;margin-bottom:10px;padding:8px 12px}
+.ct-arc summary{cursor:pointer;font-weight:700;list-style:none}
+.ct-arc summary small{display:block;color:var(--text-muted);font-weight:500;margin-top:3px}
+.ct-arc-team{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+.ct-arc-team span{color:var(--text-muted)}
+.ct-year{margin:14px 0 8px;font-weight:800}
+#contests .ct-mem{background:rgba(99,102,241,.07);border:1px dashed var(--border,var(--card-border));border-radius:14px;padding:10px;margin-bottom:10px}
+#contests .ct-mem-h{font-weight:800;font-size:14px;margin-bottom:6px}
+#contests .ct-mem-hint{color:var(--text-muted);font-size:11.5px;margin:2px 0 6px}
+#contests .ct-m{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
+#contests .ct-mn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--primary,#6366f1);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+#contests .ct-mname{flex:1;font-size:14px;font-weight:600;cursor:pointer;min-width:0}
+#contests .ct-mname small{color:var(--text-muted);font-weight:500;margin-inline-start:4px}
+#contests .ct-lead{display:inline-block;margin-inline-start:6px;background:rgba(245,158,11,.22);color:#b45309;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:800}
+#contests .ct-mem input[type=text]{width:100%;margin-top:8px}
+#contests .ct-mem .autocomplete-results{max-height:220px;overflow:auto}
+.ct-mline{display:block;color:var(--text-muted);font-weight:500;margin-top:2px}
+#contests.ct-detail-mode .ct-name,#contests.ct-detail-mode .ct-actions,#contests.ct-detail-mode .ct-final,#contests.ct-detail-mode>h3,#contests.ct-detail-mode .rb-wrap{display:none}
+#contests .ct-tl{display:flex;align-items:center;gap:12px;background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:18px;padding:14px;margin-bottom:12px;cursor:pointer;box-shadow:0 8px 22px -14px rgba(0,0,0,.35);transition:transform .12s}
+#contests .ct-tl:active{transform:scale(.98)}
+#contests .ct-tl-cup{font-size:30px;flex:none;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,rgba(251,191,36,.35),rgba(245,158,11,.12));display:flex;align-items:center;justify-content:center}
+#contests .ct-tl-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#contests .ct-tl-info b{font-size:16px}
+#contests .ct-tl-info small{color:var(--text-muted);font-size:12.5px}
+#contests .ct-tl-pts{text-align:center;font-weight:900;font-size:20px;color:#d97706}
+#contests .ct-tl-pts small{display:block;font-size:11px;color:var(--text-muted);font-weight:600}
+#contests .ct-tl-go{color:var(--text-muted);font-size:18px}
+body .att-ct{display:block;margin-top:3px;font-size:11.5px;font-weight:700;color:#dc2626;line-height:1.4}
+body.dark-mode .att-ct{color:#f87171}
+#contests .ct-back{width:100%;margin:6px 0 12px;padding:12px;font-size:14px;background:linear-gradient(135deg,#818cf8,#6366f1)}
+</style>
 </head>
 <body>
 <div class="bg-logo"></div>
@@ -1458,22 +1529,23 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
         </section>
 
         <div class="nav-tabs">
-            <button class="active" onclick="showTab('add-member', this)" data-tab="add-member" id="tab-add-btn">إضافة مخدوم ✨</button>
-            <button onclick="showTab('attendance', this)" data-tab="attendance">شيت الحضور 📋</button>
+            <button class="active" onclick="showTab('add-member', this)" data-tab="add-member" id="tab-add-btn">تسجيل مخدوم</button>
+            <button onclick="showTab('attendance', this)" data-tab="attendance">حضور</button>
             <button onclick="showTab('visitation', this)" data-tab="visitation" id="tab-vis-btn">
-                <span>الافتقاد 📞</span>
+                <span>افتقاد</span>
                 <span id="visitation-notification-dot" style="display:none;" class="notification-dot"></span>
             </button>
-            <button onclick="showTab('families', this)" data-tab="families" id="tab-fam-btn">الأسر 👥</button>
+            <button onclick="showTab('trips', this)" data-tab="trips">رحلات</button>
+            <button onclick="showTab('contests', this)" data-tab="contests">مسابقات</button>
+            <button onclick="showTab('families', this)" data-tab="families" id="tab-fam-btn">أسر</button>
             <button onclick="showTab('birthdays', this)" data-tab="birthdays" id="tab-bday-btn">
-                <span>أعياد ميلاد 🎂</span>
+                <span>أعياد ميلاد</span>
                 <span id="birthday-notification-dot" style="display:none;" class="notification-dot"></span>
             </button>
-            <button onclick="showTab('committed', this)" data-tab="committed">الملتزمين 🏆</button>
-            <button onclick="showTab('bonus', this)" data-tab="bonus">البونص 🎁</button>
-            <button onclick="showTab('trips', this)" data-tab="trips">الرحلات 🚌</button>
-            <button onclick="showTab('profiles', this)" data-tab="profiles">بحث 🔍</button>
-            <button onclick="showTab('settings', this)" data-tab="settings">الإعدادات ⚙️</button>
+            <button onclick="showTab('bonus', this)" data-tab="bonus">بونص</button>
+            <button onclick="showTab('committed', this)" data-tab="committed">مواظبين</button>
+            <button onclick="showTab('profiles', this)" data-tab="profiles">بحث</button>
+            <button onclick="showTab('settings', this)" data-tab="settings">إعدادات</button>
         </div>
 
         <!-- إضافة / تعديل مخدوم -->
@@ -1550,6 +1622,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <button id="mr-toggle" onclick="toggleMeetingsReport()" style="width:100%; margin-bottom:16px;">📑 تقارير الاجتماعات</button>
             <div id="meetings-report" style="display:none; margin-bottom:22px;">
+                <div style="text-align:left;margin-bottom:8px"><button onclick="toggleMeetingsReport()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>
                 <div class="mr-bar">
                     <select id="mr-year"></select>
                     <button class="btn-success" onclick="openYearlyReport(document.getElementById('mr-year').value)">📥 تحميل تقرير سنوي</button>
@@ -1563,9 +1636,21 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 </div>
             </div>
             
-            <!-- بحث عن مخدوم: حضر كام مرة وبالتواريخ -->
-            <div class="input-group autocomplete-container" style="margin-bottom:14px;">
-                <label>🔎 ابحث عن مخدوم وشوف حضر كام مرة وفي أنهي تواريخ:</label>
+            <!-- فلاتر الحضور (للمسجلين في الحضور فقط) -->
+            <div class="settings-card" style="margin-bottom:16px;">
+                <div style="font-weight:800; margin-bottom:10px;">🎛️ فلاتر الحضور <small style="color:var(--text-muted); font-weight:600;">(الفلاتر بتجيب حاضري اليوم المفتوح بس، والبحث بالاسم لأي مخدوم)</small></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <button onclick="attFilter('early')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none;">⏰ حضروا بدري</button>
+                    <button onclick="attFilter('bday')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#f472a6,#c4306b);">🎂 أعياد ميلاد</button>
+                    <button onclick="attFilter('search')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#818cf8,#6366f1);">🔎 بحث بالاسم</button>
+                    <button onclick="attFilter('last3')" style="flex:1; min-width:130px; padding:11px; font-size:13.5px; box-shadow:none; background:linear-gradient(135deg,#34d399,#059669);">✅ آخر ٣ اجتماعات ورا بعض</button>
+                </div>
+                <div id="att-filter-extra"></div>
+                <div id="att-filter-result"></div>
+            </div>
+            <div class="input-group autocomplete-container" id="att-person-wrap" style="margin-bottom:14px; display:none;">
+                <div style="text-align:left"><button onclick="attFilterClose()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>
+                <label>🔎 ابحث عن أي مخدوم وشوف حضر كام مرة وفي أنهي تواريخ:</label>
                 <input type="text" id="att-person-search" placeholder="اكتب الاسم واختاره من القائمة..." autocomplete="off" oninput="attPersonSearch(this.value)" onfocus="attPersonSearch(this.value)">
                 <div id="att-person-results" class="autocomplete-results" style="display:none"></div>
             </div>
@@ -1592,7 +1677,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 </h4>
                 <div class="table-responsive">
                     <table class="custom-table" id="attendance-table">
-                        <thead><tr><th>مسلسل</th><th>الاسم</th><th>الأسرة</th><th>وقت وتاريخ الحضور</th><th>بونص</th><th>إجراء</th></tr></thead>
+                        <thead><tr><th>مسلسل</th><th>الاسم</th><th>الأسرة</th><th>وقت وتاريخ الحضور</th><th>بونص</th><th>سبب البونص</th><th>إجراء</th></tr></thead>
                         <tbody id="attendance-tbody"></tbody>
                     </table>
                 </div>
@@ -1608,7 +1693,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             </div>
 
             <h3>متابعة الغياب والافتقاد التلقائي 📞</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">يتم هنا رصد المتغيبين أوتوماتيكياً (الغياب المتتالي حتى آخر اجتماع). اختر عدد مرات الغياب لعرض اللي غابوها فقط.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">يتم هنا رصد المتغيبين أوتوماتيكياً: أي مخدوم حضر قبل كده وبعدها غاب اجتماع أو أكتر ورا بعض لحد آخر اجتماع، بيظهر اسمه ومعاه عدد مرات الغياب وتاريخ آخر مرة حضر فيها. اختر عدد مرات الغياب لعرض اللي غابوها فقط.</p>
 
             <div style="display: flex; gap: 15px; flex-wrap: wrap; background: rgba(0,0,0,0.03); border: 1px solid var(--card-border); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 16px; align-items: center; font-size: 13px;">
                 <span style="font-weight: 800; color: var(--text-main);">دليل الألوان:</span>
@@ -1628,18 +1713,18 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
             <div id="visitation-container" style="margin-top: 20px;"></div>
         </div>
 
-        <!-- تبويب الملتزمين -->
+        <!-- تبويب المواظبين -->
         <div id="committed" class="tab-content">
             <div class="rb-wrap" style="--c:#f59e0b">
-                <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب الملتزمين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
-                <div class="rb-say" onclick="openHelp('committed')"><b>كوجي بوت 🤖 · شرح «الملتزمين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
+                <button class="rb-btn" onclick="openHelp('committed')" aria-label="شرح تبويب المواظبين"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
+                <div class="rb-say" onclick="openHelp('committed')"><b>كوجي بوت 🤖 · شرح «المواظبين»</b><span class="rb-line" data-text="دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.">دول الأبطال! اللي حضروا ٤ أو ٥ اجتماعات ورا بعض.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
-                <h3 style="margin:0;">الملتزمين 🏆</h3>
+                <h3 style="margin:0;">المواظبين 🏆</h3>
                 <a href="#" onclick="exportCommittedExcel(); return false;" style="color:#2e9e6b; font-weight:800; font-size:14px; text-decoration:underline;">📥 تصدير Excel</a>
             </div>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">اللي حضروا ٤ أو ٥ اجتماعات ورا بعض بدون غياب.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">اللي حضروا ٤ اجتماعات ورا بعض أو أكتر بدون غياب (ولاد وبنات) — من شيت الحضور.</p>
             <div id="committed-container"></div>
         </div>
 
@@ -1657,6 +1742,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <select id="bonus-filter" onchange="setBonusFilter(this.value)" style="padding:10px 14px; border-radius:12px; border:1.5px solid var(--card-border); font-family:inherit; font-weight:800; font-size:14px; min-width:230px;"></select>
             </div>
             <div id="bonus-container"></div>
+            <div style="margin-top:20px;"><button class="btn-delete" style="width:100%" onclick="clearAllBonus()">🗑️ مسح كل البونص</button></div>
         </div>
 
         <!-- الأسر -->
@@ -1718,6 +1804,7 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                     <div id="family-detail-header-text" style="text-align: right; flex-grow: 1;"></div>
                     <button class="btn-success" id="btn-add-to-fam" onclick="">➕ إضافة مخدوم للأسرة</button>
                     <button class="btn-edit" id="btn-rename-fam" onclick="renameCurrentFamily()">✏️ تعديل اسم الأسرة</button>
+                    <button class="btn-delete" id="btn-delete-fam" onclick="deleteCurrentFamily()">🗑️ إزالة الأسرة</button>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -1791,6 +1878,8 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 <button onclick="openTripDiscountsModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:none;">🏷️ الخصومات</button>
                 <button onclick="openTripYearModal()" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:none;">📅 رحلات السنة</button>
                 <button onclick="openTripGenderModal('شاب')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#4ba3ea,#1d6fb8); box-shadow:none;">👦 عدد الشباب <span id="trip-cnt-m" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
+                <button onclick="openTripPaidModal(true)" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#34d399,#059669); box-shadow:none;">✅ دافعين كامل <span id="trip-cnt-full" style="background:rgba(255,255,255,.28); padding:1px 8px; border-radius:10px; margin-right:4px;">0</span></button>
+                <button onclick="openTripPaidModal(false)" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#fb7185,#e11d48); box-shadow:none;">⚠️ مش مكملين <span id="trip-cnt-part" style="background:rgba(255,255,255,.28); padding:1px 8px; border-radius:10px; margin-right:4px;">0</span></button>
                 <button onclick="openTripGenderModal('شابة')" style="flex:1; min-width:140px; padding:12px; font-size:14px; background:linear-gradient(135deg,#f472a6,#c4306b); box-shadow:none;">👧 عدد الشابات <span id="trip-cnt-f" style="background:rgba(255,255,255,.28); padding:1px 9px; border-radius:12px; font-weight:800; margin-right:4px;">0</span></button>
             </div>
 
@@ -1826,6 +1915,38 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
                 </div>
             </div>
             </div><!-- /trip-sheet-view -->
+        </div>
+
+        <!-- المسابقات -->
+        <div id="contests" class="tab-content">
+            <div class="rb-wrap" style="--c:#f59e0b">
+                <button class="rb-btn" onclick="openHelp('contests')" aria-label="شرح تبويب المسابقات"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">🏆</i></span></button>
+                <div class="rb-say" onclick="openHelp('contests')"><b>كوجي بوت 🤖 · شرح «المسابقات»</b><span class="rb-line" data-text="سجّل الفرق ودرجاتها وأنا أحسبلك المجموع وأرتبهم تلقائي.">سجّل الفرق ودرجاتها وأنا أحسبلك المجموع وأرتبهم تلقائي.</span><u>اشرحلي بالتفصيل ◂</u></div>
+            </div>
+
+            <h3>نظام المسابقات والفرق الذكي</h3>
+
+            <div class="ct-name">
+                <label for="ct-name">🏷️ اسم المسابقة</label>
+                <input type="text" id="ct-name" placeholder="مثال: مسابقة صوم ٢٠٢٦" oninput="ctSetName(this.value)">
+            </div>
+
+            <div class="ct-actions">
+                <button onclick="ctAddTeam()">➕ فريق جديد</button>
+                <button onclick="ctOpenArchive()" style="background:linear-gradient(135deg,#818cf8,#6366f1);">🗂️ مسابقات السنة</button>
+                <button onclick="ctSendArchive()" style="background:linear-gradient(135deg,#34d399,#10b981);">📦 إرسال للأرشيف</button>
+            </div>
+
+            <div id="ct-teams"></div>
+
+            <div class="ct-final">
+                <h4>🏆 الترتيب النهائي</h4>
+                <div id="ct-ranking"></div>
+            </div>
+
+            <div class="ct-actions" style="margin-top:20px;">
+                <button class="btn-delete" onclick="ctClearCurrent()">🗑️ تصفير المسابقة الحالية فقط</button>
+            </div>
         </div>
 
         <!-- البروفايلات والبحث -->
@@ -1918,9 +2039,9 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 
             <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
                 <h4 style="color:var(--danger);">⚠️ منطقة الخطر والتصفير</h4>
-                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير جميع سجلات حضور الاجتماعات وشيتات الرحلات بالكامل وإرجاعها فارغة دون المساس ببيانات البرفايلات والمخدومين الأساسية.</p>
+                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:14px;">يتم هنا تصفير <b>كل الشيتات من أول السنة</b>: حضور الاجتماعات (وبالتالي البونص والملتزمين والافتقاد)، الرحلات وأرشيفها، المسابقات وأرشيفها — وإرجاعها كلها فاضية. <b>بيانات المخدومين المسجلين هي الوحيدة اللي مش بتتلمس.</b></p>
                 <div class="action-row">
-                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير شيتات الحضور والرحلات فقط</button>
+                    <button class="btn-delete" onclick="clearAllSheetsData()">🗑️ تصفير كل الشيتات (الحضور والرحلات والمسابقات وأرشيفهم)</button>
                 </div>
             </div>
         </div>
@@ -2001,27 +2122,29 @@ notify pgrst, 'reload schema';</pre>
                     'اختار <b>«تاريخ الاجتماع»</b>. أول ما تختاره بتظهر أدوات التسجيل وقائمة حضور اليوم ده (ولو اليوم متسجل قبل كده بترجعلك أسماء اللي حضروا).',
                     'سجّل الحضور بطريقتين: <b>«📷 تسجيل سريع بمسح QR Code»</b> بكاميرا الموبايل، أو اكتب أول حروف الاسم في خانة البحث واختاره من القائمة.',
                     'في الجدول هتلاقي الاسم والأسرة ووقت الحضور. اكتب <b>البونص</b> قدام المخدوم لو أخد، ومن عمود <b>«إجراء»</b> تقدر تشيل حضور اتسجل بالغلط.',
-                    'فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
+                    'الجدول مرتب بوقت التسجيل: أول واحد سجّل بياخد <b>رقم ١</b> والباقي تحته ٢ و٣ و٤ بالترتيب، ووقت الحضور بيتسجل بالثانية. فوق الجدول بتشوف <b>إجمالي الحضور</b> و<b>إجمالي البونص</b> لليوم ده.',
+                    '<b>🎛️ فلاتر الحضور</b> بتشتغل على حاضري <b>اليوم المفتوح</b> بس: <b>⏰ حضروا بدري</b> (أول ١٠ ولاد وأول ١٠ بنات بوقت التسجيل، ومن الأزرار تختار فترة زي ٧ - ٧:٣٠ أو ٧:٣٠ - ٧:٤٥ أو ٧:٣٠ - ٧:٥٠ أو ٧:٣٠ - ٨ أو ٧:٣٠ - ٨:١٥ أو ٨ - ٨:٣٠ أو ٨:١٥ - ٨:٣٠ فيطلعلك كل اللي حضروا فيها، ولاد لوحدهم وبنات لوحدهم)، <b>🎂 أعياد ميلاد</b> (اختار شهر أو كذا شهر مع بعض وتشوف الحاضرين المولودين فيهم)، <b>✅ آخر ٣ اجتماعات</b> (الحاضرين اللي حضروا ٣ اجتماعات ورا بعض أو أكتر). أما <b>🔎 بحث بالاسم</b> فبتدوّر في كل الأسماء (حاضر أو لأ) وتشوف حضر كام مرة وبأنهي تواريخ.',
                     '<b>«📑 تقارير الاجتماعات»</b> فيها كل الاجتماعات ونسب الحضور وتحميل تقرير سنوي، و<b>«📊 تحميل شيت الحضور Excel»</b> بينزّل شيت اليوم.'],
                 tips: [
                     'لازم تكون سجّلت المخدومين الأول من تبويب «إضافة مخدوم» علشان يظهروا في البحث ويتمسح كارتهم.']
             },
             'visitation': {
-                title: 'الافتقاد', icon: '📞', color: '#ef4444',
+                title: 'الافتقاد', icon: '📞', color: '#f97316',
                 goal: 'ده تبويب <b>المتابعة والافتقاد</b>: بيرصد لوحده اللي غابوا من آخر الاجتماعات علشان تتصل بيهم وتطمّن عليهم.',
                 steps: [
-                    'مش محتاج تدخّل أي حاجة — الأسماء بتظهر <b>أوتوماتيك</b> حسب الغياب المتتالي لحد آخر اجتماع.',
+                    'مش محتاج تدخّل أي حاجة — أي مخدوم حضر قبل كده وبعدها غاب اجتماع أو أكتر ورا بعض لحد آخر اجتماع، اسمه بيظهر <b>أوتوماتيك</b> من قاعدة البيانات وشيت الحضور.',
                     'من أزرار الفلتر فوق اختار <b>عدد مرات الغياب</b> علشان تشوف اللي غابوها بس.',
-                    'قدام كل اسم <b>عدد الاجتماعات</b> اللي غابها، واللون بيوريك درجة الخطورة:<br><i class="hm-dot" style="background:#4caf7a"></i> اجتماع &nbsp;<i class="hm-dot" style="background:#ff9999"></i> اتنين &nbsp;<i class="hm-dot" style="background:#f25c5c"></i> تلاتة &nbsp;<i class="hm-dot" style="background:#b30000"></i> ٤–٥ ⚠️ &nbsp;<i class="hm-dot" style="background:#5a0000"></i> ٦ فأكتر 🚨',
-                    '<b>«📥 تصدير الافتقاد Excel»</b> بينزّل القائمة في ملف تطبعه أو تبعته لخدام الافتقاد.'],
+                    'جوه كل كارت هتلاقي <b>آخر مرة حضر فيها بالتاريخ</b>، وعدد الاجتماعات اللي غابها ورا بعض، وإجمالي غيابه، وتواريخ الغياب. وقدام كل اسم <b>عدد الاجتماعات</b> اللي غابها، واللون بيوريك درجة الخطورة:<br><i class="hm-dot" style="background:#4caf7a"></i> اجتماع &nbsp;<i class="hm-dot" style="background:#ff9999"></i> اتنين &nbsp;<i class="hm-dot" style="background:#f25c5c"></i> تلاتة &nbsp;<i class="hm-dot" style="background:#b30000"></i> ٤–٥ ⚠️ &nbsp;<i class="hm-dot" style="background:#5a0000"></i> ٦ فأكتر 🚨',
+                    '<b>«📥 تصدير الافتقاد Excel»</b> بينزّل القائمة في ملف تطبعه أو تبعته لخدام الافتقاد، وفيه كمان عمودين: آخر حضور وإجمالي الغياب.'],
                 tips: [
-                    'النقطة الحمراء جنب اسم التبويب معناها إن فيه ناس محتاجة افتقاد.']
+                    'النقطة الحمراء جنب اسم التبويب معناها إن فيه ناس محتاجة افتقاد.',
+                    'يوم تسجيل المخدوم نفسه مش بيتحسب عليه غياب — العدّ بيبدأ من أول اجتماع بعده.']
             },
             'committed': {
-                title: 'الملتزمين', icon: '🏆', color: '#f59e0b',
-                goal: 'بيعرض <b>الملتزمين</b>: اللي حضروا ٤ أو ٥ اجتماعات ورا بعض من غير ما يغيبوا ولا مرة.',
+                title: 'المواظبين', icon: '🏆', color: '#10b981',
+                goal: 'بيعرض <b>المواظبين</b>: أي مخدوم (شاب أو شابة) حضر <b>٤ اجتماعات ورا بعض أو أكتر</b> من غير ما يغيب، وده محسوب من شيت الحضور.',
                 steps: [
-                    'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، مفيش حاجة تكتبها هنا.',
+                    'القائمة بتتحدث <b>لوحدها</b> من شيت الحضور، ومقسمة قسمين: <b>👦 الأولاد</b> و<b>👧 البنات</b>.',
                     'استخدمها تشجّع وتكرّم المواظبين، وتعرف مين ثابت على الاجتماعات.',
                     'من رابط <b>«📥 تصدير Excel»</b> فوق تنزّل القائمة في ملف.'],
                 tips: [
@@ -2038,30 +2161,50 @@ notify pgrst, 'reload schema';</pre>
                     'لو ظهرت رسالة «تفعيل خانة البونص»، انسخ الكود اللي فيها وشغّله مرة واحدة في Supabase ← SQL Editor، وبعدين جرّب تاني.']
             },
             'families': {
-                title: 'الأسر', icon: '👥', color: '#10b981',
+                title: 'الأسر', icon: '👥', color: '#14b8a6',
                 goal: 'بتشوف <b>كل الأسر</b> (شباب وشابات) وأعدادهم، وتدير أعضاء كل أسرة.',
                 steps: [
                     'فوق بتلاقي <b>إجمالي الشباب</b> و<b>إجمالي الشابات</b> و<b>الإجمالي الكلي</b>.',
-                    'اضغط على أي أسرة علشان تفتح أعضاءها. جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
+                    'كل أسرة بتظهر في قايمة نوعها: اللي بتسجّله <b>شاب</b> بيروح أسرة الشباب، واللي بتسجّلها <b>شابة</b> بتروح أسرة الشابات، حتى لو الاسم واحد. اضغط على أي أسرة علشان تفتح أعضاءها (ومعاها زرار «⬅️ رجوع»). جوه تقدر تدوّر على اسم داخل الأسرة، أو تضيف مخدوم بزرار <b>«➕ إضافة مخدوم للأسرة»</b>.',
                     '<b>«📈 نسبة حضور الأسر»</b> بتقارن الأسر في شهر تختاره. النسبة = مرات حضور الأفراد ÷ (عدد الأفراد المسجلين قبل كل اجتماع × اجتماعات الشهر)، وفيه أعمدة صغيرة لآخر ٦ شهور.',
                     '<b>«📥 تصدير كل بيانات الأسر»</b> بيطلعلك ملف Excel واحد وكل أسرة في شيت لوحدها.',
-                    'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.'],
-                tips: []
+                    'زرار <b>«🧹 دمج أسماء الأسر المتشابهة»</b> (في آخر الصفحة) يفيدك لو أسرة اتكتبت بأكتر من صيغة.',
+                    'جوه أي أسرة زرار <b>«🗑️ إزالة الأسرة»</b> بيمسح الأسرة دي بكل مخدوميها (أسماءهم الأساسية وحضورهم وحجوزاتهم) — ومخدومين الأسر التانية ما بيتأثروش. بيطلعلك تحذير وتأكيدين قبل المسح.'],
+                tips: ['مسح الأسرة نهائي وما بيترجعش، فخد نسخة احتياطية من الإعدادات قبل ما تمسح.']
             },
             'trips': {
-                title: 'الرحلات', icon: '🚌', color: '#f97316',
+                title: 'الرحلات', icon: '🚌', color: '#06b6d4',
                 goal: 'إدارة <b>حجز الرحلات والمؤتمرات والأيام الروحية</b> ومتابعة الفلوس: مين دفع ومين لسه.',
                 steps: [
                     'اختار <b>نوع الفعالية</b> (رحلة / مؤتمر / يوم روحي / اجتماع خارجي)، واكتب <b>قيمة الاشتراك</b> و<b>اسم الفعالية</b>.',
-                    'ضيف المخدومين بـ <b>«📷 إضافة مخدوم للحجز بـ QR Code»</b> أو بالبحث بالاسم.',
+                    'ضيف المخدومين بـ <b>«📷 إضافة مخدوم للحجز بـ QR Code»</b> أو بالبحث بالاسم. الشيت مرتب بترتيب الحجز: أول واحد اتحجز <b>رقم ١</b> والباقي تحته بالترتيب.',
+                    'أزرار <b>«👦 عدد الشباب»</b> و<b>«👧 عدد الشابات»</b> بتعرض الأسماء ومدفوعاتهم، و<b>«✅ دافعين كامل»</b> بيطلعلك اللي سدّدوا كل المطلوب، و<b>«⚠️ مش مكملين»</b> اللي لسه عليهم باقي (مع المدفوع والباقي).',
                     'في الشيت سجّل <b>المدفوع</b> والأقساط، والحالة بتتغير لوحدها: خالص / متبقي / لم يتم الدفع.',
                     '<b>«🏷️ الخصومات»</b> لتطبيق خصم على مخدوم، وعمود <b>«استرداد»</b> لو حد لغى وفلوسه رجعتله.',
                     '<b>«📅 رحلات السنة»</b> بتفتحلك الفعاليات السابقة، و<b>«📊 تحميل شيت الرحلة Excel»</b> بينزّل الشيت.'],
                 tips: [
                     'زرار <b>«🗑️ تصفير شيت الحجز فقط»</b> بيمسح حجز الفعالية الحالية — خد بالك قبل ما تضغطه.']
             },
+            'contests': {
+                title: 'المسابقات', icon: '🏅', color: '#f59e0b',
+                goal: 'تسجيل <b>فرق المسابقة</b> وأعضاء كل فريق وقائده، وإضافة الدرجات في أي وقت، وحساب المجاميع وترتيب الفرق تلقائي.',
+                steps: [
+                    'اكتب <b>اسم المسابقة</b> في الخانة اللي فوق (مثال: مسابقة صوم ٢٠٢٦).',
+                    'اضغط <b>«➕ فريق جديد»</b>، اكتب اسم الفريق وضيف أعضاءه. <b>مش لازم تكتب أي درجة</b> علشان الفريق يتضاف.',
+                    'في مربع <b>«👥 الأعضاء»</b> اكتب أول حروف الاسم واختاره من المخدومين المسجلين في السيستم. اضغط على اسم العضو علشان يبقى <b>قائد الفريق 👑</b> (واضغط عليه تاني لو عايز تشيل العلامة).',
+                    'دوس <b>«▸ رجوع لكل الفرق»</b> وهتلاقي كل فريق في <b>كارت</b> لوحده والكروت تحت بعض، مكتوب عليه عدد الأعضاء والقائد والمجموع.',
+                    'اضغط على أي كارت علشان <b>تدخل على الفريق</b> وتسجّل الدرجات في أي وقت: اختار نوع الدرجة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
+                    '<b>ربط المسابقة بالحضور:</b> طول ما المسابقة مفتوحة، أي عضو في فريق وبتسجله في شيت الحضور بيظهر تحت اسمه بالأحمر «🏆 مشارك في مسابقة ... — فريق ...» جنب وقت حضوره، فتعرف هو في فريق مين وانت بتدّيله درجة الحضور. أول ما تبعت المسابقة للأرشيف أو تمسحها التنبيه ده بيختفي من الحضور خالص.',
+                    '<b>كل حاجة في الفريق تتعدّل في أي وقت:</b> اسم الفريق، إضافة أعضاء أو شيلهم، القائد 👑، نوع أي درجة (من القايمة أو «أخرى» تكتبه بنفسك)، وقيمة أي درجة أو مسحها. <b>مجموع الفريق</b> والترتيب بيتحسبوا لوحدهم.',
+                    'تحت الكروت <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع (🥇 🥈 🥉). بيظهر أول ما تسجّل درجات لفريق واحد على الأقل. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
+                    '<b>«📦 إرسال للأرشيف»</b> بينقل المسابقة لـ<b>«🗂️ مسابقات السنة»</b> ويفضي الشيت لمسابقة جديدة، و«مسابقات السنة» بتفتحلك كل المسابقات اللي اتأرشفت.'],
+                tips: [
+                    'المسابقة مفتوحة دايماً زي الرحلات، وكل حاجة بتتسجل بتتحفظ لوحدها.',
+                    'العضو الواحد ما ينفعش يتضاف في فريقين في نفس المسابقة.',
+                    'زرار <b>«🗑️ تصفير المسابقة الحالية فقط»</b> بيمسح المسابقة المفتوحة كلها — خد بالك قبل ما تضغطه.']
+            },
             'profiles': {
-                title: 'البحث', icon: '🔍', color: '#3b82f6',
+                title: 'البحث', icon: '🔍', color: '#ec4899',
                 goal: '<b>محرك البحث</b>: تلاقي أي مخدوم بسرعة وتفتح ملفه الكامل.',
                 steps: [
                     'اكتب أول حرف من الاسم والنتايج بتظهر فوراً (وبـ Enter بيفتح أول نتيجة).',
@@ -2072,7 +2215,7 @@ notify pgrst, 'reload schema';</pre>
                 tips: []
             },
             'birthdays': {
-                title: 'أعياد الميلاد', icon: '🎂', color: '#ec4899',
+                title: 'أعياد الميلاد', icon: '🎂', color: '#eab308',
                 goal: 'بينبّهك بـ <b>أعياد الميلاد</b> علشان تهنّي المخدومين في وقتها.',
                 steps: [
                     'اللي عيد ميلاده <b>النهارده</b> بيظهر في كارت تهنئة.',
@@ -2088,12 +2231,12 @@ notify pgrst, 'reload schema';</pre>
                     '<b>«⬇️ تحميل نسخة احتياطية»</b> بينزّل ملف JSON فيه كل البيانات — اعمله بشكل دوري.',
                     'للاسترجاع: اختار ملف الـ JSON واضغط <b>«⬆️ استرجاع البيانات»</b>.',
                     '<b>التقارير PDF:</b> اختار الشهر أو السنة واضغط «عرض التقرير»، وبعدها «حفظ كـ PDF» واختار Save as PDF من نافذة الطباعة.',
-                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات وشيتات الرحلات فقط</b>، وبيانات المخدومين بتفضل زي ما هي.'],
+                    '<b>⚠️ منطقة الخطر:</b> التصفير بيمسح <b>حضور الاجتماعات من أول السنة والرحلات والمسابقات (وأرشيفهم)</b> كلها، وبيانات المخدومين هي الوحيدة اللي بتفضل زي ما هي. وفي أرشيف الرحلات وأرشيف المسابقات فيه زرار <b>«🧹 تنظيف الأرشيف»</b> بيمسح الأرشيف ده لوحده ويبدأ من جديد.'],
                 tips: [
                     'اعمل <b>نسخة احتياطية</b> قبل أي تصفير.']
             }
         };
-        const helpOrder = ['add-member', 'attendance', 'visitation', 'committed', 'bonus', 'families', 'trips', 'profiles', 'birthdays', 'settings'];
+        const helpOrder = ['add-member', 'attendance', 'families', 'visitation', 'trips', 'contests', 'birthdays', 'bonus', 'committed', 'profiles', 'settings'];
         let helpCurrent = 'add-member';
 
         function openHelp(tabKey) {
@@ -2209,7 +2352,7 @@ notify pgrst, 'reload schema';</pre>
                 db.members = membersRes.data || [];
                 db.meetings = [];
                 db.attendanceRecords = {};
-                db.tripsData = {}; db.tripArchive = []; db.bonus = {}; db.attRows = attendanceRes.data || [];
+                db.tripsData = {}; db.tripArchive = []; db.contests = []; db.bonus = {}; db.bonusReason = {}; db.attRows = attendanceRes.data || [];
 
                 (attendanceRes.data || []).forEach(record => {
                     if (!db.meetings.includes(record.meeting_date)) db.meetings.push(record.meeting_date);
@@ -2218,7 +2361,16 @@ notify pgrst, 'reload schema';</pre>
                 });
                 db.meetings.sort();
 
+                let _tripIdx = 0;
                 (tripsRes.data || []).forEach(t => {
+                    if (String(t.trip_type).startsWith('BREASON|')) {   // أسباب البونص
+                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.bonusReason[String(t.trip_type).slice(8)] = o; } catch (e) {}
+                        return;
+                    }
+                    if (String(t.trip_type).startsWith('CONTEST|')) {   // المسابقات
+                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.contests.push({ key: t.trip_type, ...o }); } catch (e) {}
+                        return;
+                    }
                     if (String(t.trip_type).startsWith('ARCHIVE|')) {   // سجل الرحلات المحفوظ
                         try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) { const it = { key: t.trip_type, ...o }, ix = db.tripArchive.findIndex(x => x.key === t.trip_type); if (ix < 0) db.tripArchive.push(it); else if ((it.attendees || 0) >= (db.tripArchive[ix].attendees || 0)) db.tripArchive[ix] = it; } } catch (e) {}
                         return;
@@ -2227,13 +2379,15 @@ notify pgrst, 'reload schema';</pre>
                     if (t.fee > 0 || !db.tripsData[t.trip_type].fee) db.tripsData[t.trip_type].fee = t.fee || 0;
                     if (t.member_id) {
                         let u = unpackInst(t.installments);
-                        db.tripsData[t.trip_type].reservations[t.member_id] = { paid: t.paid || 0, installments: u.items, discount: u.discount, refunded: u.refunded, refundAmount: u.refundAmount, refundDate: u.refundDate };
+                        db.tripsData[t.trip_type].reservations[t.member_id] = { paid: t.paid || 0, installments: u.items, discount: u.discount, refunded: u.refunded, refundAmount: u.refundAmount, refundDate: u.refundDate, regAt: u.regAt, seq: (u.regAt > 0 ? u.regAt : (t.created_at && !isNaN(Date.parse(t.created_at)) ? Date.parse(t.created_at) : -1e15 + (typeof t.id === 'number' ? t.id : _tripIdx))) };
+                        _tripIdx++;
                     }
                 });
 
                 checkBirthdays();
                 renderFamiliesList();
                 updateNotificationIndicators();
+                try { contestsAfterLoad(); } catch (e) { console.error(e); }
                 renderTripCards(); updateTripNav(); setTimeout(() => sweepExpiredTrips().then(m => { if (m && tripsTabActive()) openTripsHome(true); }), 0);
             } catch(e) {
                 console.error("Error loading data", e);
@@ -2247,20 +2401,8 @@ notify pgrst, 'reload schema';</pre>
             let bdayDot = document.getElementById('birthday-notification-dot');
             if (bdayDot) bdayDot.style.display = hasBirthdayToday ? 'inline-block' : 'none';
 
-            let recentMeetings = [...db.meetings].reverse().slice(0, 1);
             let currentAbsentIds = [];
-            if (recentMeetings.length > 0 && db.members.length > 0) {
-                db.members.forEach(m => {
-                    let missingAll = absenceCounts(m, recentMeetings[0]);
-                    for(let date of recentMeetings) {
-                        if(db.attendanceRecords[date] && db.attendanceRecords[date][m.id]) {
-                            missingAll = false;
-                            break;
-                        }
-                    }
-                    if(missingAll) currentAbsentIds.push(m.id);
-                });
-            }
+            try { currentAbsentIds = getVisitationData().list; } catch (e) {}
 
             let visDot = document.getElementById('visitation-notification-dot');
             if (visDot) visDot.style.display = currentAbsentIds.length > 0 ? 'inline-block' : 'none';
@@ -2402,6 +2544,7 @@ notify pgrst, 'reload schema';</pre>
             if(tabId === 'settings') fillReportSelectors();
             if(tabId === 'visitation') renderVisitationList();
             if(tabId === 'trips') await openTripsHome();
+            if(tabId === 'contests') openContestsHome();
             if(tabId === 'birthdays') checkBirthdays();
         }
 
@@ -2701,17 +2844,28 @@ notify pgrst, 'reload schema';</pre>
             let allMeetings = [...db.meetings].sort();
             let list = [];
             db.members.forEach(m => {
-                let n = 0, dates = [];
-                for (let i = allMeetings.length - 1; i >= 0; i--) {
-                    let d = allMeetings[i];
-                    let attended = db.attendanceRecords[d] && db.attendanceRecords[d][m.id];
-                    if (attended) break;
-                    if (!absenceCounts(m, d)) break; // اجتماع قبل تسجيله: ماينفعش يتحسب غياب
-                    n++; dates.push(d);
-                }
-                if (n > 0) list.push({ m, n, dates: dates.reverse() });
+                // الاجتماعات اللي تحسب على المخدوم (من بعد تسجيله، أو اللي حضرها فعلاً)
+                let scope = allMeetings.filter(d => inScope(m, d));
+                let attendedDates = scope.filter(d => attAt(d, m.id));
+                let lastAttended = attendedDates.length ? attendedDates[attendedDates.length - 1] : null;
+                // الغياب المتتالي = كل اجتماع بعد آخر حضور (بعد يوم تسجيله) لحد آخر اجتماع
+                let dates = scope.filter(d => !attAt(d, m.id) && (!lastAttended || d > lastAttended));
+                let n = dates.length;
+                if (n > 0) list.push({
+                    m, n, dates,
+                    lastAttended,
+                    totalAbsent: scope.length - attendedDates.length,
+                    totalAttended: attendedDates.length
+                });
             });
             return { allMeetings, list };
+        }
+
+        function visFmtDate(d) {
+            if (!d) return '';
+            let p = String(d).split('-');
+            if (p.length < 3) return d;
+            return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         }
 
         function visStyle(n) {
@@ -2759,7 +2913,7 @@ notify pgrst, 'reload schema';</pre>
             shown.sort((a, b) => b.n - a.n);
 
             let html = '';
-            shown.forEach(({ m, n, dates }) => {
+            shown.forEach(({ m, n, dates, lastAttended, totalAbsent, totalAttended }) => {
                 let st = visStyle(n);
                 let absenceText = n === 1 ? 'غاب آخر اجتماع' : n === 2 ? 'غاب آخر اجتماعين' : `غاب آخر ${n} اجتماعات`;
                 if (n === 4 || n === 5) absenceText = '⚠️ ' + absenceText;
@@ -2774,6 +2928,8 @@ notify pgrst, 'reload schema';</pre>
                             </div>
                             <p><strong>الأسرة:</strong> ${m.family || '-'} | <strong>التليفون:</strong> ${phoneLink}</p>
                             <p><strong>أب الاعتراف:</strong> ${m.father || '-'} | <strong>العنوان:</strong> ${m.address || '-'}</p>
+                            <p style="font-weight:800; color:var(--text-main);">🗓️ آخر مرة حضر فيها: ${lastAttended ? visFmtDate(lastAttended) : '<span style="color:#b30000;">لم يحضر أي اجتماع من وقت تسجيله</span>'}</p>
+                            <p><strong>غاب:</strong> ${n} ${n === 1 ? 'اجتماع' : 'اجتماعات'} ورا بعض ${totalAttended > 0 ? '| <strong>حضر:</strong> ' + totalAttended + ' | <strong>إجمالي الغياب:</strong> ' + totalAbsent : ''}</p>
                             <p><strong>تواريخ الغياب:</strong> ${dates.join(' ، ')}</p>
                             <p><strong>ملاحظات:</strong> ${m.notes || 'لا توجد'}</p>
                         </div>
@@ -2802,7 +2958,7 @@ notify pgrst, 'reload schema';</pre>
             let { allMeetings, list } = getVisitationData();
             if (list.length === 0) { alert('لا يوجد متغيبون للتصدير.'); return; }
             let today = new Date().toISOString().slice(0, 10);
-            let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب'];
+            let headers = ['مسلسل', 'الاسم', 'الأسرة', 'أب الاعتراف', 'العنوان', 'رقم التليفون', 'عدد مرات الغياب', 'تواريخ الغياب', 'آخر حضور', 'إجمالي الغياب'];
             const isF = x => x.m.gender === 'شابة';
             // الأكتر غياب في الأول، ولو نفس العدد بالترتيب الأبجدي
             const byAbs = (a, b) => (b.n - a.n) || String(a.m.name || '').localeCompare(String(b.m.name || ''), 'ar');
@@ -2813,7 +2969,7 @@ notify pgrst, 'reload schema';</pre>
                     if (!arr.length) return;
                     rows.push({ section: label + '  (' + arr.length + ')', kind }); rowStyles.push(null);
                     arr.forEach((x, i) => {
-                        rows.push([i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، ')]);
+                        rows.push([i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.address || '', x.m.phone || '', x.n, x.dates.join(' ، '), x.lastAttended || 'لم يحضر', x.totalAbsent]);
                         rowStyles.push(visExcelStyle(x.n));
                     });
                 };
@@ -2823,8 +2979,8 @@ notify pgrst, 'reload schema';</pre>
                     name, title,
                     subtitle: 'العدد: ' + items.length + '  (شباب ' + boys.length + ' • شابات ' + girls.length + ')   |   تاريخ التصدير: ' + today,
                     headers, rows,
-                    widths: [9, 28, 20, 22, 34, 17, 14, 45],
-                    align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right'],
+                    widths: [9, 28, 20, 22, 34, 17, 14, 45, 16, 14],
+                    align: ['center', 'right', 'right', 'right', 'right', 'center', 'center', 'right', 'center', 'center'],
                     textCols: [5],
                     rowStyles,
                     badgeCols: [1, 6],
@@ -2928,7 +3084,7 @@ notify pgrst, 'reload schema';</pre>
                     let d = all[i];
                     if (db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) { n++; dates.push(d); } else break;
                 }
-                if (n === 4 || n === 5) list.push({ m, n, dates: dates.reverse() });
+                if (n >= 4) list.push({ m, n, dates: dates.reverse() });
             });
             list.sort((a, b) => b.n - a.n || String(a.m.name).localeCompare(String(b.m.name), 'ar'));
             return list;
@@ -2939,8 +3095,8 @@ notify pgrst, 'reload schema';</pre>
             if (!box) return;
             if (db.meetings.length === 0) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا توجد اجتماعات مسجلة حتى الآن.</p>'; return; }
             let list = getCommittedData();
-            if (!list.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد ملتزمين حالياً.</p>'; return; }
-            box.innerHTML = list.map(({ m, n, dates }, i) => {
+            if (!list.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد مواظبين حالياً.</p>'; return; }
+            const card = ({ m, n, dates }, i) => {
                 let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="font-size:16px; font-weight:900; color:#2e9e6b;">${i + 1}</span>`;
                 let phone = m.phone ? `<a href="tel:${esc(m.phone)}" style="color:var(--success); text-decoration:none; font-weight:800;" onclick="event.stopPropagation()">📞 ${esc(m.phone)}</a>` : 'بدون رقم تليفون';
                 return `
@@ -2949,22 +3105,25 @@ notify pgrst, 'reload schema';</pre>
                         <div class="info">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
                                 <h4 style="margin:0;">${esc(m.name)}</h4>
-                                <span style="background:#2e9e6b; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">حضر آخر ${n} اجتماعات</span>
+                                <span style="background:#2e9e6b; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">واظب ${n} اجتماعات</span>
                             </div>
                             <p><strong>الأسرة:</strong> ${esc(m.family || '-')} | <strong>التليفون:</strong> ${phone}</p>
                             <p><strong>أب الاعتراف:</strong> ${esc(m.father || '-')}</p>
                             <p><strong>تواريخ الحضور:</strong> ${dates.join(' ، ')}</p>
                         </div>
                     </div>`;
-            }).join('');
+            };
+            const girls = list.filter(x => x.m.gender === 'شابة'), boys = list.filter(x => x.m.gender !== 'شابة');
+            const sec = (t, arr) => `<h4 style="margin:18px 0 10px; color:var(--primary);">${t} (${arr.length})</h4>` + (arr.length ? arr.map(card).join('') : '<p style="color:var(--text-muted); text-align:center; padding:14px;">لا يوجد.</p>');
+            box.innerHTML = sec('👦 المواظبين الأولاد', boys) + sec('👧 المواظبات البنات', girls);
         }
 
         async function exportCommittedExcel() {
             let list = getCommittedData();
-            if (!list.length) { alert('لا يوجد ملتزمين للتصدير حالياً.'); return; }
+            if (!list.length) { alert('لا يوجد مواظبين للتصدير حالياً.'); return; }
             let today = new Date().toISOString().slice(0, 10);
-            await downloadStyledWorkbook(`الملتزمين_${today}.xlsx`, [{
-                name: 'الملتزمين', title: 'الملتزمين (٤ - ٥ اجتماعات متتالية)',
+            await downloadStyledWorkbook(`المواظبين_${today}.xlsx`, [{
+                name: 'المواظبين', title: 'المواظبين (٤ اجتماعات متتالية أو أكتر)',
                 subtitle: 'العدد: ' + list.length + '   |   تاريخ التصدير: ' + today,
                 headers: ['الترتيب', 'الاسم', 'الأسرة', 'أب الاعتراف', 'رقم التليفون', 'عدد الاجتماعات المتتالية', 'تواريخ الحضور'],
                 rows: list.map((x, i) => [i + 1, x.m.name || '', x.m.family || '', x.m.father || '', x.m.phone || '', x.n, x.dates.join(' ، ')]),
@@ -2979,14 +3138,28 @@ notify pgrst, 'reload schema';</pre>
         // ============================================================
         let bonusFilter = 'all';
 
-        function getBonusData() {
+        function bonusCtxActive(d, id) {
+            const tag = (((db.bonusReason || {})[d]) || {})['c:' + id];
+            if (!tag || typeof CT === 'undefined' || !CT.cur || CT.cur.archived || CT.cur.id !== tag.c) return null;
+            const team = (CT.cur.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(id)));
+            return team ? { n: CT.cur.name || '', t: team.name || '' } : null;
+        }
+        function getBonusData(kind) {
+            kind = kind || 'all';
             let meetings = [...db.meetings].sort();
             let list = [];
             db.members.forEach(m => {
                 let items = [];
                 meetings.forEach(d => {
                     let v = parseFloat((((db.bonus || {})[d]) || {})[m.id]);
-                    if (!isNaN(v) && v !== 0 && db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) items.push({ d, v });
+                    if (!isNaN(v) && v !== 0 && db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) {
+                        const ctx = bonusCtxActive(d, m.id);
+                        const reason = ((((db.bonusReason || {})[d]) || {})[m.id]) || '';
+                        const it = { d, v, ctx, reason, time: db.attendanceRecords[d][m.id] };
+                        if (kind === 'regular' && ctx) return;
+                        if (kind === 'contest' && !ctx) return;
+                        items.push(it);
+                    }
                 });
                 if (items.length) list.push({ m, items, total: items.reduce((s, x) => s + x.v, 0) });
             });
@@ -3006,30 +3179,39 @@ notify pgrst, 'reload schema';</pre>
             let sel = document.getElementById('bonus-filter');
             let sum = document.getElementById('bonus-summary');
             if (!box || !sel) return;
-            let list = getBonusData();
+            const isKind = ['regular', 'contest'].includes(bonusFilter);
+            const all = getBonusData('all'), reg = getBonusData('regular'), con = getBonusData('contest');
+            let list = isKind ? (bonusFilter === 'regular' ? reg : con) : all;
             let cnt = { high: 0, mid: 0, low: 0 };
-            list.forEach(x => cnt[x.tier]++);
+            all.forEach(x => cnt[x.tier]++);
             let grand = list.reduce((s, x) => s + x.total, 0);
             if (sum) sum.innerHTML = `
                 <div class="stat-card"><div class="stat-title">إجمالي البونص</div><div class="stat-num">${grand}</div></div>
                 <div class="stat-card"><div class="stat-title">عدد اللي أخدوا بونص</div><div class="stat-num">${list.length}</div></div>`;
-            sel.innerHTML = [['all', `الكل (${list.length})`], ['high', `🥇 الأعلى (${cnt.high})`], ['mid', `🔸 المتوسط (${cnt.mid})`], ['low', `🔻 الأقل (${cnt.low})`]]
+            sel.innerHTML = [['all', `الكل (${all.length})`], ['regular', `🎁 بونص (${reg.length})`], ['contest', `🏆 بونص مسابقة (${con.length})`], ['high', `🥇 الأعلى (${cnt.high})`], ['mid', `🔸 المتوسط (${cnt.mid})`], ['low', `🔻 الأقل (${cnt.low})`]]
                 .map(([k, l]) => `<option value="${k}" ${bonusFilter === k ? 'selected' : ''}>${l}</option>`).join('');
-            let shown = list.filter(x => bonusFilter === 'all' || x.tier === bonusFilter);
+            let shown = list.filter(x => isKind || bonusFilter === 'all' || x.tier === bonusFilter);
             if (!shown.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد بونص مسجل في هذه الفئة. اكتب البونص في خانة "بونص" بشيت الحضور وهيظهر هنا تلقائياً.</p>'; return; }
             let T = { high: ['#a855f7', '🥇 الأعلى'], mid: ['#f59e0b', '🔸 المتوسط'], low: ['#64748b', '🔻 الأقل'] };
             box.innerHTML = shown.map(x => {
                 let [col, lab] = T[x.tier];
-                let chips = x.items.map(it => `<span style="display:inline-block; background:rgba(168,85,247,0.14); border-radius:10px; padding:2px 8px; margin:2px; font-size:12px;">${it.d.slice(8)}/${it.d.slice(5, 7)}: <b>+${it.v}</b></span>`).join('');
+                let rows = x.items.map(it => `<div style="background:rgba(168,85,247,0.10); border-radius:12px; padding:8px 10px; margin:6px 0; font-size:13px; line-height:1.7;">
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                    <b style="font-size:15px;">+${it.v}</b>
+                    ${it.ctx ? `<span style="background:rgba(245,158,11,.22); color:#b45309; border-radius:8px; padding:1px 7px; font-weight:800;">🏆 بونص مسابقة${it.ctx.n ? ' «' + esc(it.ctx.n) + '»' : ''}${it.ctx.t ? ' — فريق ' + esc(it.ctx.t) : ''}</span>` : `<span style="background:rgba(100,116,139,.18); border-radius:8px; padding:1px 7px; font-weight:700;">🎁 بونص</span>`}</div>
+                    <div>📅 <strong>التاريخ:</strong> ${esc(fmtD(it.d))}</div>
+                    <div>🕒 <strong>الحضور:</strong> ${esc(it.time || '-')}</div>
+                    <div>📝 <strong>السبب:</strong> ${it.reason ? esc(it.reason) : '<span style="color:var(--text-muted);">لم يُكتب سبب</span>'}</div></div>`).join('');
                 return `
                     <div class="visitation-card" style="background:${col}22; border-color:${col}; border-right:6px solid ${col};" onclick="openMemberDetail(${x.m.id})">
                         <div class="info">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
                                 <h4 style="margin:0;">${esc(x.m.name)}</h4>
-                                <span style="background:${col}; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">${lab}</span>
+                                <span style="display:flex; gap:6px; align-items:center;"><span style="background:${col}; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">${lab}</span>
+                                <button class="btn-delete" style="padding:4px 10px; font-size:12px; width:auto;" onclick="event.stopPropagation(); clearMemberBonus(${x.m.id})">🗑️ مسح</button></span>
                             </div>
                             <p><strong>الأسرة:</strong> ${esc(x.m.family || '-')}</p>
-                            <div style="margin:4px 0;">${chips}</div>
+                            <div style="margin:4px 0;">${rows}</div>
                             <p style="font-size:15px;"><strong>الإجمالي:</strong> <span style="color:${col}; font-weight:900; font-size:18px;">${x.total}</span> <span style="color:var(--text-muted);">(${x.items.map(i => i.v).join(' + ')})</span></p>
                         </div>
                     </div>`;
@@ -3443,7 +3625,7 @@ notify pgrst, 'reload schema';</pre>
         function renderFamilyMembersTable() {
             let container = document.getElementById('family-members-container');
             let members = db.members.filter(m => {
-                let matchFam = (m.family || 'أسرة عامة') === currentSelectedFamilyName;
+                let matchFam = (m.family || 'أسرة عامة') === currentSelectedFamilyName && ((m.gender === 'شابة') === (currentSelectedFamilyGender === 'شابة'));
                 if(!currentFamilySearchTerm) return matchFam;
                 return matchFam && m.name.toLowerCase().includes(currentFamilySearchTerm.toLowerCase());
             });
@@ -3613,14 +3795,15 @@ notify pgrst, 'reload schema';</pre>
         function unpackInst(raw) {
             let v = raw;
             try { if (typeof v === 'string') v = JSON.parse(v); } catch (e) { v = []; }
-            if (Array.isArray(v)) return { items: v, discount: 0, refunded: false, refundAmount: 0, refundDate: '' };
-            if (v && typeof v === 'object') return { items: Array.isArray(v.items) ? v.items : [], discount: parseFloat(v.discount) || 0, refunded: !!v.refunded, refundAmount: parseFloat(v.refundAmount) || 0, refundDate: v.refundDate || '' };
-            return { items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '' };
+            if (Array.isArray(v)) return { items: v, discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: 0 };
+            if (v && typeof v === 'object') return { items: Array.isArray(v.items) ? v.items : [], discount: parseFloat(v.discount) || 0, refunded: !!v.refunded, refundAmount: parseFloat(v.refundAmount) || 0, refundDate: v.refundDate || '', regAt: parseFloat(v.regAt) || 0 };
+            return { items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: 0 };
         }
         function packInst(res) {
-            if (!res.discount && !res.refunded) return JSON.stringify(res.installments || []);
-            return JSON.stringify({ items: res.installments || [], discount: res.discount || 0, refunded: !!res.refunded, refundAmount: res.refundAmount || 0, refundDate: res.refundDate || '' });
+            if (!res.discount && !res.refunded && !res.regAt) return JSON.stringify(res.installments || []);
+            return JSON.stringify({ items: res.installments || [], discount: res.discount || 0, refunded: !!res.refunded, refundAmount: res.refundAmount || 0, refundDate: res.refundDate || '', regAt: res.regAt || 0 });
         }
+        function tripIds(trip) { return Object.keys(trip.reservations).sort((a, b) => (trip.reservations[a].seq || 0) - (trip.reservations[b].seq || 0)); }
         function tripDue(t, r) { return Math.max((t.fee || 0) - (r.discount || 0), 0); }
         async function saveTripRes(key, trip, id) {
             let res = trip.reservations[id]; if (!res) return;
@@ -3718,7 +3901,7 @@ notify pgrst, 'reload schema';</pre>
                     member_id: id,
                     fee: fee,
                     paid: 0,
-                    installments: JSON.stringify([])
+                    installments: JSON.stringify({ items: [], discount: 0, refunded: false, refundAmount: 0, refundDate: '', regAt: Date.now() })
                 }], { onConflict: 'trip_type,member_id' });
                 await loadData();
                 renderTripTable();
@@ -3797,9 +3980,7 @@ notify pgrst, 'reload schema';</pre>
 
         // ===== الرحلات الجارية والنقل للأرشيف =====
         // الرحلة في الأرشيف لو اتبعتت يدوي (sent) أو تاريخها عدّى. غير كده هي رحلة جارية بتظهر كارت.
-        // تاريخ صالح بصيغة YYYY-MM-DD بس. أي تاريخ فاضي أو غلط ما يتحسبش «عدّى» (كان بيودّي الرحلة للأرشيف فوراً)
-        function tripDateOK(d) { return /^\d{4}-\d{2}-\d{2}$/.test(String(d || '')); }
-        function tripIsArchived(x) { return x.sent === true || (tripDateOK(x.date) && String(x.date) < localISO()); }
+        function tripIsArchived(x) { return x.sent === true || String(x.date || '') < localISO(); }
         let _tripSweeping = false, _tripCardItems = [];
 
         function showTripList() {
@@ -3918,13 +4099,12 @@ notify pgrst, 'reload schema';</pre>
         }
         async function _sweepImpl() {
             let moved = 0;
-            if (!navigator.onLine) { _tripSweeping = false; return 0; }   // أوفلاين: مفيش نقل تلقائي (بيانات محلية ممكن تكون قديمة)
             try {
                 const today = localISO(), latest = {};
                 (db.tripArchive || []).forEach(x => { if (x.type && (!latest[x.type] || String(x.date) > String(latest[x.type].date))) latest[x.type] = x; });
                 for (const type of Object.keys(latest)) {
                     const x = latest[type];
-                    if (x.sent || !tripDateOK(x.date) || !(String(x.date) < today)) continue;           // لسه جارية، أو اتنقلت قبل كده
+                    if (x.sent || !(String(x.date) < today)) continue;           // لسه جارية، أو اتنقلت قبل كده
                     const t = db.tripsData[type];
                     if (!t || !Object.keys(t.reservations || {}).length) continue; // الشيت فاضي: هي أصلاً في الأرشيف بتاريخها
                     const snap = tripSnapshot(type, x.name, x.date);
@@ -4098,7 +4278,8 @@ notify pgrst, 'reload schema';</pre>
                 <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
                     <select onchange="openTripYearModal(this.value)" style="padding:8px 12px; border-radius:10px; border:1px solid var(--card-border); font-family:inherit; font-weight:800;">${years.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select>
                     <span style="font-size:13px; color:var(--text-muted);">عدد الرحلات: <b>${items.length}</b> • إجمالي المخدومين: <b>${totAtt}</b> • إجمالي المبالغ: <b>${totMoney} ج</b></span>
-                </div>${list}`;
+                </div>${list}
+                ${archive.length ? `<div style="margin-top:14px;"><button class="btn-delete" onclick="cleanTripArchive()" style="padding:10px 14px; font-size:13px;">🧹 تنظيف الأرشيف (مسح كل رحلات السنين)</button></div>` : ''}`;
             showTripModal('📅 رحلات سنة ' + year, body);
         }
 
@@ -4138,7 +4319,7 @@ notify pgrst, 'reload schema';</pre>
             let trip = getTripObj();
             let feeInp = document.getElementById('trip-fee');
             if (!trip.fee && feeInp && feeInp.value) trip.fee = parseFloat(feeInp.value) || 0;
-            let memberIds = Object.keys(trip.reservations);
+            let memberIds = tripIds(trip);
 
             let totalDue = 0, totalCollected = 0, activeCount = 0, refundedCount = 0, refundedSum = 0;
             memberIds.forEach(id => {
@@ -4380,7 +4561,7 @@ notify pgrst, 'reload schema';</pre>
 
         async function exportTripExcel() {
             let trip = getTripObj();
-            let activeIds = Object.keys(trip.reservations).filter(id => !trip.reservations[id].refunded);   // اللي استرد فلوسه مش بيظهر في الإكسيل
+            let activeIds = tripIds(trip).filter(id => !trip.reservations[id].refunded);   // اللي استرد فلوسه مش بيظهر في الإكسيل
             if (activeIds.length === 0) {
                 alert("لا توجد حجوزات مسجلة في هذا الشيت لتصديرها!");
                 return;
@@ -4648,7 +4829,7 @@ notify pgrst, 'reload schema';</pre>
 
                 // بناء tripsData
                 (tripsRes.data || []).forEach(t => {
-                    if (String(t.trip_type).startsWith('ARCHIVE|')) return;
+                    if (String(t.trip_type).startsWith('ARCHIVE|') || String(t.trip_type).startsWith('CONTEST|') || String(t.trip_type).startsWith('BREASON|')) return;
                     if (!backup.dbSnapshot.tripsData[t.trip_type]) {
                         backup.dbSnapshot.tripsData[t.trip_type] = {
                             fee: t.fee || 0,
@@ -4776,7 +4957,7 @@ notify pgrst, 'reload schema';</pre>
                                 member_id: memberId,
                                 fee: tripObj.fee || 0,
                                 paid: reservation?.paid || 0,
-                                installments: packInst({ installments: reservation?.installments || [], discount: reservation?.discount, refunded: reservation?.refunded, refundAmount: reservation?.refundAmount, refundDate: reservation?.refundDate })
+                                installments: packInst({ regAt: reservation?.regAt, installments: reservation?.installments || [], discount: reservation?.discount, refunded: reservation?.refunded, refundAmount: reservation?.refundAmount, refundDate: reservation?.refundDate })
                             });
                         });
                     });
@@ -4908,15 +5089,49 @@ notify pgrst, 'reload schema';</pre>
             }
         }
 
+        function resetArchCaches() {
+            try { [_archKeys, _archFresh, _archWarned].forEach(o => Object.keys(o).forEach(k => delete o[k])); } catch (e) {}
+        }
         async function clearAllSheetsData() {
-            if(confirm("⚠️ تحذير: هل أنت متأكد من تصفير كافة شيتات الحضور والرحلات؟")) {
-                await Promise.all([
+            if (!confirm("⚠️ تحذير: هتتمسح كل الشيتات نهائي من أول السنة:\n• حضور كل الاجتماعات (والبونص)\n• كل الرحلات وأرشيفها\n• كل المسابقات وأرشيفها\n\nبيانات المخدومين المسجلين هتفضل زي ما هي. تكمل؟")) return;
+            if (!confirm("تأكيد أخير: التصفير ما ينفعش يترجع إلا من نسخة احتياطية. تمسح كل الشيتات دلوقتي؟")) return;
+            clearTimeout(CT.timer); CT.seq++; CT.cur = null; CT.open = null;
+            try { await CT.chain; } catch (e) {}
+            CT.pending = false;
+            let results = [];
+            try {
+                results = await Promise.all([
                     _supabase.from('attendance').delete().neq('id', 0),
-                    _supabase.from('trips').delete().neq('member_id', '0')
+                    _supabase.from('trips').delete().neq('trip_type', ''),
+                    _supabase.from('trips').delete().is('trip_type', null)
                 ]);
+            } catch (e) { results = [{ error: e }]; }
+            const bad = results.find(r => r && r.error);
+            resetArchCaches();
+            if (bad) {
+                alert("تعذر تصفير بعض الشيتات: " + (bad.error.message || bad.error) + "\nراجع صلاحيات قاعدة البيانات وحاول تاني.");
+            } else {
                 alert("تم تصفير جميع الشيتات بنجاح.");
-                await loadData();
             }
+            await loadData();
+        }
+
+        // تنظيف أرشيف رحلات السنة (كل السنين) — بيمسح الأرشيف بس
+        async function cleanTripArchive() {
+            const n = (db.tripArchive || []).filter(x => x.key).length;
+            if (!n) { toast('أرشيف الرحلات فاضي'); return; }
+            if (!confirm('تنظّف أرشيف الرحلات؟\nهتتمسح كل الرحلات المحفوظة (' + n + ') لكل السنين نهائي، وتبدأ من جديد.')) return;
+            const keys = [...new Set((db.tripArchive || []).map(x => x.key).filter(Boolean))];
+            let err = null;
+            for (let i = 0; i < keys.length && !err; i += 100) {
+                const r = await _supabase.from('trips').delete().in('trip_type', keys.slice(i, i + 100));
+                err = r.error || null;
+            }
+            if (err) { alert('تعذر تنظيف الأرشيف: ' + (err.message || err)); return; }
+            resetArchCaches();
+            await loadData();
+            openTripYearModal();
+            toast('اتنضّف أرشيف الرحلات ✅');
         }
     
 /* استرجاع الجلسة بعد الريفريش من غير ما يطلب دخول تاني */
@@ -5006,6 +5221,30 @@ async function renameCurrentFamily(){
   await loadData();
   openFamilyDetail(newName, currentSelectedFamilyGender);
 }
+async function deleteCurrentFamily(){
+  const famName = currentSelectedFamilyName;
+  const isG = currentSelectedFamilyGender === 'شابة';
+  const norm = x => String(x||'').trim().replace(/\s+/g,' ');
+  const inFam = db.members.filter(m => (m.gender==='شابة')===isG && (norm(m.family)||'أسرة عامة')===norm(famName));
+  if(!inFam.length){ alert('الأسرة مفيهاش مخدومين.'); return; }
+  if(!confirm(`⚠️ تحذير شديد\n\nإنت كده هتمسح الأسماء الأساسية للمخدومين نفسهم، مش بس الأسرة!\n\nهتتمسح أسرة «${famName}» بكل مخدوميها (${inFam.length} مخدوم) نهائي، مع كل بيانات حضورهم وحجوزاتهم في الرحلات.\n\nمخدومين الأسر التانية مش هيتأثروا.\n\nتكمل؟`)) return;
+  if(!confirm(`تأكيد أخير: مسح ${inFam.length} مخدوم من أسرة «${famName}» ما ينفعش يترجع. تمسح فعلاً؟`)) return;
+  const ids = inFam.map(m=>m.id);
+  let err = null;
+  for(let i=0;i<ids.length && !err;i+=100){
+    const chunk = ids.slice(i,i+100);
+    const rs = await Promise.all([
+      _supabase.from('attendance').delete().in('member_id', chunk),
+      _supabase.from('trips').delete().in('member_id', chunk)
+    ]);
+    err = (rs.find(r=>r&&r.error)||{}).error || null;
+    if(!err){ const r = await _supabase.from('members').delete().in('id', chunk); err = r.error || null; }
+  }
+  if(err){ alert('تعذر مسح الأسرة بالكامل: '+(err.message||err)); }
+  else if(typeof toast==='function') toast('اتمسحت الأسرة ومخدوميها ✅');
+  await loadData();
+  backToFamiliesList();
+}
 /* الجلسة بتتخزن في التبويب بس: ريفريش = يفضل داخل، فتح اللينك من جديد = تسجيل دخول */
 try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
 async function logoutUser(){
@@ -5077,7 +5316,95 @@ async function saveBonus(id,inp){
     if(ins.error){toast('❌ '+ins.error.message);return}
   }
   (db.bonus[d]=db.bonus[d]||{})[id]=val;
-  updateBonusTotal();toast('تم حفظ البونص ✅');
+  bonusCtxSet(d,id,val!=null&&val!==0);persistBonusMeta(d);
+  updateBonusTotal();toast(val!=null&&val!==0&&!(((db.bonusReason||{})[d]||{})[id])?'تم حفظ البونص ✅ — اكتب السبب في الخانة اللي جنبه':'تم حفظ البونص ✅');
+}
+let _brChain=Promise.resolve();
+function bonusCtxSet(d,id,on){
+  db.bonusReason=db.bonusReason||{};
+  const map=db.bonusReason[d]=db.bonusReason[d]||{},k='c:'+id;
+  let t=null;
+  if(on&&typeof CT!=='undefined'&&CT.cur&&!CT.cur.archived){
+    const team=(CT.cur.teams||[]).find(x=>(x.members||[]).some(m=>String(m.id)===String(id)));
+    if(team)t={c:CT.cur.id,n:CT.cur.name||'',t:team.name||''};
+  }
+  if(t)map[k]=t;else delete map[k];
+  return t;
+}
+function persistBonusMeta(d){
+  const map=(db.bonusReason||{})[d]||{},snap=JSON.stringify(map),key='BREASON|'+d;
+  _brChain=_brChain.then(async()=>{
+    try{
+      await _supabase.from('trips').delete().eq('trip_type',key);
+      if(snap==='{}')return;
+      let row={trip_type:key,member_id:null,fee:0,paid:0,installments:snap};
+      let r=await _supabase.from('trips').insert([row]);
+      if(r.error){row.member_id=0;r=await _supabase.from('trips').insert([row])}
+      if(r.error)toast('❌ تعذر حفظ السبب: '+r.error.message);
+    }catch(e){console.error(e)}
+  });
+}
+function saveBonusReason(id,inp){
+  const d=currentMeetingDate,v=inp.value.trim();
+  db.bonusReason=db.bonusReason||{};
+  const map=db.bonusReason[d]=db.bonusReason[d]||{};
+  if(v==='')delete map[id];else map[id]=v;
+  persistBonusMeta(d);toast('تم حفظ السبب ✅');
+}
+async function clearMemberBonus(id){
+  const m=(db.members||[]).find(x=>String(x.id)===String(id));
+  if(!confirm('تمسح كل بونص «'+(m?m.name:'')+'» (كل الأيام) وأسبابه؟'))return;
+  try{
+    const rows=(db.attRows||[]).filter(r=>String(r.member_id)===String(id)&&r.bonus!=null);
+    if(rows.length){
+      let r=await _supabase.from('attendance').update({bonus:null}).eq('member_id',id).not('bonus','is',null).select();
+      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
+      if(!r.data||!r.data.length){
+        for(const old of rows){
+          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
+          if(del.error){toast('❌ '+del.error.message);return}
+          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
+          if(ins.error){toast('❌ '+ins.error.message);return}
+        }
+      }
+    }
+    rows.forEach(r=>{r.bonus=null});
+    Object.keys(db.bonus||{}).forEach(d=>{if(db.bonus[d]&&id in db.bonus[d])db.bonus[d][id]=null});
+    Object.keys(db.bonusReason||{}).forEach(d=>{
+      const mp=db.bonusReason[d];
+      if(mp&&(id in mp||('c:'+id) in mp)){delete mp[id];delete mp['c:'+id];persistBonusMeta(d)}
+    });
+    renderBonusTab();
+    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
+    toast('اتمسح بونص '+(m?m.name:'الشخص')+' ✅');
+  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
+}
+async function clearAllBonus(){
+  if(!confirm('تمسح كل البونص من كل الأيام (العادي وبونص المسابقات) وأسبابه؟\nده هيصفّر خانة البونص في شيت الحضور كمان.'))return;
+  try{
+    const rows=(db.attRows||[]).filter(r=>r.bonus!=null);
+    if(rows.length){
+      let r=await _supabase.from('attendance').update({bonus:null}).not('bonus','is',null).select();
+      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
+      if(!r.data||!r.data.length){
+        for(const old of rows){
+          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
+          if(del.error){toast('❌ '+del.error.message);return}
+          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
+          if(ins.error){toast('❌ '+ins.error.message);return}
+        }
+      }
+    }
+    for(const d of Object.keys(db.bonusReason||{})){
+      const t=await _supabase.from('trips').delete().eq('trip_type','BREASON|'+d);
+      if(t.error){toast('❌ تعذر مسح الأسباب: '+t.error.message);return}
+    }
+    (db.attRows||[]).forEach(r=>{r.bonus=null});
+    db.bonus={};db.bonusReason={};
+    renderBonusTab();
+    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
+    toast('اتمسح كل البونص ✅');
+  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
 }
 function updateBonusTotal(){const b=db.bonus[currentMeetingDate]||{};let s=0;currentAttendees.forEach(m=>{s+=parseFloat(b[m.id])||0});const e=document.getElementById('bonus-total');if(e)e.textContent=s}
 function renderAttendanceTable(){
@@ -5087,8 +5414,9 @@ function renderAttendanceTable(){
   const b=db.bonus[currentMeetingDate]||{};
   currentAttendees.forEach((m,i)=>{
     const bv=b[m.id];
-    tb.insertAdjacentHTML('beforeend',`<tr style="cursor:pointer" onclick="openMemberDetail(${m.id})"><td>${i+1}</td><td><strong>${esc(m.name)}</strong></td><td>${esc(m.family||'-')}</td><td>${esc(db.attendanceRecords[currentMeetingDate][m.id])}</td>
+    tb.insertAdjacentHTML('beforeend',`<tr style="cursor:pointer" onclick="openMemberDetail(${m.id})"><td>${i+1}</td><td><strong>${esc(m.name)}</strong>${typeof ctMemberTagHTML==='function'?ctMemberTagHTML(m.id):''}</td><td>${esc(m.family||'-')}</td><td>${esc(db.attendanceRecords[currentMeetingDate][m.id])}</td>
     <td><input class="bonus-input" type="number" step="any" inputmode="decimal" placeholder="بونص" value="${bv==null?'':esc(bv)}" onclick="event.stopPropagation()" onchange="saveBonus(${m.id},this)"></td>
+    <td><input class="bonus-reason" type="text" placeholder="السبب..." value="${esc(((db.bonusReason||{})[currentMeetingDate]||{})[m.id]||'')}" onclick="event.stopPropagation()" onchange="saveBonusReason(${m.id},this)"></td>
     <td><button class="btn-delete" onclick="removeMemberFromMeeting(${m.id});event.stopPropagation()">إلغاء ✖️</button></td></tr>`);
   });
   updateBonusTotal();
@@ -5162,12 +5490,23 @@ function openMemberDetail(memberId,event){
   addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay').forEach(m=>{if(m.style.display==='flex'&&m.id!=='qr-scanner-modal')m.style.display='none'})});
 })();
 </script>
+<style id="nav-icons-real">
+.nav-tabs .ic,.nav-tabs button:hover .ic,.nav-tabs button:active .ic,.nav-tabs button.active .ic{
+  width:44px!important;height:44px!important;border-radius:13px!important;display:grid!important;place-items:center;
+  background:linear-gradient(165deg,var(--a),var(--a2))!important;
+  box-shadow:0 5px 12px -6px rgba(var(--ar),.7),inset 0 1px 0 rgba(255,255,255,.32),inset 0 -2px 3px rgba(0,0,0,.14)!important;
+  transform:none!important;animation:none!important;transition:box-shadow .2s,filter .2s;text-shadow:none!important;filter:none!important}
+.nav-tabs .ic svg{width:24px;height:24px;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.nav-tabs button:hover .ic{filter:brightness(1.06)!important}
+.nav-tabs button.active .ic{box-shadow:0 8px 16px -6px rgba(var(--ar),.85),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 3px rgba(0,0,0,.16)!important}
+</style>
 <script>
-/* أيقونات التبويبات 3D + بروفايل بنفس الشكل */
-(function(){const E={'add-member':'➕','attendance':'📋','visitation':'🤝','committed':'🏆','bonus':'🎁','families':'👥','trips':'🚌','profiles':'🔍','birthdays':'🎂','settings':'⚙️'};
+/* أيقونات التبويبات: SVG واقعية بدون أنيميشن */
+(function(){const I={"add-member": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M19 8v6M22 11h-6\"/></svg>", "attendance": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"8\" y=\"2\" width=\"8\" height=\"4\" rx=\"1\"/><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><path d=\"m9 14 2 2 4-4\"/></svg>", "visitation": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"/></svg>", "trips": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 6v6M15 6v6M2 12h19.6\"/><path d=\"M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/><path d=\"M9 18h5\"/><circle cx=\"16\" cy=\"18\" r=\"2\"/></svg>", "contests": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16\"/><path d=\"M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22\"/><path d=\"M18 2H6v7a6 6 0 0 0 12 0V2Z\"/></svg>", "families": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75\"/></svg>", "birthdays": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8\"/><path d=\"M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01\"/></svg>", "bonus": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"8\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7\"/><path d=\"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5\"/></svg>", "committed": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.477 12.89 17 22l-5-3-5 3 1.523-9.11\"/></svg>", "profiles": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg>", "settings": "<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>"};
  document.querySelectorAll('.nav-tabs button').forEach(b=>{
+  if(b.querySelector('.ic'))return;
   const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())n.nodeValue=n.nodeValue.replace(/\p{Extended_Pictographic}\uFE0F?/gu,'').trim();
-  const s=document.createElement('span');s.className='ic';s.textContent=E[b.dataset.tab]||'•';b.prepend(s)});})();
+  const s=document.createElement('span');s.className='ic';s.innerHTML=I[b.dataset.tab]||'';b.prepend(s)});})();
 function shortD(d){const p=String(d).split('-');return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('ar-EG',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
 function openMemberDetail(memberId,event){
   if(event)event.stopPropagation();
@@ -5285,6 +5624,102 @@ function sortAttendeesByTime(list){
 }
 
 /* ---- بحث عن مخدوم: حضر كام مرة وبالتواريخ ---- */
+/* ===== فلاتر تبويب الحضور ===== */
+const AF_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function attFilterClose(){
+  ['att-filter-extra','att-filter-result'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=''});
+  const pw=document.getElementById('att-person-wrap');if(pw)pw.style.display='none';
+  closePersonAttendance();
+}
+const AF_CLOSE='<div style="text-align:left;margin-bottom:6px"><button onclick="attFilterClose()" style="padding:6px 14px;font-size:12.5px;background:var(--text-muted);box-shadow:none">✕ إغلاق</button></div>';
+function afDay(){return document.getElementById('meeting-date').value||''}
+function afAttendees(){const d=afDay(),rec=db.attendanceRecords[d]||{};return db.members.filter(m=>rec[m.id])}
+function afRow(m,extra){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid var(--card-border);cursor:pointer" onclick="openMemberDetail('+m.id+')"><span><strong>'+esc(m.name)+'</strong> <small style="color:var(--text-muted)">'+esc(m.family||'-')+' • '+esc(m.gender||'-')+'</small></span><span style="font-size:12.5px;font-weight:700;color:var(--primary);text-align:left">'+(extra||'')+'</span></div>'}
+function afBox(title,rows,empty){return '<div style="margin-top:6px"><div style="font-weight:800;margin-bottom:6px;color:var(--primary)">'+title+'</div>'+(rows.length?rows.join(''):'<p style="text-align:center;color:var(--text-muted);padding:14px">'+empty+'</p>')+'</div>'}
+function attFilter(type){
+  const ex=document.getElementById('att-filter-extra'),res=document.getElementById('att-filter-result'),pw=document.getElementById('att-person-wrap');
+  ex.innerHTML='';res.innerHTML='';pw.style.display='none';closePersonAttendance();
+  if(type==='search'){pw.style.display='block';const i=document.getElementById('att-person-search');if(i)i.focus();return}
+  const d=afDay();
+  if(!d){res.innerHTML=AF_CLOSE+afBox('🎛️ الفلتر',[],'اختار تاريخ الاجتماع الأول.');return}
+  const rec=db.attendanceRecords[d]||{},dayLbl=' — '+esc(fmtD(d));
+  if(type==='early'){
+    ex.innerHTML=AF_CLOSE+'<div id="af-slots" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>';
+    attEarlyRender(-1);
+  }else if(type==='bday'){
+    AF_SEL=new Set();attBdayChips();
+  }else{
+    const n=type==='last3'?3:4,all=[...db.meetings].sort().filter(x=>x<=d),rows=[];
+    afAttendees().forEach(m=>{let c=0,ds=[];for(let i=all.length-1;i>=0;i--){const x=all[i];if(db.attendanceRecords[x]&&db.attendanceRecords[x][m.id]){c++;ds.push(x)}else break}if(c>=n)rows.push({m,c,ds:ds.slice(0,n).reverse()})});
+    rows.sort((a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar'));
+    const last=all.slice(-n).join(' ، ');
+    res.innerHTML=AF_CLOSE+afBox('✅ حاضرين النهاردة وحضروا آخر '+n+' اجتماعات ورا بعض ('+rows.length+')'+dayLbl,rows.map(x=>afRow(x.m,x.ds.join(' ، ')+(x.c>n?' <small>(متواصل '+x.c+')</small>':''))),'مفيش حد من حاضري اليوم ده حضر '+n+' اجتماعات ورا بعض.')+'<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📅 الاجتماعات المحسوبة (من شيت الحضور): '+last+'</div>';
+  }
+}
+
+const AF_SLOTS=[['٧ - ٧:٣٠',19*3600,19.5*3600],['٧:٣٠ - ٧:٤٥',19.5*3600,19.75*3600],['٧:٣٠ - ٧:٥٠',19.5*3600,19*3600+50*60],['٧:٣٠ - ٨',19.5*3600,20*3600],['٧:٣٠ - ٨:١٥',19.5*3600,20.25*3600],['٨ - ٨:٣٠',20*3600,20.5*3600],['٨:١٥ - ٨:٣٠',20.25*3600,20.5*3600]];
+function attEarlyRender(i){
+  const d=afDay(),res=document.getElementById('att-filter-result'),box=document.getElementById('af-slots');
+  if(!d||!res)return;
+  if(box)box.innerHTML='<button onclick="attEarlyRender(-1)" style="padding:8px 14px;font-size:13px;box-shadow:none;'+(i<0?'':'opacity:.55;')+'">أول ١٠ (الكل)</button>'+AF_SLOTS.map((x,k)=>'<button onclick="attEarlyRender('+k+')" style="padding:8px 14px;font-size:13px;box-shadow:none;background:linear-gradient(135deg,#818cf8,#6366f1);'+(i===k?'':'opacity:.55;')+'">🕐 '+x[0]+'</button>').join('');
+  const prev=currentMeetingDate;currentMeetingDate=d;
+  let sorted=sortAttendeesByTime(afAttendees());
+  currentMeetingDate=prev||d;
+  const rec=db.attendanceRecords[d]||{};
+  const tm=m=>{const r=String(rec[m.id]);return r.indexOf('|')>=0?r.split('|').slice(1).join('|').trim():r};
+  const dayLbl=' — '+esc(fmtD(d));
+  let boys=sorted.filter(m=>m.gender!=='شابة'),girls=sorted.filter(m=>m.gender==='شابة'),tag,lim=10;
+  if(i>=0){
+    const sl=AF_SLOTS[i],inSlot=m=>{const t=attTimeSecs(rec[m.id]);return t!=null&&t>=sl[1]&&t<sl[2]};
+    boys=boys.filter(inSlot);girls=girls.filter(inSlot);lim=1e9;tag=' حضروا من '+sl[0];
+  }else tag=' حضروا بدري';
+  boys=boys.slice(0,lim);girls=girls.slice(0,lim);
+  const mk=l=>l.map((m,k)=>afRow(m,(k+1)+'. 🕐 '+esc(tm(m))));
+  res.innerHTML=afBox('👦 '+(i>=0?'':'أول ')+boys.length+' ولاد'+tag+dayLbl,mk(boys),i>=0?'مفيش ولاد حضروا في الفترة دي.':'مفيش ولاد حاضرين في اليوم ده.')+'<div style="height:12px"></div>'+afBox('👧 '+(i>=0?'':'أول ')+girls.length+' بنات'+tag+dayLbl,mk(girls),i>=0?'مفيش بنات حضروا في الفترة دي.':'مفيش بنات حاضرات في اليوم ده.');
+}
+let AF_SEL=new Set();
+function attBdayChips(){
+  const ex=document.getElementById('att-filter-extra');if(!ex)return;
+  ex.innerHTML=AF_CLOSE+'<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:6px">🎂 اختار شهر أو أكتر (تقدر تختار كذا شهر مع بعض):</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+    AF_MONTHS.map((n,i)=>{const on=AF_SEL.has(i+1);return '<button onclick="attBdayToggle('+(i+1)+')" style="padding:7px 12px;font-size:13px;box-shadow:none;'+(on?'background:linear-gradient(135deg,#f472a6,#c4306b);':'background:var(--text-muted);opacity:.7;')+'">'+(on?'✓ ':'')+n+'</button>'}).join('')+
+    (AF_SEL.size?'<button onclick="AF_SEL.clear();attBdayChips();attBdayRender()" style="padding:7px 12px;font-size:13px;box-shadow:none;background:#e11d48">مسح الاختيار</button>':'')+'</div>';
+}
+function attBdayToggle(m){if(AF_SEL.has(m))AF_SEL.delete(m);else AF_SEL.add(m);attBdayChips();attBdayRender()}
+function attBdayRender(){
+  const res=document.getElementById('att-filter-result');if(!res)return;
+  if(!AF_SEL.size){res.innerHTML='';return}
+  const list=afAttendees().map(m=>{const p=String(m.birthdate||'').split('-');return {m,mo:+p[1],day:+p[2]}}).filter(x=>AF_SEL.has(x.mo)).sort((a,b)=>a.mo-b.mo||a.day-b.day);
+  const names=[...AF_SEL].sort((a,b)=>a-b).map(i=>AF_MONTHS[i-1]).join(' + ');
+  res.innerHTML=afBox('🎂 حاضرين مولودين في '+names+' ('+list.length+') — '+esc(fmtD(afDay())),list.map(x=>afRow(x.m,'🎂 '+x.day+' '+AF_MONTHS[x.mo-1])),'مفيش حد من حاضري اليوم ده مولود في الشهور دي.');
+}
+
+/* ===== فلاتر الرحلة: دافعين كامل / مش مكملين ===== */
+function tripPaidLists(){
+  const trip=getTripObj(),fee=trip.fee||0,full=[],part=[];
+  Object.keys(trip.reservations).forEach(id=>{
+    const m=db.members.find(x=>x.id==id);if(!m)return;
+    const r=trip.reservations[id];if(r.refunded)return;
+    const due=tripDue(trip,r),paid=r.paid||0,rest=Math.max(due-paid,0),x={m,due,paid,rest};
+    if(rest===0&&(fee>0||paid>0))full.push(x);else if(rest>0)part.push(x);
+  });
+  const f=(a,b)=>String(a.m.name).localeCompare(String(b.m.name),'ar');
+  return {full:full.sort(f),part:part.sort(f)};
+}
+function updateTripPaidCounts(){
+  try{const l=tripPaidLists(),a=document.getElementById('trip-cnt-full'),b=document.getElementById('trip-cnt-part');if(a)a.textContent=l.full.length;if(b)b.textContent=l.part.length}catch(e){}
+}
+function openTripPaidModal(isFull){
+  const l=tripPaidLists(),list=isFull?l.full:l.part;
+  const th='style="background:var(--primary);color:#fff;padding:7px 4px;font-size:12px;white-space:nowrap;"';
+  const td='style="padding:7px 4px;border-bottom:1px solid var(--card-border);text-align:center;font-size:12.5px;white-space:nowrap;"';
+  const tdn='style="padding:7px 6px;border-bottom:1px solid var(--card-border);text-align:right;font-size:12.5px;min-width:92px;"';
+  const tot=list.reduce((o,x)=>{o.paid+=x.paid;o.rest+=x.rest;return o},{paid:0,rest:0});
+  const rows=list.map((x,i)=>'<tr><td '+td+'>'+(i+1)+'</td><td '+tdn+'><strong>'+esc(x.m.name)+'</strong><br><small style="color:var(--text-muted)">'+esc(x.m.family||'-')+'</small></td><td '+td+'>'+x.due+'</td><td '+td+'><b style="color:var(--success)">'+x.paid+'</b></td>'+(isFull?'':'<td '+td+'><b style="color:var(--danger)">'+x.rest+'</b></td>')+'</tr>').join('');
+  const body='<div style="font-weight:800;margin-bottom:10px">العدد: '+list.length+' • إجمالي المدفوع: '+tot.paid+' ج'+(isFull?'':' • إجمالي الباقي: '+tot.rest+' ج')+'</div>'+
+    (list.length?'<div class="table-responsive"><table style="width:100%;border-collapse:collapse;"><thead><tr><th '+th+'>#</th><th '+th+'>الاسم</th><th '+th+'>المطلوب</th><th '+th+'>دفع</th>'+(isFull?'':'<th '+th+'>باقي</th>')+'</tr></thead><tbody>'+rows+'</tbody></table></div>':'<p style="text-align:center;color:var(--text-muted);padding:22px 0">'+(isFull?'مفيش حد دفع كامل لحد دلوقتي.':'الكل مكمّل الفلوس 👏')+'</p>');
+  showTripModal(isFull?'✅ دافعين كامل ('+list.length+')':'⚠️ مش مكملين الفلوس ('+list.length+')',body);
+}
+
 function attPersonSearch(val){
   const box = document.getElementById('att-person-results'); if (!box) return;
   const q = norm(val);
@@ -5391,6 +5826,7 @@ function updateTripGenderCounts(){
   });
   const em = document.getElementById('trip-cnt-m'), ef = document.getElementById('trip-cnt-f');
   if (em) em.textContent = a; if (ef) ef.textContent = b;
+  updateTripPaidCounts();
 }
 function openTripGenderModal(g){
   const isG = g === 'شابة', label = isG ? 'الشابات' : 'الشباب', icon = isG ? '👧' : '👦';
@@ -5600,5 +6036,416 @@ function askAddToTodayAttendance(m,done){
 }
 if(typeof checkBirthdays==='function'){ try{ checkBirthdays(); }catch(e){} }
 </script>
+<script id="contests-js">
+/* ===== تبويب المسابقات ===== */
+const CT_TYPES = ['حضور بدري','تقييم افتتاحية وفقرات','تقييم عمل فني','حضور قداس','تسميع مزمور','تقييم بوستر أو برومو','تقييم توب شيف'];
+const CT_ORD = ['الأول','التاني','التالت','الرابع','الخامس','السادس','السابع','التامن','التاسع','العاشر'];
+const CT_MEDAL = ['🥇','🥈','🥉','🏅'];
+const CT = { cur: null, timer: null, pending: false, seq: 0, chain: Promise.resolve(), open: null };
+
+function ctUid(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function ctNewContest() { return { id: ctUid('c'), name: '', archived: false, createdAt: Date.now(), teams: [] }; }
+function ctClone(o) { return JSON.parse(JSON.stringify(o)); }
+function ctParse(v) {
+    const t = String(v == null ? '' : v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace('٫', '.').trim();
+    if (t === '') return null;
+    const n = parseFloat(t);
+    return isFinite(n) ? n : null;
+}
+function ctFmt(n) { return String(Math.round((n || 0) * 100) / 100); }
+function ctTotal(t) { return Math.round((t.entries || []).reduce((a, e) => a + (+e.p || 0), 0) * 100) / 100; }
+function ctMemberTagHTML(mid) {
+    const c = CT && CT.cur;
+    if (!c || c.archived) return '';
+    const t = (c.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(mid)));
+    if (!t) return '';
+    return '<div class="att-ct">🏆 مشارك في ' + (c.name ? 'مسابقة «' + esc(c.name) + '»' : 'المسابقة') + ' — فريق ' + esc(t.name || 'بدون اسم') + '</div>';
+}
+function ctRefreshAttendanceHints() {
+    try { if (typeof renderAttendanceTable === 'function' && document.getElementById('attendance-tbody')) renderAttendanceTable(); } catch (e) {}
+}
+function ctBonusDate() { const i = document.getElementById('meeting-date'); return (i && i.value) || (typeof currentMeetingDate !== 'undefined' ? currentMeetingDate : '') || ''; }
+function ctMemBonus(mid) { const d = ctBonusDate(); const v = parseFloat((((db.bonus || {})[d]) || {})[mid]); return isFinite(v) ? v : 0; }
+function ctTeamBonus(t) { return Math.round((t.members || []).reduce((a, m) => a + ctMemBonus(m.id), 0) * 100) / 100; }
+function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
+
+/* بعد كل تحميل بيانات: المسابقة المفتوحة هي آخر مسابقة مش مؤرشفة */
+function contestsAfterLoad() {
+    const open = (db.contests || []).filter(c => !c.archived).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];
+    if (CT.pending) return;                       // فيه تعديل لسه بيتحفظ: ماتغيرش المسابقة الحالية
+    if (open) { const c = ctClone(open); delete c.key; c._saved = true; CT.cur = c; }
+    else if (!CT.cur || CT.cur.archived || CT.cur._saved) CT.cur = ctNewContest();
+    ctRefreshAttendanceHints();
+}
+function ctTabActive() { const t = document.getElementById('contests'); return !!(t && t.classList.contains('active')); }
+function openContestsHome() { if (!CT.cur) contestsAfterLoad(); ctRender(); }
+
+/* ===== الحفظ (صف واحد لكل مسابقة في جدول trips بالاسم CONTEST|id) ===== */
+function ctSaveSoon() { ctRefreshAttendanceHints(); CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
+function ctSaveNow(c) {
+    c = c || CT.cur;
+    if (!c) return Promise.resolve(false);
+    clearTimeout(CT.timer);
+    const seq = ++CT.seq; CT.pending = true;
+    const p = CT.chain.then(async () => {
+        try {
+            const o = ctClone(c); delete o._saved; delete o.key;
+            const key = 'CONTEST|' + o.id;
+            await _supabase.from('trips').delete().eq('trip_type', key);
+            let row = { trip_type: key, member_id: null, fee: 0, paid: 0, installments: JSON.stringify(o) };
+            let r = await _supabase.from('trips').insert([row]);
+            if (r.error) { row.member_id = 0; r = await _supabase.from('trips').insert([row]); }
+            if (r.error) { console.error(r.error); toast('تعذر حفظ المسابقة: ' + r.error.message); return false; }
+            c._saved = true;
+            return true;
+        } catch (e) { console.error(e); return false; }
+    }).catch(() => false);
+    CT.chain = p.then(() => {});
+    return p.then(ok => { if (CT.seq === seq) CT.pending = false; return ok; });
+}
+
+/* ===== الترتيب ===== */
+function ctRanking(c) {
+    const arr = (c.teams || []).map(t => ({ t, total: ctTotal(t) }));
+    arr.sort((a, b) => b.total - a.total);
+    arr.forEach(x => {
+        x.rank = 1 + arr.filter(y => y.total > x.total).length;
+        x.tie = arr.filter(y => y.total === x.total).length > 1;
+    });
+    return arr;
+}
+function ctRankLabel(x) { return 'المركز ' + (CT_ORD[x.rank - 1] || ('رقم ' + x.rank)) + (x.tie ? ' مكرر' : ''); }
+function ctRankingHTML(c) {
+    const arr = ctRanking(c);
+    if (!arr.length) return '<div class="ct-empty">ضيف الفرق وسجّل درجاتها وهيظهر الترتيب هنا</div>';
+    if (!arr.some(x => (x.t.entries || []).length)) return '<div class="ct-empty">الترتيب هيظهر أول ما تسجّل درجات للفرق</div>';
+    return arr.map(x => {
+        const r = Math.min(x.rank, 4);
+        return '<div class="ct-rank r' + r + '"><span class="ct-medal">' + (x.rank <= 4 ? CT_MEDAL[r - 1] : '🎖️') + '</span>' +
+            '<div class="ct-rk-name"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b><small>' + ctRankLabel(x) + '</small></div>' +
+            '<span class="ct-rk-pts">' + ctFmt(x.total) + '<small>درجة</small></span></div>';
+    }).join('');
+}
+function ctRefreshRanking() {
+    const el = document.getElementById('ct-ranking');
+    if (el && CT.cur) el.innerHTML = ctRankingHTML(CT.cur);
+}
+
+/* ===== الرسم ===== */
+function ctCardHTML(t) {
+    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('') + '<option value="__other">✍️ أخرى (اكتب بنفسك)</option>';
+    const rows = (t.entries || []).map(e =>
+        '<div class="ct-entry"><select class="ct-et" onchange="ctSetType(\'' + t.id + '\',\'' + e.id + '\',this)">' +
+        (CT_TYPES.indexOf(e.t) < 0 ? '<option value="' + esc(e.t) + '" selected>' + esc(e.t) + '</option>' : '') +
+        CT_TYPES.map(x => '<option value="' + esc(x) + '"' + (x === e.t ? ' selected' : '') + '>' + esc(x) + '</option>').join('') +
+        '<option value="__other">✍️ أخرى (اكتب بنفسك)</option></select>' +
+        '<input type="number" step="any" inputmode="decimal" value="' + esc(e.p) + '" oninput="ctSetPts(\'' + t.id + '\',\'' + e.id + '\',this.value)">' +
+        '<button class="btn-delete ct-x" onclick="ctDelEntry(\'' + t.id + '\',\'' + e.id + '\')">✖</button></div>'
+    ).join('') || '<div class="ct-noentry">مفيش درجات متسجلة للفريق ده لسه</div>';
+    return '<div class="ct-card" id="ct-card-' + t.id + '">' +
+        '<div class="ct-card-top"><input type="text" value="' + esc(t.name) + '" placeholder="اسم الفريق" oninput="ctSetTeamName(\'' + t.id + '\',this.value)">' +
+        '<button class="btn-delete ct-x" onclick="ctDelTeam(\'' + t.id + '\')">🗑️</button></div>' +
+        ctMembersHTML(t) +
+        '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
+        '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
+        '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button></div>' +
+        '<div class="ct-entries">' + rows + '</div>' +
+        '<div class=\"ct-bonusbox\"><div>🎁 مجموع بونص الحضور (' + esc(ctBonusDate() || '—') + '): <b id=\"ct-bsum-' + t.id + '\">' + ctFmt(ctTeamBonus(t)) + '</b></div>' +
+        '<button onclick=\"ctAddBonus(\'' + t.id + '\')\">➕ ضيف البونص للمجموع</button></div>' +
+        '<div class=\"ct-total\">المجموع: <b id=\"ct-tot-' + t.id + '\">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
+}
+/* ===== أعضاء الفريق والقائد ===== */
+function ctMemRowsHTML(t) {
+    const ms = t.members || [];
+    if (!ms.length) return '<div class="ct-noentry">مفيش أعضاء لسه — دوّر على الاسم تحت وضيفه</div>';
+    return '<div class="ct-mem-hint">اضغط على اسم العضو علشان تخليه <b>قائد الفريق 👑</b></div>' + ms.map((m, i) =>
+        '<div class="ct-m"><span class="ct-mn">' + (i + 1) + '</span>' +
+        '<span class="ct-mname" onclick="ctToggleLeader(\'' + t.id + '\',\'' + esc(m.id) + '\')">' + esc(m.n) +
+        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' + ((((db.bonusReason || {})[ctBonusDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctBonusDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
+        '<button class="btn-delete ct-x" onclick="ctDelMember(\'' + t.id + '\',\'' + esc(m.id) + '\')">✖</button></div>'
+    ).join('');
+}
+function ctMembersHTML(t) {
+    return '<div class="ct-mem"><div class="ct-mem-h">👥 الأعضاء (<span id="ct-mc-' + t.id + '">' + (t.members || []).length + '</span>)</div>' +
+        '<div id="ct-ml-' + t.id + '">' + ctMemRowsHTML(t) + '</div>' +
+        '<div style="position:relative"><input type="text" id="ct-ms-' + t.id + '" placeholder="اكتب اسم العضو لإضافته..." autocomplete="off" oninput="ctMemSearch(\'' + t.id + '\',this.value)">' +
+        '<div id="ct-mr-' + t.id + '" class="autocomplete-results"></div></div></div>';
+}
+function ctRefreshMembers(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const l = document.getElementById('ct-ml-' + tid); if (l) l.innerHTML = ctMemRowsHTML(t);
+    const c = document.getElementById('ct-mc-' + tid); if (c) c.textContent = (t.members || []).length;
+}
+function ctMemberTeam(mid) {
+    return (CT.cur.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(mid)));
+}
+function ctMemSearch(tid, val) {
+    const res = document.getElementById('ct-mr-' + tid); if (!res) return;
+    res.innerHTML = '';
+    if (!String(val).trim()) return;
+    db.members.map(m => ({ m, s: nmatch(m, val) })).filter(x => x.s >= 0)
+        .sort((a, b) => a.s - b.s || String(a.m.name).localeCompare(String(b.m.name), 'ar')).slice(0, 40).forEach(({ m }) => {
+            const inTeam = ctMemberTeam(m.id);
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.innerHTML = '<strong>' + esc(m.name) + '</strong> <small style="color:var(--text-muted)">' + esc([m.family, m.stage].filter(Boolean).join(' · ')) + '</small>' +
+                (inTeam ? ' <span class="dup-badge">✅ ' + (inTeam.id === tid ? 'مضاف من قبل' : 'في فريق ' + esc(inTeam.name || 'بدون اسم')) + '</span>' : '');
+            div.onclick = () => ctAddMember(tid, m.id);
+            res.appendChild(div);
+        });
+}
+function ctAddMember(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    const m = db.members.find(x => String(x.id) === String(mid)); if (!m) return;
+    const inTeam = ctMemberTeam(m.id);
+    if (inTeam) { toast(inTeam.id === tid ? 'العضو ده مضاف في الفريق بالفعل' : 'العضو ده في فريق «' + (inTeam.name || 'بدون اسم') + '» بالفعل'); return; }
+    (t.members = t.members || []).push({ id: m.id, n: m.name || '', f: m.family || '' });
+    const inp = document.getElementById('ct-ms-' + tid), res = document.getElementById('ct-mr-' + tid);
+    if (inp) { inp.value = ''; inp.focus(); } if (res) res.innerHTML = '';
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+function ctDelMember(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.members = (t.members || []).filter(m => String(m.id) !== String(mid));
+    if (String(t.leader) === String(mid)) t.leader = null;
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+function ctToggleLeader(tid, mid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.leader = String(t.leader) === String(mid) ? null : mid;
+    ctRefreshMembers(tid); ctSaveSoon();
+}
+
+function ctTeamListHTML(t) {
+    const ms = t.members || [];
+    const lead = ms.find(m => String(m.id) === String(t.leader));
+    return '<div class="ct-tl" onclick="ctOpenTeam(\'' + t.id + '\')">' +
+        '<span class="ct-tl-cup">🏆</span>' +
+        '<div class="ct-tl-info"><b>' + esc(t.name || 'فريق بدون اسم') + '</b>' +
+        '<small>👥 ' + ms.length + ' ' + (ms.length === 1 ? 'عضو' : 'أعضاء') + (lead ? ' · 👑 ' + esc(lead.n) : '') + '</small></div>' +
+        '<span class="ct-tl-pts">' + ctFmt(ctTotal(t)) + '<small>درجة</small></span>' +
+        '<span class="ct-tl-go">◂</span></div>';
+}
+function ctRender() {
+    ctRefreshAttendanceHints();
+    const root = document.getElementById('ct-teams');
+    if (!root || !CT.cur) return;
+    const box = document.getElementById('contests');
+    const nm = document.getElementById('ct-name');
+    if (nm && document.activeElement !== nm) nm.value = CT.cur.name || '';
+    const open = CT.open && ctTeam(CT.open);
+    if (CT.open && !open) CT.open = null;
+    if (box) box.classList.toggle('ct-detail-mode', !!open);
+    if (open) {
+        root.innerHTML = '<button class="ct-back" onclick="ctCloseTeam()">▸ رجوع لكل الفرق</button>' + ctCardHTML(open);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        root.innerHTML = (CT.cur.teams || []).map(ctTeamListHTML).join('') || '<div class="ct-empty">اضغط «➕ فريق جديد» وابدأ سجّل الفرق</div>';
+    }
+    ctRefreshRanking();
+}
+function ctOpenTeam(tid) { CT.open = tid; ctRender(); }
+function ctCloseTeam() { CT.open = null; ctRender(); }
+function ctRerenderCard(tid) {
+    const t = ctTeam(tid), el = document.getElementById('ct-card-' + tid);
+    if (!t || !el) return;
+    const sel = document.getElementById('ct-sel-' + tid), keep = sel ? sel.value : '';
+    const tmp = document.createElement('div'); tmp.innerHTML = ctCardHTML(t);
+    el.replaceWith(tmp.firstElementChild);
+    const ns = document.getElementById('ct-sel-' + tid); if (ns && keep) ns.value = keep;
+    ctRefreshRanking();
+}
+
+/* ===== الإجراءات ===== */
+function ctSetName(v) { if (!CT.cur) return; CT.cur.name = v; ctSaveSoon(); }
+function ctAddTeam() {
+    if (!CT.cur) CT.cur = ctNewContest();
+    const t = { id: ctUid('t'), name: '', members: [], entries: [] };
+    CT.cur.teams.push(t);
+    CT.open = t.id;
+    ctRender(); ctSaveSoon();
+    const el = document.getElementById('ct-card-' + t.id);
+    if (el) { const i = el.querySelector('.ct-card-top input'); if (i) i.focus(); }
+}
+function ctSetTeamName(tid, v) { const t = ctTeam(tid); if (!t) return; t.name = v; ctRefreshRanking(); ctSaveSoon(); }
+function ctDelTeam(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    if (!confirm('تمسح فريق «' + (t.name || 'بدون اسم') + '» ودرجاته؟')) return;
+    CT.cur.teams = CT.cur.teams.filter(x => x.id !== tid);
+    CT.open = null;
+    ctRender(); ctSaveSoon();
+}
+function ctAddEntry(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const sel = document.getElementById('ct-sel-' + tid), inp = document.getElementById('ct-pts-' + tid);
+    const p = ctParse(inp && inp.value);
+    if (p === null) { toast('اكتب الدرجة الأول'); if (inp) inp.focus(); return; }
+    let type = sel.value;
+    if (type === '__other') {
+        type = (prompt('اكتب اسم نوع الدرجة:') || '').trim();
+        if (!type) { toast('لازم تكتب اسم النوع'); return; }
+    }
+    t.entries.push({ id: ctUid('e'), t: type, p });
+    ctRerenderCard(tid); ctSaveSoon();
+    const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
+}
+function ctAddBonus(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const d = ctBonusDate();
+    if (!(t.members || []).length) { toast('ضيف أعضاء للفريق الأول'); return; }
+    const sum = ctTeamBonus(t);
+    if (sum) { (t.members || []).forEach(m => { if (ctMemBonus(m.id)) bonusCtxSet(d, m.id, true); }); persistBonusMeta(d); }
+    if (!sum) { toast('مفيش بونص متسجل لأعضاء الفريق في حضور ' + (d || 'اليوم')); return; }
+    t.entries = t.entries || [];
+    const old = t.entries.find(e => e.bd === d);   // نفس اليوم: نحدّث بدل ما نكرر
+    if (old) { old.p = sum; toast('اتحدّث بونص اليوم في المجموع ✅'); }
+    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
+    ctRerenderCard(tid); ctSaveSoon();
+}
+function ctSetType(tid, eid, sel) {
+    const t = ctTeam(tid); if (!t) return;
+    const e = t.entries.find(x => x.id === eid); if (!e) return;
+    let v = sel.value;
+    if (v === '__other') {
+        v = (prompt('اكتب اسم نوع الدرجة:', e.t) || '').trim();
+        if (!v) { ctRerenderCard(tid); return; }
+    }
+    e.t = v;
+    ctRerenderCard(tid); ctSaveSoon();
+}
+function ctSetPts(tid, eid, v) {
+    const t = ctTeam(tid); if (!t) return;
+    const e = t.entries.find(x => x.id === eid); if (!e) return;
+    e.p = ctParse(v) || 0;
+    const tot = document.getElementById('ct-tot-' + tid); if (tot) tot.textContent = ctFmt(ctTotal(t));
+    ctRefreshRanking(); ctSaveSoon();
+}
+function ctDelEntry(tid, eid) {
+    const t = ctTeam(tid); if (!t) return;
+    t.entries = t.entries.filter(x => x.id !== eid);
+    ctRerenderCard(tid); ctSaveSoon();
+}
+async function ctSendArchive() {
+    const c = CT.cur;
+    if (!c || !(c.teams || []).length) { toast('المسابقة فاضية — ضيف فرق الأول'); return; }
+    if (!String(c.name || '').trim()) { toast('اكتب اسم المسابقة الأول'); const n = document.getElementById('ct-name'); if (n) n.focus(); return; }
+    if (!confirm('تبعت «' + c.name.trim() + '» للأرشيف؟\nالشيت هيتفضى وتلاقيها في «مسابقات السنة».')) return;
+    c.name = c.name.trim(); c.archived = true; c.archivedAt = localISO();
+    const ok = await ctSaveNow(c);
+    if (!ok) { c.archived = false; delete c.archivedAt; toast('تعذر نقل المسابقة للأرشيف، حاول تاني'); return; }
+    db.contests = (db.contests || []).filter(x => x.id !== c.id).concat([Object.assign({ key: 'CONTEST|' + c.id }, ctClone(c))]);
+    CT.cur = ctNewContest(); CT.open = null;
+    const n = document.getElementById('ct-name'); if (n) n.value = '';
+    ctRender();
+    toast('اتبعتت للأرشيف ✅');
+}
+function ctClearCurrent() {
+    const c = CT.cur; if (!c) return;
+    if (!confirm('تصفّر المسابقة الحالية بالكامل (الاسم والفرق والدرجات)؟')) return;
+    clearTimeout(CT.timer); CT.seq++; CT.pending = true;
+    const id = c.id;
+    CT.chain = CT.chain.then(() => _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + id)).catch(() => {}).then(() => { CT.pending = false; });
+    db.contests = (db.contests || []).filter(x => x.id !== id);
+    CT.cur = ctNewContest(); CT.open = null;
+    const n = document.getElementById('ct-name'); if (n) n.value = '';
+    ctRender();
+    toast('اتصفّرت المسابقة');
+}
+
+/* ===== مسابقات السنة (الأرشيف) ===== */
+function ctArcItemHTML(c) {
+    const arr = ctRanking(c);
+    const winners = arr.filter(x => x.rank === 1 && (x.t.entries || []).length).map(x => esc(x.t.name || 'فريق بدون اسم')).join(' + ');
+    const teams = arr.map(x =>
+        '<div class="ct-arc-team"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b> — ' + ctFmt(x.total) + ' درجة · ' + ctRankLabel(x) +
+        ((x.t.members || []).length ? '<span class="ct-mline">👥 ' + (x.t.members || []).map((m, i) => (i + 1) + '. ' + esc(m.n) + (String(x.t.leader) === String(m.id) ? ' 👑' : '')).join(' • ') + '</span>' : '') +
+        ((x.t.entries || []).length ? '<br><span>' + (x.t.entries || []).map(e => esc(e.t) + ': ' + ctFmt(e.p)).join(' • ') + '</span>' : '') + '</div>'
+    ).join('');
+    return '<details class="ct-arc"><summary>🏆 ' + esc(c.name || 'مسابقة بدون اسم') +
+        '<small>📅 ' + esc(c.archivedAt || '') + ' · 👥 ' + arr.length + ' فرق' + (winners ? ' · 🥇 ' + winners : '') + '</small></summary>' +
+        '<div style="margin-top:10px;">' + ctRankingHTML(c) + '</div>' +
+        '<div style="margin-top:6px;">' + teams + '</div>' +
+        '<div style="margin-top:10px;"><button class="btn-delete" style="padding:8px 12px;font-size:13px;" onclick="ctDelArchived(\'' + c.id + '\')">🗑️ مسح من الأرشيف</button></div></details>';
+}
+function ctOpenArchive() {
+    const list = (db.contests || []).filter(c => c.archived).sort((a, b) => String(b.archivedAt || '').localeCompare(String(a.archivedAt || '')));
+    let body;
+    if (!list.length) body = '<div class="ct-empty">مفيش مسابقات في الأرشيف لسه</div>';
+    else {
+        const years = {};
+        list.forEach(c => { const y = String(c.archivedAt || '').slice(0, 4) || '—'; (years[y] = years[y] || []).push(c); });
+        body = Object.keys(years).sort().reverse().map(y => '<div class="ct-year">📅 ' + y + '</div>' + years[y].map(ctArcItemHTML).join('')).join('');
+    }
+    if (list.length) body += '<div style="margin-top:14px;"><button class="btn-delete" style="padding:10px 14px;font-size:13px;" onclick="ctCleanArchive()">🧹 تنظيف الأرشيف (مسح كل المسابقات)</button></div>';
+    showTripModal('🗂️ مسابقات السنة', body);
+}
+async function ctCleanArchive() {
+    const list = (db.contests || []).filter(c => c.archived);
+    if (!list.length) { toast('أرشيف المسابقات فاضي'); return; }
+    if (!confirm('تنظّف أرشيف المسابقات؟\nهتتمسح كل المسابقات المؤرشفة (' + list.length + ') نهائي، وتبدأ من جديد.')) return;
+    let rs = [];
+    try { rs = await Promise.all(list.map(c => _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + c.id))); } catch (e) { rs = [{ error: e }]; }
+    const bad = rs.find(r => r && r.error);
+    if (bad) { alert('تعذر تنظيف الأرشيف: ' + (bad.error.message || bad.error)); return; }
+    db.contests = (db.contests || []).filter(c => !c.archived);
+    ctOpenArchive();
+    toast('اتنضّف أرشيف المسابقات ✅');
+}
+async function ctDelArchived(id) {
+    const c = (db.contests || []).find(x => x.id === id); if (!c) return;
+    if (!confirm('تمسح «' + (c.name || 'مسابقة') + '» من الأرشيف نهائي؟')) return;
+    try { await _supabase.from('trips').delete().eq('trip_type', 'CONTEST|' + id); } catch (e) { console.error(e); }
+    db.contests = db.contests.filter(x => x.id !== id);
+    ctOpenArchive();
+    toast('اتمسحت من الأرشيف');
+}
+</script>
+<style id="btn-3d">
+.btn-edit,.btn-delete{color:#fff!important}
+.btn-edit{border:0!important}
+/* ===== أزرار 3D: نفس ألوان كل زرار، بعمق وظل وضغطة حقيقية ===== */
+button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]),
+.sd-b{
+  position:relative;
+  border-radius:14px!important;
+  border:0;
+  text-shadow:0 1px 1px rgba(0,0,0,.22);
+  box-shadow:
+    0 6px 0 rgba(0,0,0,.30),
+    0 14px 18px -8px rgba(0,0,0,.40),
+    inset 0 2px 0 rgba(255,255,255,.45),
+    inset 0 -3px 0 rgba(0,0,0,.12)!important;
+  transform:translateY(0);
+  transition:transform .12s ease,box-shadow .12s ease,filter .15s;
+}
+button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]):hover,
+.sd-b:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.06);
+  box-shadow:
+    0 8px 0 rgba(0,0,0,.30),
+    0 18px 22px -8px rgba(0,0,0,.42),
+    inset 0 2px 0 rgba(255,255,255,.5),
+    inset 0 -3px 0 rgba(0,0,0,.12)!important;
+}
+button:not([data-tab]):not(.rb-btn):not(.x):not(.pw-eye):not(.sd-b):not([style*="transparent"]):active,
+.sd-b:active{
+  transform:translateY(5px);
+  filter:brightness(.97);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.30),
+    0 3px 6px -2px rgba(0,0,0,.35),
+    inset 0 2px 4px rgba(0,0,0,.18)!important;
+}
+/* الأزرار الصغيرة جوه الجداول والكروت: عمق أخف */
+td button,.visitation-card button,.profile-card button,.family-card-btn{
+}
+td button:not([data-tab]),.visitation-card button,.profile-card button{
+  box-shadow:0 4px 0 rgba(0,0,0,.28),0 8px 12px -6px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.4),inset 0 -2px 0 rgba(0,0,0,.1)!important;
+}
+td button:not([data-tab]):active,.visitation-card button:active,.profile-card button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.28),inset 0 2px 3px rgba(0,0,0,.18)!important}
+@media(prefers-reduced-motion:reduce){button{transition:none!important}}
+</style>
+
 </body>
 </html>
