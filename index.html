@@ -559,6 +559,7 @@ button:active{transform:translateY(2px)!important;box-shadow:0 3px 8px rgba(0,0,
 .custom-table tbody tr:nth-child(even){background:rgba(127,127,160,.06)}
 .modal-overlay{background:rgba(6,8,16,.62)}
 .modal-body{animation:pop .3s cubic-bezier(.2,1.2,.4,1)}@keyframes pop{from{opacity:0;transform:scale(.9) rotateX(10deg)}}
+.bonus-reason{width:170px!important;min-width:120px;padding:8px 10px!important;border-radius:10px!important}
 .bonus-input{width:90px!important;padding:8px 10px!important;text-align:center;font-weight:800;border-radius:10px!important;border:1px dashed var(--secondary)!important}
 .search-pro{margin-bottom:22px}
 .search-row{display:flex;align-items:center;gap:10px;padding:6px 16px;border-radius:18px;background:var(--card-glass);border:1px solid var(--card-border);box-shadow:var(--shadow-3d-card);color:var(--primary)}
@@ -1389,6 +1390,10 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 #contests .ct-noentry,#contests .ct-empty,.ct-empty{color:var(--text-muted);font-size:13px;text-align:center;padding:10px}
 #contests .ct-total{margin-top:10px;text-align:center;font-weight:800;background:rgba(245,158,11,.16);border-radius:12px;padding:8px}
 #contests .ct-final{margin-top:22px}
+#contests .ct-bn{display:inline-block;margin-inline-start:6px;background:rgba(168,85,247,.16);color:#7e22ce;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:800}
+body.dark-mode #contests .ct-bn{color:#d8b4fe}
+#contests .ct-bonusbox{margin-top:12px;display:flex;flex-direction:column;gap:8px;background:rgba(168,85,247,.10);border:1px dashed #a855f7;border-radius:14px;padding:10px;text-align:center;font-weight:700}
+#contests .ct-bonusbox button{padding:11px;font-size:14px;background:linear-gradient(135deg,#c084fc,#a855f7)}
 #contests .ct-final h4,.ct-final-h{margin:0 0 10px;font-size:17px}
 .ct-rank{display:flex;align-items:center;gap:10px;background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:14px;padding:10px 12px;margin-bottom:8px}
 .ct-rank.r1{border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.06))}
@@ -1672,7 +1677,7 @@ body.dark-mode .att-ct{color:#f87171}
                 </h4>
                 <div class="table-responsive">
                     <table class="custom-table" id="attendance-table">
-                        <thead><tr><th>مسلسل</th><th>الاسم</th><th>الأسرة</th><th>وقت وتاريخ الحضور</th><th>بونص</th><th>إجراء</th></tr></thead>
+                        <thead><tr><th>مسلسل</th><th>الاسم</th><th>الأسرة</th><th>وقت وتاريخ الحضور</th><th>بونص</th><th>سبب البونص</th><th>إجراء</th></tr></thead>
                         <tbody id="attendance-tbody"></tbody>
                     </table>
                 </div>
@@ -1737,6 +1742,7 @@ body.dark-mode .att-ct{color:#f87171}
                 <select id="bonus-filter" onchange="setBonusFilter(this.value)" style="padding:10px 14px; border-radius:12px; border:1.5px solid var(--card-border); font-family:inherit; font-weight:800; font-size:14px; min-width:230px;"></select>
             </div>
             <div id="bonus-container"></div>
+            <div style="margin-top:20px;"><button class="btn-delete" style="width:100%" onclick="clearAllBonus()">🗑️ مسح كل البونص</button></div>
         </div>
 
         <!-- الأسر -->
@@ -2346,7 +2352,7 @@ notify pgrst, 'reload schema';</pre>
                 db.members = membersRes.data || [];
                 db.meetings = [];
                 db.attendanceRecords = {};
-                db.tripsData = {}; db.tripArchive = []; db.contests = []; db.bonus = {}; db.attRows = attendanceRes.data || [];
+                db.tripsData = {}; db.tripArchive = []; db.contests = []; db.bonus = {}; db.bonusReason = {}; db.attRows = attendanceRes.data || [];
 
                 (attendanceRes.data || []).forEach(record => {
                     if (!db.meetings.includes(record.meeting_date)) db.meetings.push(record.meeting_date);
@@ -2357,6 +2363,10 @@ notify pgrst, 'reload schema';</pre>
 
                 let _tripIdx = 0;
                 (tripsRes.data || []).forEach(t => {
+                    if (String(t.trip_type).startsWith('BREASON|')) {   // أسباب البونص
+                        try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.bonusReason[String(t.trip_type).slice(8)] = o; } catch (e) {}
+                        return;
+                    }
                     if (String(t.trip_type).startsWith('CONTEST|')) {   // المسابقات
                         try { let o = typeof t.installments === 'string' ? JSON.parse(t.installments) : t.installments; if (o) db.contests.push({ key: t.trip_type, ...o }); } catch (e) {}
                         return;
@@ -3128,14 +3138,28 @@ notify pgrst, 'reload schema';</pre>
         // ============================================================
         let bonusFilter = 'all';
 
-        function getBonusData() {
+        function bonusCtxActive(d, id) {
+            const tag = (((db.bonusReason || {})[d]) || {})['c:' + id];
+            if (!tag || typeof CT === 'undefined' || !CT.cur || CT.cur.archived || CT.cur.id !== tag.c) return null;
+            const team = (CT.cur.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(id)));
+            return team ? { n: CT.cur.name || '', t: team.name || '' } : null;
+        }
+        function getBonusData(kind) {
+            kind = kind || 'all';
             let meetings = [...db.meetings].sort();
             let list = [];
             db.members.forEach(m => {
                 let items = [];
                 meetings.forEach(d => {
                     let v = parseFloat((((db.bonus || {})[d]) || {})[m.id]);
-                    if (!isNaN(v) && v !== 0 && db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) items.push({ d, v });
+                    if (!isNaN(v) && v !== 0 && db.attendanceRecords[d] && db.attendanceRecords[d][m.id]) {
+                        const ctx = bonusCtxActive(d, m.id);
+                        const reason = ((((db.bonusReason || {})[d]) || {})[m.id]) || '';
+                        const it = { d, v, ctx, reason, time: db.attendanceRecords[d][m.id] };
+                        if (kind === 'regular' && ctx) return;
+                        if (kind === 'contest' && !ctx) return;
+                        items.push(it);
+                    }
                 });
                 if (items.length) list.push({ m, items, total: items.reduce((s, x) => s + x.v, 0) });
             });
@@ -3155,30 +3179,39 @@ notify pgrst, 'reload schema';</pre>
             let sel = document.getElementById('bonus-filter');
             let sum = document.getElementById('bonus-summary');
             if (!box || !sel) return;
-            let list = getBonusData();
+            const isKind = ['regular', 'contest'].includes(bonusFilter);
+            const all = getBonusData('all'), reg = getBonusData('regular'), con = getBonusData('contest');
+            let list = isKind ? (bonusFilter === 'regular' ? reg : con) : all;
             let cnt = { high: 0, mid: 0, low: 0 };
-            list.forEach(x => cnt[x.tier]++);
+            all.forEach(x => cnt[x.tier]++);
             let grand = list.reduce((s, x) => s + x.total, 0);
             if (sum) sum.innerHTML = `
                 <div class="stat-card"><div class="stat-title">إجمالي البونص</div><div class="stat-num">${grand}</div></div>
                 <div class="stat-card"><div class="stat-title">عدد اللي أخدوا بونص</div><div class="stat-num">${list.length}</div></div>`;
-            sel.innerHTML = [['all', `الكل (${list.length})`], ['high', `🥇 الأعلى (${cnt.high})`], ['mid', `🔸 المتوسط (${cnt.mid})`], ['low', `🔻 الأقل (${cnt.low})`]]
+            sel.innerHTML = [['all', `الكل (${all.length})`], ['regular', `🎁 بونص (${reg.length})`], ['contest', `🏆 بونص مسابقة (${con.length})`], ['high', `🥇 الأعلى (${cnt.high})`], ['mid', `🔸 المتوسط (${cnt.mid})`], ['low', `🔻 الأقل (${cnt.low})`]]
                 .map(([k, l]) => `<option value="${k}" ${bonusFilter === k ? 'selected' : ''}>${l}</option>`).join('');
-            let shown = list.filter(x => bonusFilter === 'all' || x.tier === bonusFilter);
+            let shown = list.filter(x => isKind || bonusFilter === 'all' || x.tier === bonusFilter);
             if (!shown.length) { box.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">لا يوجد بونص مسجل في هذه الفئة. اكتب البونص في خانة "بونص" بشيت الحضور وهيظهر هنا تلقائياً.</p>'; return; }
             let T = { high: ['#a855f7', '🥇 الأعلى'], mid: ['#f59e0b', '🔸 المتوسط'], low: ['#64748b', '🔻 الأقل'] };
             box.innerHTML = shown.map(x => {
                 let [col, lab] = T[x.tier];
-                let chips = x.items.map(it => `<span style="display:inline-block; background:rgba(168,85,247,0.14); border-radius:10px; padding:2px 8px; margin:2px; font-size:12px;">${it.d.slice(8)}/${it.d.slice(5, 7)}: <b>+${it.v}</b></span>`).join('');
+                let rows = x.items.map(it => `<div style="background:rgba(168,85,247,0.10); border-radius:12px; padding:8px 10px; margin:6px 0; font-size:13px; line-height:1.7;">
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                    <b style="font-size:15px;">+${it.v}</b>
+                    ${it.ctx ? `<span style="background:rgba(245,158,11,.22); color:#b45309; border-radius:8px; padding:1px 7px; font-weight:800;">🏆 بونص مسابقة${it.ctx.n ? ' «' + esc(it.ctx.n) + '»' : ''}${it.ctx.t ? ' — فريق ' + esc(it.ctx.t) : ''}</span>` : `<span style="background:rgba(100,116,139,.18); border-radius:8px; padding:1px 7px; font-weight:700;">🎁 بونص</span>`}</div>
+                    <div>📅 <strong>التاريخ:</strong> ${esc(fmtD(it.d))}</div>
+                    <div>🕒 <strong>الحضور:</strong> ${esc(it.time || '-')}</div>
+                    <div>📝 <strong>السبب:</strong> ${it.reason ? esc(it.reason) : '<span style="color:var(--text-muted);">لم يُكتب سبب</span>'}</div></div>`).join('');
                 return `
                     <div class="visitation-card" style="background:${col}22; border-color:${col}; border-right:6px solid ${col};" onclick="openMemberDetail(${x.m.id})">
                         <div class="info">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
                                 <h4 style="margin:0;">${esc(x.m.name)}</h4>
-                                <span style="background:${col}; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">${lab}</span>
+                                <span style="display:flex; gap:6px; align-items:center;"><span style="background:${col}; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:800; white-space:nowrap;">${lab}</span>
+                                <button class="btn-delete" style="padding:4px 10px; font-size:12px; width:auto;" onclick="event.stopPropagation(); clearMemberBonus(${x.m.id})">🗑️ مسح</button></span>
                             </div>
                             <p><strong>الأسرة:</strong> ${esc(x.m.family || '-')}</p>
-                            <div style="margin:4px 0;">${chips}</div>
+                            <div style="margin:4px 0;">${rows}</div>
                             <p style="font-size:15px;"><strong>الإجمالي:</strong> <span style="color:${col}; font-weight:900; font-size:18px;">${x.total}</span> <span style="color:var(--text-muted);">(${x.items.map(i => i.v).join(' + ')})</span></p>
                         </div>
                     </div>`;
@@ -4796,7 +4829,7 @@ notify pgrst, 'reload schema';</pre>
 
                 // بناء tripsData
                 (tripsRes.data || []).forEach(t => {
-                    if (String(t.trip_type).startsWith('ARCHIVE|') || String(t.trip_type).startsWith('CONTEST|')) return;
+                    if (String(t.trip_type).startsWith('ARCHIVE|') || String(t.trip_type).startsWith('CONTEST|') || String(t.trip_type).startsWith('BREASON|')) return;
                     if (!backup.dbSnapshot.tripsData[t.trip_type]) {
                         backup.dbSnapshot.tripsData[t.trip_type] = {
                             fee: t.fee || 0,
@@ -5283,7 +5316,93 @@ async function saveBonus(id,inp){
     if(ins.error){toast('❌ '+ins.error.message);return}
   }
   (db.bonus[d]=db.bonus[d]||{})[id]=val;
-  updateBonusTotal();toast('تم حفظ البونص ✅');
+  bonusCtxSet(d,id,val!=null&&val!==0);persistBonusMeta(d);
+  updateBonusTotal();toast(val!=null&&val!==0&&!(((db.bonusReason||{})[d]||{})[id])?'تم حفظ البونص ✅ — اكتب السبب في الخانة اللي جنبه':'تم حفظ البونص ✅');
+}
+let _brChain=Promise.resolve();
+function bonusCtxSet(d,id,on){
+  db.bonusReason=db.bonusReason||{};
+  const map=db.bonusReason[d]=db.bonusReason[d]||{},k='c:'+id;
+  let t=null;
+  if(on&&typeof CT!=='undefined'&&CT.cur&&!CT.cur.archived){
+    const team=(CT.cur.teams||[]).find(x=>(x.members||[]).some(m=>String(m.id)===String(id)));
+    if(team)t={c:CT.cur.id,n:CT.cur.name||'',t:team.name||''};
+  }
+  if(t)map[k]=t;else delete map[k];
+  return t;
+}
+function persistBonusMeta(d){
+  const map=(db.bonusReason||{})[d]||{},snap=JSON.stringify(map),key='BREASON|'+d;
+  _brChain=_brChain.then(async()=>{
+    try{
+      await _supabase.from('trips').delete().eq('trip_type',key);
+      if(snap==='{}')return;
+      let row={trip_type:key,member_id:null,fee:0,paid:0,installments:snap};
+      let r=await _supabase.from('trips').insert([row]);
+      if(r.error){row.member_id=0;r=await _supabase.from('trips').insert([row])}
+      if(r.error)toast('❌ تعذر حفظ السبب: '+r.error.message);
+    }catch(e){console.error(e)}
+  });
+}
+function saveBonusReason(id,inp){
+  const d=currentMeetingDate,v=inp.value.trim();
+  db.bonusReason=db.bonusReason||{};
+  const map=db.bonusReason[d]=db.bonusReason[d]||{};
+  if(v==='')delete map[id];else map[id]=v;
+  persistBonusMeta(d);toast('تم حفظ السبب ✅');
+}
+async function clearMemberBonus(id){
+  const m=(db.members||[]).find(x=>String(x.id)===String(id));
+  if(!confirm('تمسح كل بونص «'+(m?m.name:'')+'» (كل الأيام) وأسبابه؟'))return;
+  try{
+    const rows=(db.attRows||[]).filter(r=>String(r.member_id)===String(id)&&r.bonus!=null);
+    if(rows.length){
+      let r=await _supabase.from('attendance').update({bonus:null}).eq('member_id',id).not('bonus','is',null).select();
+      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
+      if(!r.data||!r.data.length){
+        for(const old of rows){
+          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
+          if(del.error){toast('❌ '+del.error.message);return}
+          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
+          if(ins.error){toast('❌ '+ins.error.message);return}
+        }
+      }
+    }
+    rows.forEach(r=>{r.bonus=null});
+    Object.keys(db.bonus||{}).forEach(d=>{if(db.bonus[d]&&id in db.bonus[d])db.bonus[d][id]=null});
+    Object.keys(db.bonusReason||{}).forEach(d=>{
+      const mp=db.bonusReason[d];
+      if(mp&&(id in mp||('c:'+id) in mp)){delete mp[id];delete mp['c:'+id];persistBonusMeta(d)}
+    });
+    renderBonusTab();
+    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
+    toast('اتمسح بونص '+(m?m.name:'الشخص')+' ✅');
+  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
+}
+async function clearAllBonus(){
+  if(!confirm('تمسح كل البونص من كل الأيام (العادي وبونص المسابقات) وأسبابه؟\nده هيصفّر خانة البونص في شيت الحضور كمان.'))return;
+  try{
+    const rows=(db.attRows||[]).filter(r=>r.bonus!=null);
+    if(rows.length){
+      let r=await _supabase.from('attendance').update({bonus:null}).not('bonus','is',null).select();
+      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
+      if(!r.data||!r.data.length){
+        for(const old of rows){
+          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
+          if(del.error){toast('❌ '+del.error.message);return}
+          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
+          if(ins.error){toast('❌ '+ins.error.message);return}
+        }
+      }
+    }
+    const t=await _supabase.from('trips').delete().like('trip_type','BREASON|%');
+    if(t.error){toast('❌ تعذر مسح الأسباب: '+t.error.message);return}
+    (db.attRows||[]).forEach(r=>{r.bonus=null});
+    db.bonus={};db.bonusReason={};
+    renderBonusTab();
+    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
+    toast('اتمسح كل البونص ✅');
+  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
 }
 function updateBonusTotal(){const b=db.bonus[currentMeetingDate]||{};let s=0;currentAttendees.forEach(m=>{s+=parseFloat(b[m.id])||0});const e=document.getElementById('bonus-total');if(e)e.textContent=s}
 function renderAttendanceTable(){
@@ -5295,6 +5414,7 @@ function renderAttendanceTable(){
     const bv=b[m.id];
     tb.insertAdjacentHTML('beforeend',`<tr style="cursor:pointer" onclick="openMemberDetail(${m.id})"><td>${i+1}</td><td><strong>${esc(m.name)}</strong>${typeof ctMemberTagHTML==='function'?ctMemberTagHTML(m.id):''}</td><td>${esc(m.family||'-')}</td><td>${esc(db.attendanceRecords[currentMeetingDate][m.id])}</td>
     <td><input class="bonus-input" type="number" step="any" inputmode="decimal" placeholder="بونص" value="${bv==null?'':esc(bv)}" onclick="event.stopPropagation()" onchange="saveBonus(${m.id},this)"></td>
+    <td><input class="bonus-reason" type="text" placeholder="السبب..." value="${esc(((db.bonusReason||{})[currentMeetingDate]||{})[m.id]||'')}" onclick="event.stopPropagation()" onchange="saveBonusReason(${m.id},this)"></td>
     <td><button class="btn-delete" onclick="removeMemberFromMeeting(${m.id});event.stopPropagation()">إلغاء ✖️</button></td></tr>`);
   });
   updateBonusTotal();
@@ -5942,6 +6062,9 @@ function ctMemberTagHTML(mid) {
 function ctRefreshAttendanceHints() {
     try { if (typeof renderAttendanceTable === 'function' && document.getElementById('attendance-tbody')) renderAttendanceTable(); } catch (e) {}
 }
+function ctBonusDate() { const i = document.getElementById('meeting-date'); return (i && i.value) || (typeof currentMeetingDate !== 'undefined' ? currentMeetingDate : '') || ''; }
+function ctMemBonus(mid) { const d = ctBonusDate(); const v = parseFloat((((db.bonus || {})[d]) || {})[mid]); return isFinite(v) ? v : 0; }
+function ctTeamBonus(t) { return Math.round((t.members || []).reduce((a, m) => a + ctMemBonus(m.id), 0) * 100) / 100; }
 function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
 
 /* بعد كل تحميل بيانات: المسابقة المفتوحة هي آخر مسابقة مش مؤرشفة */
@@ -6025,7 +6148,9 @@ function ctCardHTML(t) {
         '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
         '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button></div>' +
         '<div class="ct-entries">' + rows + '</div>' +
-        '<div class="ct-total">المجموع: <b id="ct-tot-' + t.id + '">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
+        '<div class=\"ct-bonusbox\"><div>🎁 مجموع بونص الحضور (' + esc(ctBonusDate() || '—') + '): <b id=\"ct-bsum-' + t.id + '\">' + ctFmt(ctTeamBonus(t)) + '</b></div>' +
+        '<button onclick=\"ctAddBonus(\'' + t.id + '\')\">➕ ضيف البونص للمجموع</button></div>' +
+        '<div class=\"ct-total\">المجموع: <b id=\"ct-tot-' + t.id + '\">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
 }
 /* ===== أعضاء الفريق والقائد ===== */
 function ctMemRowsHTML(t) {
@@ -6034,7 +6159,7 @@ function ctMemRowsHTML(t) {
     return '<div class="ct-mem-hint">اضغط على اسم العضو علشان تخليه <b>قائد الفريق 👑</b></div>' + ms.map((m, i) =>
         '<div class="ct-m"><span class="ct-mn">' + (i + 1) + '</span>' +
         '<span class="ct-mname" onclick="ctToggleLeader(\'' + t.id + '\',\'' + esc(m.id) + '\')">' + esc(m.n) +
-        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
+        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' + ((((db.bonusReason || {})[ctBonusDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctBonusDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
         '<button class="btn-delete ct-x" onclick="ctDelMember(\'' + t.id + '\',\'' + esc(m.id) + '\')">✖</button></div>'
     ).join('');
 }
@@ -6161,6 +6286,19 @@ function ctAddEntry(tid) {
     t.entries.push({ id: ctUid('e'), t: type, p });
     ctRerenderCard(tid); ctSaveSoon();
     const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
+}
+function ctAddBonus(tid) {
+    const t = ctTeam(tid); if (!t) return;
+    const d = ctBonusDate();
+    if (!(t.members || []).length) { toast('ضيف أعضاء للفريق الأول'); return; }
+    const sum = ctTeamBonus(t);
+    if (sum) { (t.members || []).forEach(m => { if (ctMemBonus(m.id)) bonusCtxSet(d, m.id, true); }); persistBonusMeta(d); }
+    if (!sum) { toast('مفيش بونص متسجل لأعضاء الفريق في حضور ' + (d || 'اليوم')); return; }
+    t.entries = t.entries || [];
+    const old = t.entries.find(e => e.bd === d);   // نفس اليوم: نحدّث بدل ما نكرر
+    if (old) { old.p = sum; toast('اتحدّث بونص اليوم في المجموع ✅'); }
+    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
+    ctRerenderCard(tid); ctSaveSoon();
 }
 function ctSetType(tid, eid, sel) {
     const t = ctTeam(tid); if (!t) return;
