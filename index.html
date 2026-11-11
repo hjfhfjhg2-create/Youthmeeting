@@ -1383,7 +1383,11 @@ body:not(.in-app) #login-section>button[onclick="loginDirect()"]{background:line
 #contests .ct-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 #contests .ct-add select{flex:2 1 160px;width:auto!important;min-width:0}
 #contests .ct-add input{flex:1 1 80px;width:auto!important;min-width:70px}
-#contests .ct-add button{flex:1 1 100px;padding:10px;font-size:13px}
+#contests .ct-add{flex-wrap:nowrap;align-items:stretch}
+#contests .ct-add select{flex:2 1 0!important;min-width:0!important;font-size:12.5px;padding:8px 6px}
+#contests .ct-add input{flex:1 1 0!important;min-width:0!important;padding:8px 6px}
+#contests .ct-add button{flex:0 0 auto;padding:8px 10px;font-size:12.5px;white-space:nowrap}
+#contests .ct-add .ct-bbtn{background:linear-gradient(135deg,#c084fc,#a855f7)}
 #contests .ct-entry{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border))}
 #contests .ct-entry .ct-et{flex:1;font-size:13.5px;font-weight:600;min-width:0;width:auto!important}
 #contests .ct-entry input{width:84px!important;flex:none;text-align:center;padding:8px}
@@ -2193,7 +2197,7 @@ notify pgrst, 'reload schema';</pre>
                     'اضغط <b>«➕ فريق جديد»</b>، اكتب اسم الفريق وضيف أعضاءه. <b>مش لازم تكتب أي درجة</b> علشان الفريق يتضاف.',
                     'في مربع <b>«👥 الأعضاء»</b> اكتب أول حروف الاسم واختاره من المخدومين المسجلين في السيستم. اضغط على اسم العضو علشان يبقى <b>قائد الفريق 👑</b> (واضغط عليه تاني لو عايز تشيل العلامة).',
                     'دوس <b>«▸ رجوع لكل الفرق»</b> وهتلاقي كل فريق في <b>كارت</b> لوحده والكروت تحت بعض، مكتوب عليه عدد الأعضاء والقائد والمجموع.',
-                    'اضغط على أي كارت علشان <b>تدخل على الفريق</b> وتسجّل الدرجات في أي وقت: اختار نوع الدرجة (حضور بدري / تقييم افتتاحية وفقرات / تقييم عمل فني / حضور قداس / تسميع مزمور / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
+                    'اضغط على أي كارت علشان <b>تدخل على الفريق</b> وتسجّل الدرجات في أي وقت: اختار نوع الدرجة (تقييم افتتاحية وفقرات / تقييم بوستر أو برومو / تقييم توب شيف)، واكتب الدرجة واضغط <b>«➕ إضافة»</b>.',
                     '<b>ربط المسابقة بالحضور:</b> طول ما المسابقة مفتوحة، أي عضو في فريق وبتسجله في شيت الحضور بيظهر تحت اسمه بالأحمر «🏆 مشارك في مسابقة ... — فريق ...» جنب وقت حضوره، فتعرف هو في فريق مين وانت بتدّيله درجة الحضور. أول ما تبعت المسابقة للأرشيف أو تمسحها التنبيه ده بيختفي من الحضور خالص.',
                     '<b>كل حاجة في الفريق تتعدّل في أي وقت:</b> اسم الفريق، إضافة أعضاء أو شيلهم، القائد 👑، نوع أي درجة (من القايمة أو «أخرى» تكتبه بنفسك)، وقيمة أي درجة أو مسحها. <b>مجموع الفريق</b> والترتيب بيتحسبوا لوحدهم.',
                     'تحت الكروت <b>«🏆 الترتيب النهائي»</b> بيرتب الفرق حسب المجموع (🥇 🥈 🥉). بيظهر أول ما تسجّل درجات لفريق واحد على الأقل. لو فريقين أو أكتر ليهم نفس المجموع بيتكتب جنب المركز <b>«مكرر»</b>.',
@@ -3139,10 +3143,13 @@ notify pgrst, 'reload schema';</pre>
         let bonusFilter = 'all';
 
         function bonusCtxActive(d, id) {
-            const tag = (((db.bonusReason || {})[d]) || {})['c:' + id];
-            if (!tag || typeof CT === 'undefined' || !CT.cur || CT.cur.archived || CT.cur.id !== tag.c) return null;
+            if (typeof CT === 'undefined' || !CT.cur || CT.cur.archived) return null;
             const team = (CT.cur.teams || []).find(x => (x.members || []).some(m => String(m.id) === String(id)));
-            return team ? { n: CT.cur.name || '', t: team.name || '' } : null;
+            if (!team) return null;
+            const tag = (((db.bonusReason || {})[d]) || {})['c:' + id];
+            const created = CT.cur.createdAt ? localISO(new Date(CT.cur.createdAt)) : '';
+            if ((tag && tag.c === CT.cur.id) || (created && d >= created)) return { n: CT.cur.name || '', t: team.name || '' };
+            return null;
         }
         function getBonusData(kind) {
             kind = kind || 'all';
@@ -5351,58 +5358,70 @@ function saveBonusReason(id,inp){
   if(v==='')delete map[id];else map[id]=v;
   persistBonusMeta(d);toast('تم حفظ السبب ✅');
 }
+async function writeBonus(d,id,val){
+  let r=await _supabase.from('attendance').update({bonus:val}).eq('meeting_date',d).eq('member_id',id).select();
+  if(r.error){toast('❌ '+(r.error.message||'تعذر الحفظ'));return false}
+  if(!r.data||!r.data.length){
+    const old=(db.attRows||[]).find(x=>x.meeting_date==d&&x.member_id==id);
+    if(!old)return true;
+    const del=await _supabase.from('attendance').delete().eq('meeting_date',d).eq('member_id',id);
+    if(del.error){toast('❌ '+del.error.message);return false}
+    const ins=await _supabase.from('attendance').insert([{...old,bonus:val}]);
+    if(ins.error){toast('❌ '+ins.error.message);return false}
+  }
+  (db.bonus[d]=db.bonus[d]||{})[id]=val;
+  const row=(db.attRows||[]).find(x=>x.meeting_date==d&&x.member_id==id);if(row)row.bonus=val;
+  return true;
+}
+function bonusTargets(onlyId){
+  const out=[];
+  Object.keys(db.bonus||{}).forEach(d=>{
+    Object.keys(db.bonus[d]||{}).forEach(id=>{
+      if(onlyId!=null&&String(id)!==String(onlyId))return;
+      const v=db.bonus[d][id];
+      if(v!=null&&v!=='')out.push([d,id]);
+    });
+  });
+  return out;
+}
+async function clearBonusCore(onlyId){
+  const memId=onlyId==null?null:((db.members||[]).find(x=>String(x.id)===String(onlyId))||{}).id;
+  for(const [d,id] of bonusTargets(onlyId)){
+    const k=(db.members||[]).find(x=>String(x.id)===String(id));
+    if(!(await writeBonus(d,k?k.id:id,null)))return false;
+  }
+  for(const d of Object.keys(db.bonusReason||{})){
+    const mp=db.bonusReason[d];if(!mp)continue;
+    if(onlyId==null){
+      const t=await _supabase.from('trips').delete().eq('trip_type','BREASON|'+d);
+      if(t.error){toast('❌ تعذر مسح الأسباب: '+t.error.message);return false}
+      delete db.bonusReason[d];
+    }else if(onlyId in mp||('c:'+onlyId) in mp){
+      delete mp[onlyId];delete mp['c:'+onlyId];persistBonusMeta(d);
+    }
+  }
+  return true;
+}
+function afterBonusClear(){
+  renderBonusTab();
+  try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
+}
 async function clearMemberBonus(id){
   const m=(db.members||[]).find(x=>String(x.id)===String(id));
   if(!confirm('تمسح كل بونص «'+(m?m.name:'')+'» (كل الأيام) وأسبابه؟'))return;
   try{
-    const rows=(db.attRows||[]).filter(r=>String(r.member_id)===String(id)&&r.bonus!=null);
-    if(rows.length){
-      let r=await _supabase.from('attendance').update({bonus:null}).eq('member_id',id).not('bonus','is',null).select();
-      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
-      if(!r.data||!r.data.length){
-        for(const old of rows){
-          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
-          if(del.error){toast('❌ '+del.error.message);return}
-          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
-          if(ins.error){toast('❌ '+ins.error.message);return}
-        }
-      }
-    }
-    rows.forEach(r=>{r.bonus=null});
-    Object.keys(db.bonus||{}).forEach(d=>{if(db.bonus[d]&&id in db.bonus[d])db.bonus[d][id]=null});
-    Object.keys(db.bonusReason||{}).forEach(d=>{
-      const mp=db.bonusReason[d];
-      if(mp&&(id in mp||('c:'+id) in mp)){delete mp[id];delete mp['c:'+id];persistBonusMeta(d)}
-    });
-    renderBonusTab();
-    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
-    toast('اتمسح بونص '+(m?m.name:'الشخص')+' ✅');
-  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
+    const ok=await clearBonusCore(id);
+    afterBonusClear();
+    if(ok)toast('اتمسح بونص '+(m?m.name:'الشخص')+' ✅');
+  }catch(e){console.error(e);afterBonusClear();toast('❌ خطأ في المسح: '+((e&&e.message)||e),8000)}
 }
 async function clearAllBonus(){
   if(!confirm('تمسح كل البونص من كل الأيام (العادي وبونص المسابقات) وأسبابه؟\nده هيصفّر خانة البونص في شيت الحضور كمان.'))return;
   try{
-    const rows=(db.attRows||[]).filter(r=>r.bonus!=null);
-    if(rows.length){
-      let r=await _supabase.from('attendance').update({bonus:null}).not('bonus','is',null).select();
-      if(r.error){toast('❌ تعذر المسح: '+r.error.message);return}
-      if(!r.data||!r.data.length){
-        for(const old of rows){
-          const del=await _supabase.from('attendance').delete().eq('meeting_date',old.meeting_date).eq('member_id',old.member_id);
-          if(del.error){toast('❌ '+del.error.message);return}
-          const ins=await _supabase.from('attendance').insert([{...old,bonus:null}]);
-          if(ins.error){toast('❌ '+ins.error.message);return}
-        }
-      }
-    }
-    const t=await _supabase.from('trips').delete().like('trip_type','BREASON|%');
-    if(t.error){toast('❌ تعذر مسح الأسباب: '+t.error.message);return}
-    (db.attRows||[]).forEach(r=>{r.bonus=null});
-    db.bonus={};db.bonusReason={};
-    renderBonusTab();
-    try{if(document.getElementById('attendance-tbody')&&typeof currentAttendees!=='undefined')renderAttendanceTable()}catch(e){}
-    toast('اتمسح كل البونص ✅');
-  }catch(e){console.error(e);toast('❌ حصل خطأ في المسح')}
+    const ok=await clearBonusCore(null);
+    afterBonusClear();
+    if(ok)toast('اتمسح كل البونص ✅');
+  }catch(e){console.error(e);afterBonusClear();toast('❌ خطأ في المسح: '+((e&&e.message)||e),8000)}
 }
 function updateBonusTotal(){const b=db.bonus[currentMeetingDate]||{};let s=0;currentAttendees.forEach(m=>{s+=parseFloat(b[m.id])||0});const e=document.getElementById('bonus-total');if(e)e.textContent=s}
 function renderAttendanceTable(){
@@ -6036,7 +6055,7 @@ if(typeof checkBirthdays==='function'){ try{ checkBirthdays(); }catch(e){} }
 </script>
 <script id="contests-js">
 /* ===== تبويب المسابقات ===== */
-const CT_TYPES = ['حضور بدري','تقييم افتتاحية وفقرات','تقييم عمل فني','حضور قداس','تسميع مزمور','تقييم بوستر أو برومو','تقييم توب شيف'];
+const CT_TYPES = ['تقييم افتتاحية وفقرات','تقييم بوستر أو برومو','تقييم توب شيف'];
 const CT_ORD = ['الأول','التاني','التالت','الرابع','الخامس','السادس','السابع','التامن','التاسع','العاشر'];
 const CT_MEDAL = ['🥇','🥈','🥉','🏅'];
 const CT = { cur: null, timer: null, pending: false, seq: 0, chain: Promise.resolve(), open: null };
@@ -6146,10 +6165,9 @@ function ctCardHTML(t) {
         ctMembersHTML(t) +
         '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
         '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
-        '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button></div>' +
+        '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button>' +
+        '<button class=\"ct-bbtn\" onclick=\"ctAddBonus(\'' + t.id + '\')\" title=\"بونص الحضور بتاريخ ' + esc(ctBonusDate() || '—') + ': ' + ctFmt(ctTeamBonus(t)) + '\">🎁 ضيف البونص' + (ctTeamBonus(t) ? ' (' + ctFmt(ctTeamBonus(t)) + ')' : '') + '</button></div>' +
         '<div class="ct-entries">' + rows + '</div>' +
-        '<div class=\"ct-bonusbox\"><div>🎁 مجموع بونص الحضور (' + esc(ctBonusDate() || '—') + '): <b id=\"ct-bsum-' + t.id + '\">' + ctFmt(ctTeamBonus(t)) + '</b></div>' +
-        '<button onclick=\"ctAddBonus(\'' + t.id + '\')\">➕ ضيف البونص للمجموع</button></div>' +
         '<div class=\"ct-total\">المجموع: <b id=\"ct-tot-' + t.id + '\">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
 }
 /* ===== أعضاء الفريق والقائد ===== */
@@ -6159,7 +6177,7 @@ function ctMemRowsHTML(t) {
     return '<div class="ct-mem-hint">اضغط على اسم العضو علشان تخليه <b>قائد الفريق 👑</b></div>' + ms.map((m, i) =>
         '<div class="ct-m"><span class="ct-mn">' + (i + 1) + '</span>' +
         '<span class="ct-mname" onclick="ctToggleLeader(\'' + t.id + '\',\'' + esc(m.id) + '\')">' + esc(m.n) +
-        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' + ((((db.bonusReason || {})[ctBonusDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctBonusDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
+        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + (ctMemBonus(m.id) ? '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' : '') + (ctMemBonus(m.id) && (((db.bonusReason || {})[ctBonusDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctBonusDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
         '<button class="btn-delete ct-x" onclick="ctDelMember(\'' + t.id + '\',\'' + esc(m.id) + '\')">✖</button></div>'
     ).join('');
 }
