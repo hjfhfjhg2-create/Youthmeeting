@@ -1559,6 +1559,8 @@ body.dark-mode .att-ct{color:#f87171}
                 <div class="rb-say" onclick="openHelp('add-member')"><b>كوجي بوت 🤖 · شرح «إضافة مخدوم»</b><span class="rb-line" data-text="هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.">هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
 
+            <button class="btn-qr" onclick="openQRScanner('register')" style="width:100%; padding:16px; font-size:15px; margin-bottom:18px;">📷 مسح كارت QR لتسجيل المخدوم تلقائياً</button>
+
             <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
             <input type="hidden" id="edit-id" value="">
             
@@ -2647,10 +2649,55 @@ notify pgrst, 'reload schema';</pre>
                 html5QrCode.stop().then(() => document.getElementById('qr-scanner-modal').style.display = 'none').catch(() => document.getElementById('qr-scanner-modal').style.display = 'none');
             } else { document.getElementById('qr-scanner-modal').style.display = 'none'; }
         }
+        // ===== كارت QR اللي بيطلع من صفحة التسجيل (registration.html): TKM1:base64(JSON) =====
+        function parseProfileQR(str) {
+            str = String(str || '').trim();
+            if (str.indexOf('TKM1:') !== 0) return null;
+            try {
+                const bin = atob(str.slice(5));
+                const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+                const a = JSON.parse(new TextDecoder().decode(bytes));
+                if (!Array.isArray(a) || !a[0]) return null;
+                return { name: a[0], gender: a[1] === 'F' ? 'شابة' : 'شاب', stage: a[2] || '', family: a[3] || '',
+                         birthdate: a[4] || '', phone: a[5] || '', address: a[6] || '', father: a[7] || '' };
+            } catch (e) { return null; }
+        }
+        let _qrBusy = false;
+        async function registerFromQR(p) {
+            await showTab('add-member');
+            cancelEdit();
+            document.getElementById('m-name').value = p.name;
+            document.getElementById('m-gender').value = p.gender;
+            document.getElementById('m-stage').value = p.stage;
+            document.getElementById('m-family').value = p.family;
+            document.getElementById('m-birthdate').value = p.birthdate;
+            document.getElementById('m-phone').value = p.phone;
+            document.getElementById('m-address').value = p.address;
+            document.getElementById('m-father').value = p.father;
+            toast('📷 تم قراءة بيانات: ' + p.name);
+            await saveMember();   // نفس الحفظ العادي (فيه التحقق ومنع التكرار)
+        }
         async function handleScannedQRCode(codeStr) {
-            let memberId = codeStr.replace("TAKLA:", "").trim();
-            let member = db.members.find(m => m.id == memberId);
-            if(!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
+            if (_qrBusy) return;
+            const prof = parseProfileQR(codeStr);
+            let member = null;
+            if (prof) {
+                if (activeQRTarget === 'register') {
+                    _qrBusy = true; setTimeout(() => _qrBusy = false, 2500);
+                    closeQRScanner();
+                    await registerFromQR(prof);
+                    return;
+                }
+                // الكارت الجديد في شاشات الحضور/الرحلات/البحث: نلاقي المخدوم المسجل بالاسم والتليفون
+                member = (db.members || []).find(x => nPhone(x.phone) === nPhone(prof.phone) && nTxt(x.name) === nTxt(prof.name));
+                if (!member) { alert('المخدوم ده (' + prof.name + ') لسه مش مسجل! سجّله الأول من تبويب إضافة مخدوم.'); return; }
+            } else {
+                if (activeQRTarget === 'register') { alert('الكارت ده مش كارت تسجيل صحيح!'); return; }
+                let memberId = codeStr.replace("TAKLA:", "").trim();
+                member = db.members.find(m => m.id == memberId);
+                if (!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
+            }
+            _qrBusy = true; setTimeout(() => _qrBusy = false, 1500);
             closeQRScanner();
             if(activeQRTarget === 'attendance') { if (await addMemberToMeeting(member.id)) alert("✅ تسجيل حضور: " + member.name); }
             else if(activeQRTarget === 'trip') { if (await addMemberToTrip(member.id)) alert("✅ إضافة: " + member.name + " لقائمة الرحلة"); }
