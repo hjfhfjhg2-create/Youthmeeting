@@ -1399,11 +1399,7 @@ body.dark-mode #contests .ct-bn{color:#d8b4fe}
 #contests .ct-bonusbox{margin-top:12px;display:flex;flex-direction:column;gap:8px;background:rgba(168,85,247,.10);border:1px dashed #a855f7;border-radius:14px;padding:10px;text-align:center;font-weight:700}
 #contests .ct-bonusbox button{padding:11px;font-size:14px;background:linear-gradient(135deg,#c084fc,#a855f7)}
 #contests .ct-final h4,.ct-final-h{margin:0 0 10px;font-size:17px}
-#contests .ct-datebar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-#contests .ct-datebar label{margin:0;white-space:nowrap;font-weight:800;font-size:13.5px}
-#contests .ct-datebar input{flex:1;min-width:0;padding:8px}
-#contests .ct-day{margin-top:16px;padding-top:10px;border-top:3px solid #f59e0b}
-#contests .ct-day:first-child{margin-top:0;padding-top:0;border-top:0}
+#contests .ct-day{margin-top:12px;padding:10px;border:2px solid #f59e0b;border-radius:14px;background:rgba(245,158,11,.06)}
 #contests .ct-day-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:800;font-size:14px;margin-bottom:4px}
 #contests .ct-day-sub{font-size:12.5px;color:var(--text-muted);font-weight:700}
 #contests .ct-sum{margin-top:18px;border:2px solid #f59e0b;border-radius:14px;padding:10px 12px;background:rgba(245,158,11,.10)}
@@ -1552,8 +1548,14 @@ body.dark-mode .att-ct{color:#f87171}
                 <span>افتقاد</span>
                 <span id="visitation-notification-dot" style="display:none;" class="notification-dot"></span>
             </button>
-            <button onclick="showTab('trips', this)" data-tab="trips">رحلات</button>
-            <button onclick="showTab('contests', this)" data-tab="contests">مسابقات</button>
+            <button onclick="showTab('trips', this)" data-tab="trips">
+                <span>رحلات</span>
+                <span id="trips-open-dot" style="display:none;" class="notification-dot"></span>
+            </button>
+            <button onclick="showTab('contests', this)" data-tab="contests">
+                <span>مسابقات</span>
+                <span id="contests-open-dot" style="display:none;" class="notification-dot"></span>
+            </button>
             <button onclick="showTab('families', this)" data-tab="families" id="tab-fam-btn">أسر</button>
             <button onclick="showTab('birthdays', this)" data-tab="birthdays" id="tab-bday-btn">
                 <span>أعياد ميلاد</span>
@@ -2425,6 +2427,7 @@ notify pgrst, 'reload schema';</pre>
             if (visDot) visDot.style.display = currentAbsentIds.length > 0 ? 'inline-block' : 'none';
 
             renderHeroToday();
+            if (typeof updateOpenDots === 'function') updateOpenDots();
         }
 
         // نسبة الحضور لاجتماع واحد (المخدومين المسجلين قبل الاجتماع بس)
@@ -4144,6 +4147,7 @@ notify pgrst, 'reload schema';</pre>
         // ===== فتح تبويب الرحلات: الرحلة المفتوحة جاهزة بشيتها وأسمائها، ولو مفيش رحلة مفتوحة تظهر صفحة جديدة للتسجيل =====
         function tripsTabActive() { const t = document.getElementById('trips'); return !!(t && t.classList.contains('active')); }
         function updateTripNav() {
+            if (typeof updateOpenDots === 'function') updateOpenDots();
             const act = (db.tripArchive || []).filter(x => !tripIsArchived(x)).length;
             const b = document.getElementById('trip-back-btn');
             if (b) b.style.display = act > 1 ? '' : 'none';
@@ -6096,7 +6100,8 @@ function ctRefreshAttendanceHints() {
 }
 function ctBonusDate() { const i = document.getElementById('meeting-date'); return (i && i.value) || (typeof currentMeetingDate !== 'undefined' ? currentMeetingDate : '') || ''; }
 function ctToday() { const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); }
-function ctSelDate() { return CT.dateSel || ctBonusDate() || ctToday(); }
+function ctSelDate() { return ctBonusDate() || ctToday(); }   // تاريخ شيت الحضور اللي بيتسحب منه البونص (زي الأول)
+function ctRecDate() { return ctToday(); }                      // تاريخ التسجيل: النهارده تلقائي
 function ctMemBonus(mid, d) { d = (d === undefined) ? ctSelDate() : d; const v = parseFloat((((db.bonus || {})[d]) || {})[mid]); return isFinite(v) ? v : 0; }
 function ctTeamBonus(t, d) { return Math.round((t.members || []).reduce((a, m) => a + ctMemBonus(m.id, d), 0) * 100) / 100; }
 function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
@@ -6113,7 +6118,7 @@ function ctTabActive() { const t = document.getElementById('contests'); return !
 function openContestsHome() { if (!CT.cur) contestsAfterLoad(); ctRender(); }
 
 /* ===== الحفظ (صف واحد لكل مسابقة في جدول trips بالاسم CONTEST|id) ===== */
-function ctSaveSoon() { ctRefreshAttendanceHints(); CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
+function ctSaveSoon() { updateOpenDots(); ctRefreshAttendanceHints(); CT.pending = true; CT.seq++; clearTimeout(CT.timer); CT.timer = setTimeout(() => ctSaveNow(), 600); }
 function ctSaveNow(c) {
     c = c || CT.cur;
     if (!c) return Promise.resolve(false);
@@ -6215,8 +6220,6 @@ function ctCardHTML(t) {
         '<div class="ct-card-top"><input type="text" value="' + esc(t.name) + '" placeholder="اسم الفريق" oninput="ctSetTeamName(\'' + t.id + '\',this.value)">' +
         '<button class="btn-delete ct-x" onclick="ctDelTeam(\'' + t.id + '\')">🗑️</button></div>' +
         ctMembersHTML(t) +
-        '<div class="ct-datebar"><label for="ct-date-' + t.id + '">📅 تاريخ التسجيل</label>' +
-        '<input type="date" id="ct-date-' + t.id + '" value="' + esc(d) + '" onchange="ctSetDate(this.value)"></div>' +
         '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
         '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
         '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button>' +
@@ -6297,6 +6300,7 @@ function ctTeamListHTML(t) {
         '<span class="ct-tl-go">◂</span></div>';
 }
 function ctRender() {
+    updateOpenDots();
     ctRefreshAttendanceHints();
     const root = document.getElementById('ct-teams');
     if (!root || !CT.cur) return;
@@ -6350,8 +6354,6 @@ function ctDelTeam(tid) {
 function ctAddEntry(tid) {
     const t = ctTeam(tid); if (!t) return;
     const sel = document.getElementById('ct-sel-' + tid), inp = document.getElementById('ct-pts-' + tid);
-    const di = document.getElementById('ct-date-' + tid);
-    if (di && di.value) CT.dateSel = di.value;
     const p = ctParse(inp && inp.value);
     if (p === null) { toast('اكتب الدرجة الأول'); if (inp) inp.focus(); return; }
     let type = sel.value;
@@ -6359,18 +6361,13 @@ function ctAddEntry(tid) {
         type = (prompt('اكتب اسم نوع الدرجة:') || '').trim();
         if (!type) { toast('لازم تكتب اسم النوع'); return; }
     }
-    t.entries.push({ id: ctUid('e'), t: type, p, d: ctSelDate() });
+    t.entries.push({ id: ctUid('e'), t: type, p, d: ctRecDate() });
     ctRerenderCard(tid); ctSaveSoon();
     const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
 }
-function ctSetDate(v) {
-    CT.dateSel = v || '';
-    if (CT.open) ctRerenderCard(CT.open);
-}
+
 function ctAddBonus(tid) {
     const t = ctTeam(tid); if (!t) return;
-    const di = document.getElementById('ct-date-' + tid);
-    if (di && di.value) CT.dateSel = di.value;
     const d = ctSelDate();
     if (!(t.members || []).length) { toast('ضيف أعضاء للفريق الأول'); return; }
     const sum = ctTeamBonus(t, d);
@@ -6378,8 +6375,8 @@ function ctAddBonus(tid) {
     if (!sum) { toast('مفيش بونص متسجل لأعضاء الفريق في حضور ' + d); return; }
     t.entries = t.entries || [];
     const old = t.entries.find(e => e.bd === d);   // نفس اليوم: نحدّث بدل ما نكرر
-    if (old) { old.p = sum; old.d = d; toast('اتحدّث بونص اليوم في المجموع ✅'); }
-    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d, d: d }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
+    if (old) { old.p = sum; toast('اتحدّث بونص اليوم في المجموع ✅'); }
+    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d, d: ctRecDate() }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
     ctRerenderCard(tid); ctSaveSoon();
 }
 function ctSetType(tid, eid, sel) {
@@ -6472,6 +6469,20 @@ async function ctCleanArchive() {
     ctOpenArchive();
     toast('اتنضّف أرشيف المسابقات ✅');
 }
+/* ===== نقطة منورة على تبويب الرحلات/المسابقات طول ما فيه رحلة أو مسابقة مفتوحة ===== */
+function updateOpenDots() {
+    try {
+        const c = (typeof CT !== 'undefined') && CT.cur;
+        const contestOpen = !!(c && !c.archived && (((c.name || '').trim()) || (c.teams || []).length));
+        const cd = document.getElementById('contests-open-dot');
+        if (cd) cd.style.display = contestOpen ? 'inline-block' : 'none';
+        const tripOpen = ((db.tripArchive || []).some(x => !tripIsArchived(x))) ||
+            Object.keys(db.tripsData || {}).some(t => Object.keys(((db.tripsData || {})[t] || {}).reservations || {}).length > 0);
+        const td = document.getElementById('trips-open-dot');
+        if (td) td.style.display = tripOpen ? 'inline-block' : 'none';
+    } catch (e) {}
+}
+setInterval(updateOpenDots, 2000);
 async function ctDelArchived(id) {
     const c = (db.contests || []).find(x => x.id === id); if (!c) return;
     if (!confirm('تمسح «' + (c.name || 'مسابقة') + '» من الأرشيف نهائي؟')) return;
