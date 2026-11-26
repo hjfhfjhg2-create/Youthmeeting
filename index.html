@@ -1399,6 +1399,19 @@ body.dark-mode #contests .ct-bn{color:#d8b4fe}
 #contests .ct-bonusbox{margin-top:12px;display:flex;flex-direction:column;gap:8px;background:rgba(168,85,247,.10);border:1px dashed #a855f7;border-radius:14px;padding:10px;text-align:center;font-weight:700}
 #contests .ct-bonusbox button{padding:11px;font-size:14px;background:linear-gradient(135deg,#c084fc,#a855f7)}
 #contests .ct-final h4,.ct-final-h{margin:0 0 10px;font-size:17px}
+#contests .ct-datebar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#contests .ct-datebar label{margin:0;white-space:nowrap;font-weight:800;font-size:13.5px}
+#contests .ct-datebar input{flex:1;min-width:0;padding:8px}
+#contests .ct-day{margin-top:16px;padding-top:10px;border-top:3px solid #f59e0b}
+#contests .ct-day:first-child{margin-top:0;padding-top:0;border-top:0}
+#contests .ct-day-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:800;font-size:14px;margin-bottom:4px}
+#contests .ct-day-sub{font-size:12.5px;color:var(--text-muted);font-weight:700}
+#contests .ct-sum{margin-top:18px;border:2px solid #f59e0b;border-radius:14px;padding:10px 12px;background:rgba(245,158,11,.10)}
+#contests .ct-sum-h{font-weight:900;font-size:15px;margin-bottom:6px;text-align:center}
+#contests .ct-sum-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--border,var(--card-border));font-size:13.5px;font-weight:600}
+#contests .ct-sum-row.bn{color:#7e22ce;font-weight:800}
+body.dark-mode #contests .ct-sum-row.bn{color:#d8b4fe}
+#contests .ct-sum-grand{margin-top:8px;text-align:center;font-weight:900;font-size:16px;background:rgba(245,158,11,.22);border-radius:10px;padding:8px}
 .ct-rank{display:flex;align-items:center;gap:10px;background:var(--card,var(--card-glass));border:1px solid var(--border,var(--card-border));border-radius:14px;padding:10px 12px;margin-bottom:8px}
 .ct-rank.r1{border-color:#f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.06))}
 .ct-rank.r2{border-color:#94a3b8;background:linear-gradient(135deg,rgba(148,163,184,.25),rgba(148,163,184,.06))}
@@ -1558,8 +1571,6 @@ body.dark-mode .att-ct{color:#f87171}
                 <button class="rb-btn" onclick="openHelp('add-member')" aria-label="شرح تبويب إضافة مخدوم"><span class="rb"><i class="rb-ant"></i><i class="rb-band"></i><i class="rb-hp l"></i><i class="rb-hp r"></i><i class="rb-head"><i class="rb-visor"><i class="rb-eye l"><i></i></i><i class="rb-eye r"><i></i></i><i class="rb-cheek l"></i><i class="rb-cheek r"></i><i class="rb-mouth"></i></i></i><i class="rb-body"></i><i class="rb-arm l"></i><i class="rb-arm r"></i><i class="rb-prop">➕</i></span></button>
                 <div class="rb-say" onclick="openHelp('add-member')"><b>كوجي بوت 🤖 · شرح «إضافة مخدوم»</b><span class="rb-line" data-text="هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.">هنا بتسجّل مخدوم جديد، وبعد الحفظ بيتعملّه كارت QR خاص بيه.</span><u>اشرحلي بالتفصيل ◂</u></div>
             </div>
-
-            <button class="btn-qr" onclick="openQRScanner('register')" style="width:100%; padding:16px; font-size:15px; margin-bottom:18px;">📷 مسح كارت QR لتسجيل المخدوم تلقائياً</button>
 
             <h3 id="form-title">تسجيل بيانات مخدوم جديد</h3>
             <input type="hidden" id="edit-id" value="">
@@ -2649,55 +2660,10 @@ notify pgrst, 'reload schema';</pre>
                 html5QrCode.stop().then(() => document.getElementById('qr-scanner-modal').style.display = 'none').catch(() => document.getElementById('qr-scanner-modal').style.display = 'none');
             } else { document.getElementById('qr-scanner-modal').style.display = 'none'; }
         }
-        // ===== كارت QR اللي بيطلع من صفحة التسجيل (registration.html): TKM1:base64(JSON) =====
-        function parseProfileQR(str) {
-            str = String(str || '').trim();
-            if (str.indexOf('TKM1:') !== 0) return null;
-            try {
-                const bin = atob(str.slice(5));
-                const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-                const a = JSON.parse(new TextDecoder().decode(bytes));
-                if (!Array.isArray(a) || !a[0]) return null;
-                return { name: a[0], gender: a[1] === 'F' ? 'شابة' : 'شاب', stage: a[2] || '', family: a[3] || '',
-                         birthdate: a[4] || '', phone: a[5] || '', address: a[6] || '', father: a[7] || '' };
-            } catch (e) { return null; }
-        }
-        let _qrBusy = false;
-        async function registerFromQR(p) {
-            await showTab('add-member');
-            cancelEdit();
-            document.getElementById('m-name').value = p.name;
-            document.getElementById('m-gender').value = p.gender;
-            document.getElementById('m-stage').value = p.stage;
-            document.getElementById('m-family').value = p.family;
-            document.getElementById('m-birthdate').value = p.birthdate;
-            document.getElementById('m-phone').value = p.phone;
-            document.getElementById('m-address').value = p.address;
-            document.getElementById('m-father').value = p.father;
-            toast('📷 تم قراءة بيانات: ' + p.name);
-            await saveMember();   // نفس الحفظ العادي (فيه التحقق ومنع التكرار)
-        }
         async function handleScannedQRCode(codeStr) {
-            if (_qrBusy) return;
-            const prof = parseProfileQR(codeStr);
-            let member = null;
-            if (prof) {
-                if (activeQRTarget === 'register') {
-                    _qrBusy = true; setTimeout(() => _qrBusy = false, 2500);
-                    closeQRScanner();
-                    await registerFromQR(prof);
-                    return;
-                }
-                // الكارت الجديد في شاشات الحضور/الرحلات/البحث: نلاقي المخدوم المسجل بالاسم والتليفون
-                member = (db.members || []).find(x => nPhone(x.phone) === nPhone(prof.phone) && nTxt(x.name) === nTxt(prof.name));
-                if (!member) { alert('المخدوم ده (' + prof.name + ') لسه مش مسجل! سجّله الأول من تبويب إضافة مخدوم.'); return; }
-            } else {
-                if (activeQRTarget === 'register') { alert('الكارت ده مش كارت تسجيل صحيح!'); return; }
-                let memberId = codeStr.replace("TAKLA:", "").trim();
-                member = db.members.find(m => m.id == memberId);
-                if (!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
-            }
-            _qrBusy = true; setTimeout(() => _qrBusy = false, 1500);
+            let memberId = codeStr.replace("TAKLA:", "").trim();
+            let member = db.members.find(m => m.id == memberId);
+            if(!member) { alert("رمز QR غير معروف أو المخدوم غير مسجل!"); return; }
             closeQRScanner();
             if(activeQRTarget === 'attendance') { if (await addMemberToMeeting(member.id)) alert("✅ تسجيل حضور: " + member.name); }
             else if(activeQRTarget === 'trip') { if (await addMemberToTrip(member.id)) alert("✅ إضافة: " + member.name + " لقائمة الرحلة"); }
@@ -6129,8 +6095,10 @@ function ctRefreshAttendanceHints() {
     try { if (typeof renderAttendanceTable === 'function' && document.getElementById('attendance-tbody')) renderAttendanceTable(); } catch (e) {}
 }
 function ctBonusDate() { const i = document.getElementById('meeting-date'); return (i && i.value) || (typeof currentMeetingDate !== 'undefined' ? currentMeetingDate : '') || ''; }
-function ctMemBonus(mid) { const d = ctBonusDate(); const v = parseFloat((((db.bonus || {})[d]) || {})[mid]); return isFinite(v) ? v : 0; }
-function ctTeamBonus(t) { return Math.round((t.members || []).reduce((a, m) => a + ctMemBonus(m.id), 0) * 100) / 100; }
+function ctToday() { const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); }
+function ctSelDate() { return CT.dateSel || ctBonusDate() || ctToday(); }
+function ctMemBonus(mid, d) { d = (d === undefined) ? ctSelDate() : d; const v = parseFloat((((db.bonus || {})[d]) || {})[mid]); return isFinite(v) ? v : 0; }
+function ctTeamBonus(t, d) { return Math.round((t.members || []).reduce((a, m) => a + ctMemBonus(m.id, d), 0) * 100) / 100; }
 function ctTeam(tid) { return CT.cur && (CT.cur.teams || []).find(x => x.id === tid); }
 
 /* بعد كل تحميل بيانات: المسابقة المفتوحة هي آخر مسابقة مش مؤرشفة */
@@ -6196,26 +6164,65 @@ function ctRefreshRanking() {
 }
 
 /* ===== الرسم ===== */
-function ctCardHTML(t) {
-    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('') + '<option value="__other">✍️ أخرى (اكتب بنفسك)</option>';
-    const rows = (t.entries || []).map(e =>
-        '<div class="ct-entry"><select class="ct-et" onchange="ctSetType(\'' + t.id + '\',\'' + e.id + '\',this)">' +
+function ctEntryRowHTML(t, e) {
+    return '<div class="ct-entry"><select class="ct-et" onchange="ctSetType(\'' + t.id + '\',\'' + e.id + '\',this)">' +
         (CT_TYPES.indexOf(e.t) < 0 ? '<option value="' + esc(e.t) + '" selected>' + esc(e.t) + '</option>' : '') +
         CT_TYPES.map(x => '<option value="' + esc(x) + '"' + (x === e.t ? ' selected' : '') + '>' + esc(x) + '</option>').join('') +
         '<option value="__other">✍️ أخرى (اكتب بنفسك)</option></select>' +
         '<input type="number" step="any" inputmode="decimal" value="' + esc(e.p) + '" oninput="ctSetPts(\'' + t.id + '\',\'' + e.id + '\',this.value)">' +
-        '<button class="btn-delete ct-x" onclick="ctDelEntry(\'' + t.id + '\',\'' + e.id + '\')">✖</button></div>'
-    ).join('') || '<div class="ct-noentry">مفيش درجات متسجلة للفريق ده لسه</div>';
+        '<button class="btn-delete ct-x" onclick="ctDelEntry(\'' + t.id + '\',\'' + e.id + '\')">✖</button></div>';
+}
+/* ===== التجميع بالتاريخ + الإجماليات ===== */
+function ctIsBonus(e) { return !!e.bd || e.t === 'بونص الحضور'; }
+function ctEDate(e) { return e.d || e.bd || ''; }
+function ctR2(n) { return Math.round(n * 100) / 100; }
+function ctDayKeys(t) {
+    const ks = []; (t.entries || []).forEach(e => { const k = ctEDate(e); if (ks.indexOf(k) < 0) ks.push(k); });
+    return ks.sort((a, b) => a.localeCompare(b));
+}
+function ctDayTotal(t, k) { return ctR2((t.entries || []).filter(e => ctEDate(e) === k).reduce((a, e) => a + (+e.p || 0), 0)); }
+function ctDayLabel(k) { return k ? (typeof fmtD === 'function' ? fmtD(k) : k) : 'بدون تاريخ'; }
+function ctBonusTotal(t) { return ctR2((t.entries || []).filter(ctIsBonus).reduce((a, e) => a + (+e.p || 0), 0)); }
+function ctTypeTotals(t) {
+    const m = {}, order = [];
+    (t.entries || []).filter(e => !ctIsBonus(e)).forEach(e => { if (!(e.t in m)) { m[e.t] = 0; order.push(e.t); } m[e.t] += (+e.p || 0); });
+    return order.map(k => [k, ctR2(m[k])]);
+}
+function ctEntriesHTML(t) {
+    if (!(t.entries || []).length) return '<div class="ct-noentry">مفيش درجات متسجلة للفريق ده لسه</div>';
+    return ctDayKeys(t).map(k =>
+        '<div class="ct-day"><div class="ct-day-h"><span>📅 ' + esc(ctDayLabel(k)) + '</span>' +
+        '<span class="ct-day-sub">مجموع اليوم: <b data-day="' + t.id + '|' + esc(k) + '">' + ctFmt(ctDayTotal(t, k)) + '</b></span></div>' +
+        t.entries.filter(e => ctEDate(e) === k).map(e => ctEntryRowHTML(t, e)).join('') + '</div>'
+    ).join('');
+}
+function ctTotalsHTML(t) {
+    const row = (l, v, c) => '<div class="ct-sum-row' + (c ? ' ' + c : '') + '"><span>' + l + '</span><b>' + ctFmt(v) + '</b></div>';
+    return '<div class="ct-sum"><div class="ct-sum-h">📊 الإجمالي</div>' +
+        row('🎁 إجمالي البونص', ctBonusTotal(t), 'bn') +
+        ctTypeTotals(t).map(x => row(esc(x[0]), x[1])).join('') +
+        '<div class="ct-sum-grand">المجموع الكلي: <b id="ct-tot-' + t.id + '">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
+}
+function ctArcEntriesHTML(t) {
+    if (!(t.entries || []).length) return '';
+    return '<br>' + ctDayKeys(t).map(k => '<span>📅 ' + esc(ctDayLabel(k)) + ': ' + t.entries.filter(e => ctEDate(e) === k).map(e => esc(e.t) + ' ' + ctFmt(e.p)).join(' • ') + '</span>').join('<br>') +
+        '<br><span><b>🎁 إجمالي البونص: ' + ctFmt(ctBonusTotal(t)) + '</b>' + ctTypeTotals(t).map(x => ' • ' + esc(x[0]) + ': ' + ctFmt(x[1])).join('') + '</span>';
+}
+function ctCardHTML(t) {
+    const opts = CT_TYPES.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('') + '<option value="__other">✍️ أخرى (اكتب بنفسك)</option>';
+    const d = ctSelDate(), tb = ctTeamBonus(t, d);
     return '<div class="ct-card" id="ct-card-' + t.id + '">' +
         '<div class="ct-card-top"><input type="text" value="' + esc(t.name) + '" placeholder="اسم الفريق" oninput="ctSetTeamName(\'' + t.id + '\',this.value)">' +
         '<button class="btn-delete ct-x" onclick="ctDelTeam(\'' + t.id + '\')">🗑️</button></div>' +
         ctMembersHTML(t) +
+        '<div class="ct-datebar"><label for="ct-date-' + t.id + '">📅 تاريخ التسجيل</label>' +
+        '<input type="date" id="ct-date-' + t.id + '" value="' + esc(d) + '" onchange="ctSetDate(this.value)"></div>' +
         '<div class="ct-add"><select id="ct-sel-' + t.id + '">' + opts + '</select>' +
         '<input type="number" step="any" inputmode="decimal" id="ct-pts-' + t.id + '" placeholder="الدرجة">' +
         '<button onclick="ctAddEntry(\'' + t.id + '\')">➕ إضافة</button>' +
-        '<button class=\"ct-bbtn\" onclick=\"ctAddBonus(\'' + t.id + '\')\" title=\"بونص الحضور بتاريخ ' + esc(ctBonusDate() || '—') + ': ' + ctFmt(ctTeamBonus(t)) + '\">🎁 ضيف البونص' + (ctTeamBonus(t) ? ' (' + ctFmt(ctTeamBonus(t)) + ')' : '') + '</button></div>' +
-        '<div class="ct-entries">' + rows + '</div>' +
-        '<div class=\"ct-total\">المجموع: <b id=\"ct-tot-' + t.id + '\">' + ctFmt(ctTotal(t)) + '</b> درجة</div></div>';
+        '<button class="ct-bbtn" onclick="ctAddBonus(\'' + t.id + '\')" title="بونص الحضور بتاريخ ' + esc(d) + ': ' + ctFmt(tb) + '">🎁 ضيف البونص' + (tb ? ' (' + ctFmt(tb) + ')' : '') + '</button></div>' +
+        '<div class="ct-entries">' + ctEntriesHTML(t) + '</div>' +
+        '<div id="ct-totbox-' + t.id + '">' + ctTotalsHTML(t) + '</div></div>';
 }
 /* ===== أعضاء الفريق والقائد ===== */
 function ctMemRowsHTML(t) {
@@ -6224,7 +6231,7 @@ function ctMemRowsHTML(t) {
     return '<div class="ct-mem-hint">اضغط على اسم العضو علشان تخليه <b>قائد الفريق 👑</b></div>' + ms.map((m, i) =>
         '<div class="ct-m"><span class="ct-mn">' + (i + 1) + '</span>' +
         '<span class="ct-mname" onclick="ctToggleLeader(\'' + t.id + '\',\'' + esc(m.id) + '\')">' + esc(m.n) +
-        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + (ctMemBonus(m.id) ? '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' : '') + (ctMemBonus(m.id) && (((db.bonusReason || {})[ctBonusDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctBonusDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
+        (m.f ? '<small>' + esc(m.f) + '</small>' : '') + (ctMemBonus(m.id) ? '<span class="ct-bn">🎁 ' + ctFmt(ctMemBonus(m.id)) + '</span>' : '') + (ctMemBonus(m.id) && (((db.bonusReason || {})[ctSelDate()] || {})[m.id]) ? '<small class="ct-br">(' + esc(db.bonusReason[ctSelDate()][m.id]) + ')</small>' : '') + (String(t.leader) === String(m.id) ? '<span class="ct-lead">👑 قائد الفريق</span>' : '') + '</span>' +
         '<button class="btn-delete ct-x" onclick="ctDelMember(\'' + t.id + '\',\'' + esc(m.id) + '\')">✖</button></div>'
     ).join('');
 }
@@ -6313,9 +6320,11 @@ function ctRerenderCard(tid) {
     const t = ctTeam(tid), el = document.getElementById('ct-card-' + tid);
     if (!t || !el) return;
     const sel = document.getElementById('ct-sel-' + tid), keep = sel ? sel.value : '';
+    const pin = document.getElementById('ct-pts-' + tid), keepP = pin ? pin.value : '';
     const tmp = document.createElement('div'); tmp.innerHTML = ctCardHTML(t);
     el.replaceWith(tmp.firstElementChild);
     const ns = document.getElementById('ct-sel-' + tid); if (ns && keep) ns.value = keep;
+    const np = document.getElementById('ct-pts-' + tid); if (np && keepP) np.value = keepP;
     ctRefreshRanking();
 }
 
@@ -6341,6 +6350,8 @@ function ctDelTeam(tid) {
 function ctAddEntry(tid) {
     const t = ctTeam(tid); if (!t) return;
     const sel = document.getElementById('ct-sel-' + tid), inp = document.getElementById('ct-pts-' + tid);
+    const di = document.getElementById('ct-date-' + tid);
+    if (di && di.value) CT.dateSel = di.value;
     const p = ctParse(inp && inp.value);
     if (p === null) { toast('اكتب الدرجة الأول'); if (inp) inp.focus(); return; }
     let type = sel.value;
@@ -6348,21 +6359,27 @@ function ctAddEntry(tid) {
         type = (prompt('اكتب اسم نوع الدرجة:') || '').trim();
         if (!type) { toast('لازم تكتب اسم النوع'); return; }
     }
-    t.entries.push({ id: ctUid('e'), t: type, p });
+    t.entries.push({ id: ctUid('e'), t: type, p, d: ctSelDate() });
     ctRerenderCard(tid); ctSaveSoon();
     const ni = document.getElementById('ct-pts-' + tid); if (ni) ni.focus();
 }
+function ctSetDate(v) {
+    CT.dateSel = v || '';
+    if (CT.open) ctRerenderCard(CT.open);
+}
 function ctAddBonus(tid) {
     const t = ctTeam(tid); if (!t) return;
-    const d = ctBonusDate();
+    const di = document.getElementById('ct-date-' + tid);
+    if (di && di.value) CT.dateSel = di.value;
+    const d = ctSelDate();
     if (!(t.members || []).length) { toast('ضيف أعضاء للفريق الأول'); return; }
-    const sum = ctTeamBonus(t);
-    if (sum) { (t.members || []).forEach(m => { if (ctMemBonus(m.id)) bonusCtxSet(d, m.id, true); }); persistBonusMeta(d); }
-    if (!sum) { toast('مفيش بونص متسجل لأعضاء الفريق في حضور ' + (d || 'اليوم')); return; }
+    const sum = ctTeamBonus(t, d);
+    if (sum) { (t.members || []).forEach(m => { if (ctMemBonus(m.id, d)) bonusCtxSet(d, m.id, true); }); persistBonusMeta(d); }
+    if (!sum) { toast('مفيش بونص متسجل لأعضاء الفريق في حضور ' + d); return; }
     t.entries = t.entries || [];
     const old = t.entries.find(e => e.bd === d);   // نفس اليوم: نحدّث بدل ما نكرر
-    if (old) { old.p = sum; toast('اتحدّث بونص اليوم في المجموع ✅'); }
-    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
+    if (old) { old.p = sum; old.d = d; toast('اتحدّث بونص اليوم في المجموع ✅'); }
+    else { t.entries.push({ id: ctUid('e'), t: 'بونص الحضور', p: sum, bd: d, d: d }); toast('اتضاف ' + ctFmt(sum) + ' بونص للمجموع ✅'); }
     ctRerenderCard(tid); ctSaveSoon();
 }
 function ctSetType(tid, eid, sel) {
@@ -6380,7 +6397,8 @@ function ctSetPts(tid, eid, v) {
     const t = ctTeam(tid); if (!t) return;
     const e = t.entries.find(x => x.id === eid); if (!e) return;
     e.p = ctParse(v) || 0;
-    const tot = document.getElementById('ct-tot-' + tid); if (tot) tot.textContent = ctFmt(ctTotal(t));
+    const k = ctEDate(e), dEl = document.querySelector('[data-day="' + tid + '|' + k + '"]'); if (dEl) dEl.textContent = ctFmt(ctDayTotal(t, k));
+    const box = document.getElementById('ct-totbox-' + tid); if (box) box.innerHTML = ctTotalsHTML(t);
     ctRefreshRanking(); ctSaveSoon();
 }
 function ctDelEntry(tid, eid) {
@@ -6422,7 +6440,7 @@ function ctArcItemHTML(c) {
     const teams = arr.map(x =>
         '<div class="ct-arc-team"><b>' + esc(x.t.name || 'فريق بدون اسم') + '</b> — ' + ctFmt(x.total) + ' درجة · ' + ctRankLabel(x) +
         ((x.t.members || []).length ? '<span class="ct-mline">👥 ' + (x.t.members || []).map((m, i) => (i + 1) + '. ' + esc(m.n) + (String(x.t.leader) === String(m.id) ? ' 👑' : '')).join(' • ') + '</span>' : '') +
-        ((x.t.entries || []).length ? '<br><span>' + (x.t.entries || []).map(e => esc(e.t) + ': ' + ctFmt(e.p)).join(' • ') + '</span>' : '') + '</div>'
+        ctArcEntriesHTML(x.t) + '</div>'
     ).join('');
     return '<details class="ct-arc"><summary>🏆 ' + esc(c.name || 'مسابقة بدون اسم') +
         '<small>📅 ' + esc(c.archivedAt || '') + ' · 👥 ' + arr.length + ' فرق' + (winners ? ' · 🥇 ' + winners : '') + '</small></summary>' +
